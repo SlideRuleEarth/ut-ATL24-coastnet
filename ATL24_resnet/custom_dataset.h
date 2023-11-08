@@ -2,60 +2,10 @@
 
 #include "ATL24_resnet/pgm.h"
 #include "ATL24_resnet/utils.h"
+#include "ATL24_utils/dataframe.h"
 
 namespace ATL24_resnet
 {
-
-using filename_pairs = std::vector<std::pair<std::string,std::string>>;
-
-class filename_pair_dataset : public torch::data::datasets::Dataset<filename_pair_dataset>
-{
-    using Example = torch::data::Example<>;
-    const filename_pairs fp;
-
-    public:
-    filename_pair_dataset (const filename_pairs &fp)
-        : fp (fp) { }
-
-    Example get(size_t index)
-    {
-        using namespace std;
-        using namespace viper::raster;
-        using namespace ATL24_resnet::pgm;
-
-        // Read the grayscale image
-        assert (index < fp.size ());
-        ifstream ifs1 (fp[index].first);
-        raster<unsigned char> p1;
-        const auto h1 = read (ifs1, p1);
-
-        // Read the labels
-        ifstream ifs2 (fp[index].second);
-        raster<unsigned char> p2;
-        const auto h2 = read (ifs2, p2);
-
-        // Check the filename sizes
-        if (h1.w != h2.w)
-            throw runtime_error ("The images are not the same size");
-        if (h1.h != h2.h)
-            throw runtime_error ("The images are not the same size");
-
-        // Create Tensors
-        auto grayscale = torch::from_blob (&p1[0],
-                { static_cast<int> (h1.h), static_cast<int> (h1.w) },
-                torch::kUInt8).to(torch::kFloat);
-        auto labels = torch::from_blob (&p2[0],
-                { static_cast<int> (h2.h), static_cast<int> (h2.w) },
-                torch::kUInt8).to(torch::kLong);
-
-        return {grayscale.clone(), labels.clone()};
-    }
-
-    torch::optional<size_t> size() const
-    {
-        return fp.size ();
-    }
-};
 
 struct sample_index
 {
@@ -72,6 +22,18 @@ class classified_point_dataset : public torch::data::datasets::Dataset<classifie
     double aspect_ratio;
     regularization_params rp;
     std::default_random_engine &rng;
+    // The classifier wants the labels to be 0-based and sequential,
+    // so remap the ASPRS labels during data loading
+    std::unordered_map<long,long> label_map = {
+        {0, 0},
+        {7, 0},
+        {2, 1},
+        {4, 2},
+        {5, 3},
+        {41, 4},
+        {45, 5},
+        {40, 6},
+    };
 
     public:
     classified_point_dataset (const std::vector<std::string> &fns,
@@ -99,14 +61,69 @@ class classified_point_dataset : public torch::data::datasets::Dataset<classifie
             if (verbose)
                 clog << "Reading " << fn << endl;
 
-            ifstream ifs (fn);
+            // Read the points
+            const auto df = ATL24_utils::dataframe::read (fn);
 
-            if (!ifs)
-                throw runtime_error ("Could not open file for reading");
+            // Convert them to the format that we want
+            assert (df.is_valid ());
+            assert (!df.headers.empty ());
+            assert (!df.columns.empty ());
 
-            // Read all the points
-            assert (i < datasets.size ());
-            datasets[i] = read_classified_point2d (ifs);
+            // Get number of photons in this file
+            const size_t nrows = df.columns[0].size ();
+
+            // Get the columns we are interested in
+            auto pi_it = find (df.headers.begin(), df.headers.end(), "ph_index");
+            auto x_it = find (df.headers.begin(), df.headers.end(), "along_track_dist");
+            auto z_it = find (df.headers.begin(), df.headers.end(), "egm08_orthometric_height");
+            auto cls_it = find (df.headers.begin(), df.headers.end(), "manual_label");
+
+            assert (pi_it != df.headers.end ());
+            assert (x_it != df.headers.end ());
+            assert (z_it != df.headers.end ());
+            assert (cls_it != df.headers.end ());
+
+            if (pi_it == df.headers.end ())
+                throw runtime_error ("Can't find 'ph_index' in dataframe");
+            if (x_it == df.headers.end ())
+                throw runtime_error ("Can't find 'along_track_dist' in dataframe");
+            if (z_it == df.headers.end ())
+                throw runtime_error ("Can't find 'egm08_orthometric_height' in dataframe");
+            if (cls_it == df.headers.end ())
+                throw runtime_error ("Can't find 'manual_label' in dataframe");
+
+            size_t ph_index = pi_it - df.headers.begin();
+            size_t x_index = x_it - df.headers.begin();
+            size_t z_index = z_it - df.headers.begin();
+            size_t cls_index = cls_it - df.headers.begin();
+
+            // Check logic
+            assert (ph_index < df.headers.size ());
+            assert (x_index < df.headers.size ());
+            assert (z_index < df.headers.size ());
+            assert (cls_index < df.headers.size ());
+            assert (ph_index < df.columns.size ());
+            assert (x_index < df.columns.size ());
+            assert (z_index < df.columns.size ());
+            assert (cls_index < df.columns.size ());
+
+            // Stuff values into the vector
+            datasets[i].resize (nrows);
+
+            for (size_t j = 0; j < nrows; ++j)
+            {
+                // Check logic
+                assert (j < df.columns[ph_index].size ());
+                assert (j < df.columns[x_index].size ());
+                assert (j < df.columns[z_index].size ());
+                assert (j < df.columns[cls_index].size ());
+
+                // Make assignments
+                datasets[i][j].h5_index = df.columns[ph_index][j];
+                datasets[i][j].x = df.columns[x_index][j];
+                datasets[i][j].z = df.columns[z_index][j];
+                datasets[i][j].cls = df.columns[cls_index][j];
+            }
 
             if (verbose)
             {
@@ -184,7 +201,7 @@ class classified_point_dataset : public torch::data::datasets::Dataset<classifie
                 torch::kUInt8).to(torch::kFloat);
 
         // Create label Tensor
-        const long cls = datasets[dataset_index][point_index].cls + 1;
+        const long cls = label_map.at (datasets[dataset_index][point_index].cls);
         auto label = torch::full ({1}, cls);
 
         return {grayscale.clone(), label.clone()};

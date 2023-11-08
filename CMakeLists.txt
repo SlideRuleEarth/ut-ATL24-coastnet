@@ -18,7 +18,7 @@ message(STATUS "Torch version ${Torch_VERSION}")
 
 set(CMAKE_CXX_FLAGS "-Wall -Werror ${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
 
-include_directories(${PROJECT_SOURCE_DIR} viper/)
+include_directories(${PROJECT_SOURCE_DIR} viper/ ../ATL24_utils)
 
 ############################################################
 # Unit tests
@@ -38,12 +38,12 @@ add_test(test_gpu)
 add_executable(latlong_to_atm ./apps/latlong_to_atm.cpp)
 target_link_libraries(latlong_to_atm gmp gdal)
 
-add_executable(resnet_train ./apps/resnet_train.cpp)
-target_link_libraries(resnet_train ${TORCH_LIBRARIES} gmp ${OpenCV_LIBS})
-target_include_directories(resnet_train PUBLIC ${OpenCV_INCLUDE_DIRS})
-target_precompile_headers(resnet_train PUBLIC ATL24_resnet/precompiled.h)
+add_executable(train ./apps/train.cpp)
+target_link_libraries(train ${TORCH_LIBRARIES} gmp ${OpenCV_LIBS})
+target_include_directories(train PUBLIC ${OpenCV_INCLUDE_DIRS})
+target_precompile_headers(train PUBLIC ATL24_resnet/precompiled.h)
 
-add_executable(resnet_classifier ./apps/resnet_classifier.cpp)
-target_link_libraries(resnet_classifier ${TORCH_LIBRARIES} gmp ${OpenCV_LIBS})
-target_include_directories(resnet_classifier PUBLIC ${OpenCV_INCLUDE_DIRS})
-target_precompile_headers(resnet_classifier PUBLIC ATL24_resnet/precompiled.h)
+add_executable(classifier ./apps/classifier.cpp)
+target_link_libraries(classifier ${TORCH_LIBRARIES} gmp ${OpenCV_LIBS})
+target_include_directories(classifier PUBLIC ${OpenCV_INCLUDE_DIRS})
+target_precompile_headers(classifier PUBLIC ATL24_resnet/precompiled.h)
