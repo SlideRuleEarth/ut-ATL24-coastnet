@@ -1,2 +1,4 @@
 build/
 venv/
+data
+resnet_test_files-*.txt
