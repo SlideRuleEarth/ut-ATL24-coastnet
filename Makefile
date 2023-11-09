@@ -49,16 +49,16 @@ train: build
 	@parallel --lb --jobs=15 \
 		"find ./data/local/OSU/*.csv | build/debug/train \
 			--verbose \
-			--num-classes=8 \
+			--num-classes=7 \
 			--test-dataset={} \
 			--random-seed=123 \
 			--network-filename=resnet_network-{}.pt \
 			> resnet_test_files-{}.txt" \
-			::: $$(seq 0 5)
+			::: $$(seq 0 4)
 
 .PHONY: classify # Run classifier
 classify: build
-	@bash run_classify_atl24.sh | parallel
+	@bash classify.sh | parallel
 
 ##############################################################################
 #
