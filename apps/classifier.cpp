@@ -1,6 +1,7 @@
 #include "ATL24_resnet/precompiled.h"
 #include "ATL24_resnet/confusion.h"
 #include "ATL24_resnet/utils.h"
+#include "ATL24_utils/dataframe.h"
 #include "viper/raster.h"
 #include "resnet.h"
 #include "classifier_cmd.h"
@@ -61,7 +62,6 @@ int main (int argc, char **argv)
             : "CUDA is NOT available.") << endl;
 
         // Create the hardware device
-        //torch::Device device (cuda_available ? torch::kCUDA : torch::kCPU);
         torch::Device device (torch::kCPU);
 
         // Prepare for inference
@@ -75,7 +75,10 @@ int main (int argc, char **argv)
         torch::NoGradGuard no_grad;
 
         // Read the points
-        auto p = read_classified_point2d (cin);
+        const auto df = ATL24_utils::dataframe::read (cin);
+
+        // Convert it to the correct format
+        auto p = convert_dataframe (df);
 
         if (args.verbose)
         {
@@ -89,7 +92,7 @@ int main (int argc, char **argv)
             { return a.x < b.x; });
 
         // Keep track of performance
-        vector<confusion_matrix> cm (args.num_classes);
+        unordered_map<long,confusion_matrix> cm;
 
         if (args.verbose)
             clog << "Classifying points" << endl;
@@ -118,28 +121,44 @@ int main (int argc, char **argv)
             t = t.unsqueeze(0).unsqueeze(0).to(device);
 
             // Decode
-            auto output = network->forward (t);
-            auto prediction = output.argmax(1);
-
-            // Save true value, 0 in the raster means 'no value'
-            const long actual = p[i].cls + 1;
+            auto prediction = network->forward (t).argmax(1);
 
             // Convert prediction from tensor to int
-            const long pred = prediction[0].item<long> ();
+            const long pred = reverse_label_map.at (prediction[0].item<long> ());
 
-            // Track performance
-            for (long cls = 1; cls < static_cast<long> (cm.size ()); ++cls)
+            // Save predicted value
+            q[i].cls = pred;
+
+            // Get actual value
+            const long actual = p[i].cls;
+
+            // Allocate confusion matrix for this classification
+            cm[actual];
+        }
+
+        // Get results
+        //
+        // For each point
+#pragma omp parallel for
+        for (size_t i = 0; i < p.size (); ++i)
+        {
+            // Get actual value
+            const long actual = p[i].cls;
+
+            // Get predicted value
+            const long pred = q[i].cls;
+
+            for (auto j : cm)
             {
+                // Get the key
+                const auto cls = j.first;
+
                 // Update the matrix
                 const bool is_present = (actual == cls);
                 const bool is_predicted = (pred == cls);
 #pragma omp critical
                 cm[cls].update (is_present, is_predicted);
             }
-
-            // Save predicted value, 0 in the point cloud means noise
-            assert (pred > 0);
-            q[i].cls = pred - 1;
         }
 
         // Compile results
@@ -159,25 +178,29 @@ int main (int argc, char **argv)
         double weighted_f1 = 0.0;
         double weighted_accuracy = 0.0;
         double weighted_bal_acc = 0.0;
-        for (size_t i = 1; i < cm.size (); ++i)
+
+        // Copy map so that it's ordered
+        std::map<long,confusion_matrix> m (cm.begin (), cm.end ());
+        for (auto i : m)
         {
-            ss << i
-                << "\t" << cm[i].accuracy ()
-                << "\t" << cm[i].F1 ()
-                << "\t" << cm[i].balanced_accuracy ()
-                << "\t" << cm[i].true_positives ()
-                << "\t" << cm[i].true_negatives ()
-                << "\t" << cm[i].false_positives ()
-                << "\t" << cm[i].false_negatives ()
-                << "\t" << cm[i].support ()
-                << "\t" << cm[i].total ()
+            const auto key = i.first;
+            ss << key
+                << "\t" << cm[key].accuracy ()
+                << "\t" << cm[key].F1 ()
+                << "\t" << cm[key].balanced_accuracy ()
+                << "\t" << cm[key].true_positives ()
+                << "\t" << cm[key].true_negatives ()
+                << "\t" << cm[key].false_positives ()
+                << "\t" << cm[key].false_negatives ()
+                << "\t" << cm[key].support ()
+                << "\t" << cm[key].total ()
                 << endl;
-            if (!isnan (cm[i].F1 ()))
-                weighted_f1 += cm[i].F1 () * cm[i].support () / cm[i].total ();
-            if (!isnan (cm[i].accuracy ()))
-                weighted_accuracy += cm[i].accuracy () * cm[i].support () / cm[i].total ();
-            if (!isnan (cm[i].balanced_accuracy ()))
-                weighted_bal_acc += cm[i].balanced_accuracy () * cm[i].support () / cm[i].total ();
+            if (!isnan (cm[key].F1 ()))
+                weighted_f1 += cm[key].F1 () * cm[key].support () / cm[key].total ();
+            if (!isnan (cm[key].accuracy ()))
+                weighted_accuracy += cm[key].accuracy () * cm[key].support () / cm[key].total ();
+            if (!isnan (cm[key].balanced_accuracy ()))
+                weighted_bal_acc += cm[key].balanced_accuracy () * cm[key].support () / cm[key].total ();
         }
         ss << "weighted_F1 = " << weighted_f1 << endl;
         ss << "weighted_accuracy = " << weighted_accuracy << endl;
