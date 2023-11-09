@@ -58,7 +58,7 @@ train: build
 
 .PHONY: classify # Run classifier
 classify: build
-	@bash classify.sh | parallel
+	@bash classify.sh | parallel --verbose --lb --jobs=15
 
 ##############################################################################
 #

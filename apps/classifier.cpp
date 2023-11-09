@@ -8,6 +8,72 @@
 
 const std::string usage {"ls *.csv | resnet [options]"};
 
+struct photon_hash
+{
+    std::size_t operator() (const std::pair<long,long> &v) const
+    {
+        size_t hash = (v.first << 0) ^ (v.second << 32);
+        return hash;
+    }
+};
+
+class prediction_cache
+{
+    public:
+    template<typename T>
+    bool check (const T &p, const size_t i) const
+    {
+        // Get photon coordinate
+        const auto h = photon_coord (p, i);
+
+        // Check the map
+        if (m.find (h) != m.end ())
+            return true;
+        else
+            return false;
+    }
+    template<typename T>
+    long get_prediction (const T &p, const size_t i) const
+    {
+        // Get photon coordinate
+        const auto h = photon_coord (p, i);
+
+        // Check logic
+        assert (m.find (h) != m.end ());
+
+        // Get the value
+        return m.at (h);
+    }
+    template<typename T>
+    void update (const T &p, const size_t i, const long prediction)
+    {
+        // Get photon coordinate
+        const auto h = photon_coord (p, i);
+
+        // Set the value
+        m[h] = prediction;
+    }
+
+    private:
+    std::unordered_map<std::pair<long,long>, long, photon_hash> m;
+    const double x_resolution = 10.0;
+    const double z_resolution = 1.0;
+
+    // Compute a hash from a photon's location
+    template<typename T>
+    std::pair<long,long> photon_coord (const T &p, const size_t i) const
+    {
+        // Check invariants
+        assert (i < p.size ());
+
+        // Quantize
+        const long x = std::round (p[i].x / x_resolution);
+        const long z = std::round (p[i].z / z_resolution);
+
+        return std::make_pair (x, z);
+    };
+};
+
 int main (int argc, char **argv)
 {
     using namespace std;
@@ -31,7 +97,7 @@ int main (int argc, char **argv)
         {
             // Show the args
             clog << "cmd_line_parameters:" << endl;
-            clog << args << endl;
+            clog << args;
         }
 
         // Get hyper-parameters
@@ -62,7 +128,7 @@ int main (int argc, char **argv)
             : "CUDA is NOT available.") << endl;
 
         // Create the hardware device
-        torch::Device device (torch::kCPU);
+        torch::Device device (torch::kCUDA);
 
         // Prepare for inference
         network->train (false);
@@ -100,31 +166,60 @@ int main (int argc, char **argv)
         // Copy the points
         auto q (p);
 
+        // Setup the prediction cache
+        prediction_cache cache;
+
         // Set regularization parameters
         regularization_params rp;
         rp.enabled = false;
         default_random_engine rng (0);
 
+        // Keep track of cache usage
+        size_t cache_lookups = 0;
+        size_t cache_hits = 0;
+
         // For each point
-#pragma omp parallel for
         for (size_t i = 0; i < p.size (); ++i)
         {
-            // Create the raster at this point
-            auto r = create_raster (p, i, hp.patch_size, hp.patch_size, hp.aspect_ratio, rp, rng);
+            // Set sentinel
+            long pred = -1;
 
-            // Create image Tensor from raster
-            auto t = torch::from_blob (&r[0],
-                { static_cast<int> (hp.patch_size), static_cast<int> (hp.patch_size) },
-                torch::kUInt8).to(torch::kFloat);
+            ++cache_lookups;
 
-            // [32 32] -> [1 1 32 32]
-            t = t.unsqueeze(0).unsqueeze(0).to(device);
+            // Do we already have a prediction near this point?
+            if (cache.check (p, i))
+            {
+                // Yes, use the previous prediction
+                pred = cache.get_prediction (p, i);
+                ++cache_hits;
+            }
+            else
+            {
+                // No, compute the prediction
+                //
+                // Create the raster at this point
+                auto r = create_raster (p, i, hp.patch_size, hp.patch_size, hp.aspect_ratio, rp, rng);
 
-            // Decode
-            auto prediction = network->forward (t).argmax(1);
+                // Create image Tensor from raster
+                auto t = torch::from_blob (&r[0],
+                    { static_cast<int> (hp.patch_size), static_cast<int> (hp.patch_size) },
+                    torch::kUInt8).to(torch::kFloat);
 
-            // Convert prediction from tensor to int
-            const long pred = reverse_label_map.at (prediction[0].item<long> ());
+                // [32 32] -> [1 1 32 32]
+                t = t.unsqueeze(0).unsqueeze(0).to(device);
+
+                // Decode
+                auto prediction = network->forward (t).argmax(1);
+
+                // Convert prediction from tensor to int
+                pred = reverse_label_map.at (prediction[0].item<long> ());
+
+                // Update the cache
+                cache.update (p, i, pred);
+            }
+
+            // Check sentinel
+            assert (pred != -1);
 
             // Save predicted value
             q[i].cls = pred;
@@ -139,7 +234,6 @@ int main (int argc, char **argv)
         // Get results
         //
         // For each point
-#pragma omp parallel for
         for (size_t i = 0; i < p.size (); ++i)
         {
             // Get actual value
@@ -156,7 +250,6 @@ int main (int argc, char **argv)
                 // Update the matrix
                 const bool is_present = (actual == cls);
                 const bool is_predicted = (pred == cls);
-#pragma omp critical
                 cm[cls].update (is_present, is_predicted);
             }
         }
@@ -205,6 +298,7 @@ int main (int argc, char **argv)
         ss << "weighted_F1 = " << weighted_f1 << endl;
         ss << "weighted_accuracy = " << weighted_accuracy << endl;
         ss << "weighted_bal_acc = " << weighted_bal_acc << endl;
+        ss << "cache usage = " << 100.0 * cache_hits / cache_lookups << "%" << endl;
 
         // Show results
         if (args.verbose)
