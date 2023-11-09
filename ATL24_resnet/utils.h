@@ -8,10 +8,34 @@
 #include <random>
 #include <sstream>
 #include <string>
+#include <unordered_map>
 #include <vector>
 
 namespace ATL24_resnet
 {
+
+// The classifier wants the labels to be 0-based and sequential,
+// so remap the ASPRS labels during data loading
+std::unordered_map<long,long> label_map = {
+    {0, 0}, // unlabeled
+    {7, 0}, // noise
+    {2, 1}, // ground
+    {4, 2}, // vegetation
+    {5, 3}, // canopy
+    {41, 4}, // sea surface
+    {45, 5}, // water column
+    {40, 6}, // bathymetry
+};
+
+std::unordered_map<long,long> reverse_label_map = {
+    {0, 0},
+    {1, 2},
+    {2, 4},
+    {3, 5},
+    {4, 41},
+    {5, 45},
+    {6, 40},
+};
 
 struct point2d
 {
@@ -167,82 +191,6 @@ std::pair<size_t,size_t> get_grid_location (const auto &p,
     return std::make_pair (row, col);
 }
 
-template<typename T>
-viper::raster::raster<unsigned char> create_raster (const T &p,
-    const size_t start_index,
-    const size_t end_index,
-    const double x_resolution,
-    const double z_resolution,
-    const int raster_type,
-    const bool normalize)
-{
-    using namespace std;
-
-    // Check the args
-    if (p.empty ())
-        return viper::raster::raster<unsigned char> ();
-
-    // Get the transect extents
-    const auto e = get_extents (p, start_index, end_index);
-
-    // Get image size
-    const auto sz = get_grid_location (e.maxp, e.minp, x_resolution, z_resolution);
-    const size_t rows = sz.first + 1;
-    const size_t cols = sz.second + 1;
-
-    // Create the PGM raster
-    viper::raster::raster<unsigned char> r (rows, cols);
-
-    // Fill the raster
-    for (size_t i = start_index; i < end_index; ++i)
-    {
-        const auto l = get_grid_location (p[i], e.minp, x_resolution, z_resolution);
-
-        // The raster origin is at the top-left
-        const size_t row = r.rows () - l.first - 1;
-        const size_t col = l.second;
-        assert (row < r.rows ());
-        assert (col < r.cols ());
-        switch (raster_type)
-        {
-            default:
-                throw std::runtime_error ("Unknown raster type");
-
-            case 0: // binary
-                r (row, col) = 1;
-            break;
-            case 1: // greyscale, clamped at 255
-                if (r (row, col) < 255)
-                    ++r (row, col);
-            break;
-            case 2: // class
-                // 0 = not assigned
-                r (row, col) = p[i].cls + 1;
-            break;
-        }
-    }
-
-    // Normalize if needed
-    if (normalize)
-    {
-        const auto max = *max_element (r.begin (), r.end ());
-        for_each (r.begin (), r.end (),
-            [&] (auto &i) { i = i * 255 / max; });
-    }
-
-    return r;
-}
-
-template<typename T>
-viper::raster::raster<unsigned char> create_raster (const T &p,
-    const double x_resolution,
-    const double z_resolution,
-    const int raster_type,
-    const bool normalize)
-{
-    return create_raster (p, 0, p.size (), x_resolution, z_resolution, raster_type, normalize);
-}
-
 struct regularization_params
 {
     bool enabled = true;
@@ -361,6 +309,75 @@ viper::raster::raster<unsigned char> create_raster (const T &p,
     }
 
     return r;
+}
+
+template<typename T>
+std::vector<ATL24_resnet::classified_point2d> convert_dataframe (const T &df)
+{
+    using namespace std;
+
+    // Check invariants
+    assert (df.is_valid ());
+    assert (!df.headers.empty ());
+    assert (!df.columns.empty ());
+
+    // Get number of photons in this file
+    const size_t nrows = df.columns[0].size ();
+
+    // Get the columns we are interested in
+    auto pi_it = find (df.headers.begin(), df.headers.end(), "ph_index");
+    auto x_it = find (df.headers.begin(), df.headers.end(), "along_track_dist");
+    auto z_it = find (df.headers.begin(), df.headers.end(), "egm08_orthometric_height");
+    auto cls_it = find (df.headers.begin(), df.headers.end(), "manual_label");
+
+    assert (pi_it != df.headers.end ());
+    assert (x_it != df.headers.end ());
+    assert (z_it != df.headers.end ());
+    assert (cls_it != df.headers.end ());
+
+    if (pi_it == df.headers.end ())
+        throw runtime_error ("Can't find 'ph_index' in dataframe");
+    if (x_it == df.headers.end ())
+        throw runtime_error ("Can't find 'along_track_dist' in dataframe");
+    if (z_it == df.headers.end ())
+        throw runtime_error ("Can't find 'egm08_orthometric_height' in dataframe");
+    if (cls_it == df.headers.end ())
+        throw runtime_error ("Can't find 'manual_label' in dataframe");
+
+    size_t ph_index = pi_it - df.headers.begin();
+    size_t x_index = x_it - df.headers.begin();
+    size_t z_index = z_it - df.headers.begin();
+    size_t cls_index = cls_it - df.headers.begin();
+
+    // Check logic
+    assert (ph_index < df.headers.size ());
+    assert (x_index < df.headers.size ());
+    assert (z_index < df.headers.size ());
+    assert (cls_index < df.headers.size ());
+    assert (ph_index < df.columns.size ());
+    assert (x_index < df.columns.size ());
+    assert (z_index < df.columns.size ());
+    assert (cls_index < df.columns.size ());
+
+    // Stuff values into the vector
+    std::vector<ATL24_resnet::classified_point2d> dataset (nrows);
+
+    for (size_t j = 0; j < nrows; ++j)
+    {
+        // Check logic
+        assert (j < df.columns[ph_index].size ());
+        assert (j < df.columns[x_index].size ());
+        assert (j < df.columns[z_index].size ());
+        assert (j < df.columns[cls_index].size ());
+
+        // Make assignments
+        dataset[j].h5_index = df.columns[ph_index][j];
+        dataset[j].x = df.columns[x_index][j];
+        dataset[j].z = df.columns[z_index][j];
+        dataset[j].cls = df.columns[cls_index][j];
+    }
+
+    return dataset;
 }
 
 } // namespace ATL24_resnet
