@@ -56,8 +56,8 @@ class prediction_cache
 
     private:
     std::unordered_map<std::pair<long,long>, long, photon_hash> m;
-    const double x_resolution = 10.0;
-    const double z_resolution = 1.0;
+    const double x_resolution = 5.0;
+    const double z_resolution = 0.5;
 
     // Compute a hash from a photon's location
     template<typename T>
