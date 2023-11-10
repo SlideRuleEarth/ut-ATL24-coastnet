@@ -100,7 +100,7 @@ void write_point2d (std::ostream &os, const T &p)
     using namespace std;
 
     // Print along-track meters
-    os << "h5_index,x,z,cls" << endl;
+    os << "ph_index,along_track_dist,egm08_orthometric_height,manual_label" << endl;
     for (size_t i = 0; i < p.size (); ++i)
     {
         // Write the index
@@ -124,7 +124,7 @@ void write_classified_point2d (std::ostream &os, const T &p)
     using namespace std;
 
     // Print along-track meters
-    os << "h5_index,x,z,cls" << endl;
+    os << "ph_index,along_track_dist,egm08_orthometric_height,manual_label" << endl;
     for (size_t i = 0; i < p.size (); ++i)
     {
         // Write the index
