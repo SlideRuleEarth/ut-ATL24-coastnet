@@ -62,6 +62,20 @@ classify: build
 
 ##############################################################################
 #
+# View data
+#
+##############################################################################
+
+PREDICTION_FNS=$(shell find ./predictions/*_classified_?.csv | shuf | head)
+
+.PHONY: view_predictions # View truth labels
+view_predictions:
+	@parallel --lb --jobs=100 \
+		"streamlit run ./apps/view_classifications.py -- --verbose {}" \
+		::: ${PREDICTION_FNS}
+
+##############################################################################
+#
 # Get help by running
 #
 #     $ make help
