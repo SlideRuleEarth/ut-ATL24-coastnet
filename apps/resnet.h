@@ -7,8 +7,9 @@ namespace ATL24_resnet
 
 struct hyper_params
 {
-    size_t patch_size = 64;
-    int64_t input_size = patch_size * patch_size;
+    size_t patch_rows = 64;
+    size_t patch_cols = 64;
+    int64_t input_size = patch_rows * patch_cols;
     double aspect_ratio = 10.0;
     int64_t batch_size = 100;
     size_t epochs = 40;
@@ -17,7 +18,8 @@ struct hyper_params
 
 std::ostream &operator<< (std::ostream &os, const hyper_params &hp)
 {
-    os << "patch_size: " << hp.patch_size << std::endl;
+    os << "patch_rows: " << hp.patch_rows << std::endl;
+    os << "patch_cols: " << hp.patch_cols << std::endl;
     os << "input_size: " << hp.input_size << std::endl;
     os << "aspect_ratio: " << hp.aspect_ratio << std::endl;
     os << "batch_size: " << hp.batch_size << std::endl;

@@ -21,7 +21,8 @@ cv::Mat to_mat (torch::Tensor t)
 void show_samples (
     const std::string &title,
     const torch::Tensor &samples,
-    const int patch_size,
+    const int patch_rows,
+    const int patch_cols,
     int total = 10)
 {
     using namespace std;
@@ -30,11 +31,11 @@ void show_samples (
     total = std::min (total, int (samples.sizes()[0]));
 
     // Convert to uint8 Mat
-    auto t = torch::zeros({total, patch_size, patch_size}, torch::kByte);
+    auto t = torch::zeros({total, patch_rows, patch_cols}, torch::kByte);
     for (int i = 0; i < total; ++i)
-        t[i] = samples[i].reshape ({patch_size, patch_size}).toType (torch::kByte);
+        t[i] = samples[i].reshape ({patch_rows, patch_cols}).toType (torch::kByte);
 
-    t = t.permute ({1, 0, 2}).reshape ({patch_size, total * patch_size});
+    t = t.permute ({1, 0, 2}).reshape ({patch_rows, total * patch_cols});
 
     cv::imshow(title, to_mat (t));
 }
@@ -137,7 +138,8 @@ int main (int argc, char **argv)
         const size_t training_samples_per_class = 10'000;
         const size_t test_samples_per_class = 200;
         auto train_dataset = classified_point_dataset (train_filenames,
-            hp.patch_size,
+            hp.patch_rows,
+            hp.patch_cols,
             hp.aspect_ratio,
             rp,
             training_samples_per_class,
@@ -145,7 +147,8 @@ int main (int argc, char **argv)
             rng)
             .map(torch::data::transforms::Stack<>());
         auto test_dataset = classified_point_dataset (test_filenames,
-            hp.patch_size,
+            hp.patch_rows,
+            hp.patch_cols,
             hp.aspect_ratio,
             rp,
             test_samples_per_class,
@@ -210,7 +213,7 @@ int main (int argc, char **argv)
                 auto output = network->forward(data);
                 auto prediction = output.argmax(1);
                 auto loss = torch::nn::functional::cross_entropy(output, target);
-                show_samples ("input", data, hp.patch_size);
+                show_samples ("input", data, hp.patch_rows, hp.patch_cols);
 
                 // Update number of correctly classified samples
                 total_correct += prediction.eq(target).sum().item<int64_t>();
@@ -278,7 +281,7 @@ int main (int argc, char **argv)
             auto output = network->forward(data);
             auto prediction = output.argmax(1);
             auto loss = torch::nn::functional::cross_entropy(output, target);
-            show_samples ("testing", data, hp.patch_size);
+            show_samples ("testing", data, hp.patch_rows, hp.patch_cols);
             cv::waitKey (1);
 
             // Update number of correctly classified samples

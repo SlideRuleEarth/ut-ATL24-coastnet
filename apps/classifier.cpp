@@ -198,11 +198,11 @@ int main (int argc, char **argv)
                 // No, compute the prediction
                 //
                 // Create the raster at this point
-                auto r = create_raster (p, i, hp.patch_size, hp.patch_size, hp.aspect_ratio, rp, rng);
+                auto r = create_raster (p, i, hp.patch_rows, hp.patch_cols, hp.aspect_ratio, rp, rng);
 
                 // Create image Tensor from raster
                 auto t = torch::from_blob (&r[0],
-                    { static_cast<int> (hp.patch_size), static_cast<int> (hp.patch_size) },
+                    { static_cast<int> (hp.patch_rows), static_cast<int> (hp.patch_cols) },
                     torch::kUInt8).to(torch::kFloat);
 
                 // [32 32] -> [1 1 32 32]

@@ -18,20 +18,23 @@ class classified_point_dataset : public torch::data::datasets::Dataset<classifie
     using Example = torch::data::Example<>;
     std::vector<std::vector<ATL24_resnet::classified_point2d>> datasets;
     std::vector<sample_index> sample_indexes;
-    size_t patch_size;
+    size_t patch_rows;
+    size_t patch_cols;
     double aspect_ratio;
     regularization_params rp;
     std::default_random_engine &rng;
 
     public:
     classified_point_dataset (const std::vector<std::string> &fns,
-        const size_t patch_size,
+        const size_t patch_rows,
+        const size_t patch_cols,
         const double aspect_ratio,
         const regularization_params &rp,
         const size_t samples_per_class,
         const bool verbose,
         std::default_random_engine &rng)
-        : patch_size (patch_size)
+        : patch_rows (patch_rows)
+        , patch_cols (patch_cols)
         , aspect_ratio (aspect_ratio)
         , rp (rp)
         , rng (rng)
@@ -119,15 +122,15 @@ class classified_point_dataset : public torch::data::datasets::Dataset<classifie
         auto p = create_raster (
             datasets[dataset_index],
             point_index,
-            patch_size,
-            patch_size,
+            patch_rows,
+            patch_cols,
             aspect_ratio,
             rp,
             rng);
 
         // Create image Tensor from raster
         auto grayscale = torch::from_blob (&p[0],
-                { static_cast<int> (patch_size), static_cast<int> (patch_size) },
+                { static_cast<int> (patch_rows), static_cast<int> (patch_cols) },
                 torch::kUInt8).to(torch::kFloat);
 
         // Create label Tensor
