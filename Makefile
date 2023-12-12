@@ -59,6 +59,7 @@ train: build
 .PHONY: classify # Run classifier
 classify: build
 	@bash classify.sh | parallel --verbose --lb --jobs=15
+	@./get_bathy_scores.bash
 
 ##############################################################################
 #
