@@ -58,6 +58,7 @@ def main(args):
                    '45': 'water column'}
 
     fig = px.scatter(df2, x="along_track_dist", y="egm08_orthometric_height",
+                     title=args.input_filename,
                      color='manual_label',
                      color_discrete_map=cdm,
                      hover_data=["along_track_dist",
@@ -73,6 +74,7 @@ def main(args):
     st.plotly_chart(fig, use_container_width=True)
 
     fig = px.scatter(df2, x="along_track_dist", y="egm08_orthometric_height",
+                     title=args.input_filename,
                      color='manual_label',
                      color_discrete_map=cdm,
                      hover_data=["along_track_dist",
@@ -93,7 +95,7 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser(
         prog='viewer',
-        description='Interactive SCuBA elevation viewer')
+        description='Interactive elevation viewer')
     parser.add_argument(
         'input_filename',
         help="Input filename specification")
