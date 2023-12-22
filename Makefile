@@ -47,7 +47,7 @@ test:
 .PHONY: train # Train a model
 train: build
 	@parallel --lb --jobs=15 \
-		"find ./data/local/OSU/*.csv | build/debug/train \
+		"find ./data/local/3DGL_curated/*.csv | build/debug/train \
 			--verbose \
 			--num-classes=7 \
 			--test-dataset={} \
@@ -67,9 +67,17 @@ classify: build
 #
 ##############################################################################
 
-PREDICTION_FNS=$(shell find ./predictions/*_classified_?.csv | shuf | head)
+TRUTH_FNS=$(shell find ./data/local/3DGL/??_A*.csv | head)
 
-.PHONY: view_predictions # View truth labels
+.PHONY: view_truth # View truth labels
+view_truth:
+	@parallel --lb --jobs=100 \
+		"streamlit run ./apps/view_classifications.py -- --verbose {}" \
+		::: ${TRUTH_FNS}
+
+PREDICTION_FNS=$(shell find ./predictions/??_A*_classified_?.csv | head)
+
+.PHONY: view_predictions # View prediction labels
 view_predictions:
 	@parallel --lb --jobs=100 \
 		"streamlit run ./apps/view_classifications.py -- --verbose {}" \
