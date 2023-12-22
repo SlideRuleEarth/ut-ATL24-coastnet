@@ -288,7 +288,6 @@ int main (int argc, char **argv)
             total_correct += prediction.eq(target).sum().item<int64_t>();
 
             clog << "batch index: " << batch_index;
-            clog << "/" << total_test_samples;
             clog << " loss " << loss.item<float>();
             clog << endl;
 
