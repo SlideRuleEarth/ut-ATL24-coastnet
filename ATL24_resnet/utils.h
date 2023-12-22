@@ -100,7 +100,7 @@ void write_point2d (std::ostream &os, const T &p)
     using namespace std;
 
     // Print along-track meters
-    os << "ph_index,along_track_dist,egm08_orthometric_height,manual_label" << endl;
+    os << "ph_index,along_track_dist,geoid_corrected_h,manual_label" << endl;
     for (size_t i = 0; i < p.size (); ++i)
     {
         // Write the index
@@ -124,7 +124,7 @@ void write_classified_point2d (std::ostream &os, const T &p)
     using namespace std;
 
     // Print along-track meters
-    os << "ph_index,along_track_dist,egm08_orthometric_height,manual_label" << endl;
+    os << "ph_index,along_track_dist,geoid_corrected_h,manual_label" << endl;
     for (size_t i = 0; i < p.size (); ++i)
     {
         // Write the index
@@ -327,7 +327,7 @@ std::vector<ATL24_resnet::classified_point2d> convert_dataframe (const T &df)
     // Get the columns we are interested in
     auto pi_it = find (df.headers.begin(), df.headers.end(), "ph_index");
     auto x_it = find (df.headers.begin(), df.headers.end(), "along_track_dist");
-    auto z_it = find (df.headers.begin(), df.headers.end(), "egm08_orthometric_height");
+    auto z_it = find (df.headers.begin(), df.headers.end(), "geoid_corrected_h");
     auto cls_it = find (df.headers.begin(), df.headers.end(), "manual_label");
 
     assert (pi_it != df.headers.end ());
@@ -340,7 +340,7 @@ std::vector<ATL24_resnet::classified_point2d> convert_dataframe (const T &df)
     if (x_it == df.headers.end ())
         throw runtime_error ("Can't find 'along_track_dist' in dataframe");
     if (z_it == df.headers.end ())
-        throw runtime_error ("Can't find 'egm08_orthometric_height' in dataframe");
+        throw runtime_error ("Can't find 'geoid_corrected_h' in dataframe");
     if (cls_it == df.headers.end ())
         throw runtime_error ("Can't find 'manual_label' in dataframe");
 
