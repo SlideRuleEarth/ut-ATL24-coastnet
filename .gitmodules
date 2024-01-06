@@ -1,3 +1,0 @@
-[submodule "viper"]
-	path = viper
-	url = git@gitlab.csr.utexas.edu:3dgl/viper.git
