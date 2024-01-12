@@ -75,7 +75,7 @@ TRUTH_FNS=$(shell find ./data/local/3DGL_curated/??_A*.csv | head)
 .PHONY: view_truth # View truth labels
 view_truth:
 	@parallel --lb --jobs=100 \
-		"streamlit run ./apps/view_classifications.py -- --verbose {}" \
+		"streamlit run ../ATL24_rasters/apps/view_classifications.py -- --verbose {}" \
 		::: ${TRUTH_FNS}
 
 PREDICTION_FNS=$(shell find ./predictions/??_A*_classified_?.csv | head)
@@ -83,7 +83,7 @@ PREDICTION_FNS=$(shell find ./predictions/??_A*_classified_?.csv | head)
 .PHONY: view_predictions # View prediction labels
 view_predictions:
 	@parallel --lb --jobs=100 \
-		"streamlit run ./apps/view_classifications.py -- --verbose {}" \
+		"streamlit run ../ATL24_rasters/apps/view_classifications.py -- --verbose {}" \
 		::: ${PREDICTION_FNS}
 
 ##############################################################################
