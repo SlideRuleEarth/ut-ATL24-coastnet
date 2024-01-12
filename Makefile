@@ -21,6 +21,9 @@ build: ./build/debug/Makefile
 clean:
 	@rm -rf build
 
+.PHONY: everything # Full build/test/run
+everything: clean build test train classify
+
 ##############################################################################
 #
 # Test
@@ -67,7 +70,7 @@ classify: build
 #
 ##############################################################################
 
-TRUTH_FNS=$(shell find ./data/local/3DGL/??_A*.csv | head)
+TRUTH_FNS=$(shell find ./data/local/3DGL_curated/??_A*.csv | head)
 
 .PHONY: view_truth # View truth labels
 view_truth:
