@@ -13,7 +13,7 @@ dnf -y install \
     gdal-devel \
     armadillo-devel
 dnf config-manager --add-repo https://developer.download.nvidia.com/compute/cuda/repos/rhel8/x86_64/cuda-rhel8.repo
-dnf -y install cuda
+dnf -y install cuda libcudnn8 libcudnn8-devel
 ```
 # Environment
 
