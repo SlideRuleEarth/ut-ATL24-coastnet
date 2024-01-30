@@ -3,6 +3,7 @@
 
 #include <getopt.h>
 #include <iostream>
+#include <cmath>
 #include <stdexcept>
 #include <string>
 #include "ATL24_resnet/cmd_utils.h"
