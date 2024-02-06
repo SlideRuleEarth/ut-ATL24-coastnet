@@ -50,7 +50,7 @@ test:
 .PHONY: train # Train a model
 train: build
 	@parallel --lb --jobs=15 \
-		"find ./data/local/3DGL_curated/*.csv | build/debug/train \
+		"find ./data/local/3DGL/*.csv | build/debug/train \
 			--verbose \
 			--num-classes=7 \
 			--test-dataset={} \
@@ -70,7 +70,7 @@ classify: build
 #
 ##############################################################################
 
-TRUTH_FNS=$(shell find ./data/local/3DGL_curated/??_A*.csv | head)
+TRUTH_FNS=$(shell find ./data/local/3DGL/??_A*.csv | head)
 
 .PHONY: view_truth # View truth labels
 view_truth:
