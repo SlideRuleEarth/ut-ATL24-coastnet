@@ -10,7 +10,7 @@ struct hyper_params
     size_t patch_rows = 76;
     size_t patch_cols = 48;
     int64_t input_size = patch_rows * patch_cols;
-    double aspect_ratio = 10.0;
+    double aspect_ratio = 20.0;
     int64_t batch_size = 100;
     size_t epochs = 40;
     double initial_learning_rate = 0.01;
