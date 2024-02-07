@@ -202,6 +202,18 @@ struct regularization_params
     bool mirror = true;
 };
 
+std::ostream &operator<< (std::ostream &os, const regularization_params &rp)
+{
+    os << "enabled: " << rp.enabled << std::endl;
+    os << "jitter_std: " << rp.jitter_std << std::endl;
+    os << "scale_x_min: " << rp.scale_x_min << std::endl;
+    os << "scale_x_max: " << rp.scale_x_max << std::endl;
+    os << "scale_z_min: " << rp.scale_z_min << std::endl;
+    os << "scale_z_max: " << rp.scale_z_max << std::endl;
+    os << "mirror: " << rp.mirror << std::endl;
+    return os;
+}
+
 template<typename T>
 viper::raster::raster<unsigned char> create_raster (const T &p,
     const size_t index,
