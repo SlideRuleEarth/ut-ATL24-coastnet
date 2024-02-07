@@ -169,8 +169,8 @@ int main (int argc, char **argv)
         // Setup the prediction cache
         prediction_cache cache;
 
-        // Set regularization parameters
-        regularization_params rp;
+        // Set augmentation parameters
+        augmentation_params rp;
         rp.enabled = false;
         default_random_engine rng (0);
 

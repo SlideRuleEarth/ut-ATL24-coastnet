@@ -191,7 +191,7 @@ std::pair<size_t,size_t> get_grid_location (const auto &p,
     return std::make_pair (row, col);
 }
 
-struct regularization_params
+struct augmentation_params
 {
     bool enabled = true;
     double jitter_std = 0.1; // standard deviation in meters
@@ -202,15 +202,15 @@ struct regularization_params
     bool mirror = true;
 };
 
-std::ostream &operator<< (std::ostream &os, const regularization_params &rp)
+std::ostream &operator<< (std::ostream &os, const augmentation_params &ap)
 {
-    os << "enabled: " << rp.enabled << std::endl;
-    os << "jitter_std: " << rp.jitter_std << std::endl;
-    os << "scale_x_min: " << rp.scale_x_min << std::endl;
-    os << "scale_x_max: " << rp.scale_x_max << std::endl;
-    os << "scale_z_min: " << rp.scale_z_min << std::endl;
-    os << "scale_z_max: " << rp.scale_z_max << std::endl;
-    os << "mirror: " << rp.mirror << std::endl;
+    os << "enabled: " << ap.enabled << std::endl;
+    os << "jitter_std: " << ap.jitter_std << std::endl;
+    os << "scale_x_min: " << ap.scale_x_min << std::endl;
+    os << "scale_x_max: " << ap.scale_x_max << std::endl;
+    os << "scale_z_min: " << ap.scale_z_min << std::endl;
+    os << "scale_z_max: " << ap.scale_z_max << std::endl;
+    os << "mirror: " << ap.mirror << std::endl;
     return os;
 }
 
@@ -220,7 +220,7 @@ viper::raster::raster<unsigned char> create_raster (const T &p,
     const size_t rows,
     const size_t cols,
     const double aspect_ratio,
-    const regularization_params &rp,
+    const augmentation_params &ap,
     std::default_random_engine &rng)
 {
     using namespace std;
@@ -266,11 +266,11 @@ viper::raster::raster<unsigned char> create_raster (const T &p,
         ++index_right;
     }
 
-    // Create regularization distributions
-    normal_distribution<double> jitter_dist (0.0, rp.jitter_std);
-    uniform_real_distribution<double> scale_x_dist (rp.scale_x_min, rp.scale_x_max);
-    uniform_real_distribution<double> scale_y_dist (rp.scale_z_min, rp.scale_z_max);
-    bernoulli_distribution mirror_dist (rp.mirror ? 0.5 : 0.0);
+    // Create augmentation distributions
+    normal_distribution<double> jitter_dist (0.0, ap.jitter_std);
+    uniform_real_distribution<double> scale_x_dist (ap.scale_x_min, ap.scale_x_max);
+    uniform_real_distribution<double> scale_y_dist (ap.scale_z_min, ap.scale_z_max);
+    bernoulli_distribution mirror_dist (ap.mirror ? 0.5 : 0.0);
 
     // Mirror all points or none
     const auto mirror = mirror_dist (rng);
@@ -291,8 +291,8 @@ viper::raster::raster<unsigned char> create_raster (const T &p,
         double dx = x - x0;
         double dz = z - z0;
 
-        // Apply regularization
-        if (rp.enabled)
+        // Apply augmentation
+        if (ap.enabled)
         {
             dx += jitter_dist (rng);
             dz += jitter_dist (rng);

@@ -22,7 +22,7 @@ class classified_point_dataset : public torch::data::datasets::Dataset<classifie
     size_t patch_rows;
     size_t patch_cols;
     double aspect_ratio;
-    regularization_params rp;
+    augmentation_params ap;
     std::default_random_engine &rng;
 
     public:
@@ -30,14 +30,14 @@ class classified_point_dataset : public torch::data::datasets::Dataset<classifie
         const size_t patch_rows,
         const size_t patch_cols,
         const double aspect_ratio,
-        const regularization_params &rp,
+        const augmentation_params &ap,
         const size_t samples_per_class,
         const bool verbose,
         std::default_random_engine &rng)
         : patch_rows (patch_rows)
         , patch_cols (patch_cols)
         , aspect_ratio (aspect_ratio)
-        , rp (rp)
+        , ap (ap)
         , rng (rng)
     {
         using namespace std;
@@ -123,7 +123,7 @@ class classified_point_dataset : public torch::data::datasets::Dataset<classifie
             patch_rows,
             patch_cols,
             aspect_ratio,
-            rp,
+            ap,
             rng);
 
         // Create image Tensor from raster
@@ -152,7 +152,7 @@ class classified_point_dataset2 : public torch::data::datasets::Dataset<classifi
     size_t patch_rows;
     size_t patch_cols;
     double aspect_ratio;
-    regularization_params rp;
+    augmentation_params ap;
     std::default_random_engine &rng;
 
     public:
@@ -160,7 +160,7 @@ class classified_point_dataset2 : public torch::data::datasets::Dataset<classifi
         const size_t patch_rows,
         const size_t patch_cols,
         const double aspect_ratio,
-        const regularization_params &rp,
+        const augmentation_params &ap,
         const size_t min_samples_per_class,
         const size_t max_samples_per_class,
         const bool verbose,
@@ -168,7 +168,7 @@ class classified_point_dataset2 : public torch::data::datasets::Dataset<classifi
         : patch_rows (patch_rows)
         , patch_cols (patch_cols)
         , aspect_ratio (aspect_ratio)
-        , rp (rp)
+        , ap (ap)
         , rng (rng)
     {
         using namespace std;
@@ -284,7 +284,7 @@ class classified_point_dataset2 : public torch::data::datasets::Dataset<classifi
             patch_rows,
             patch_cols,
             aspect_ratio,
-            rp,
+            ap,
             rng);
 
         // Create image Tensor from raster

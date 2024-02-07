@@ -129,22 +129,20 @@ int main (int argc, char **argv)
         hyper_params hp;
 
         // Get other parameters
-        regularization_params rp;
+        augmentation_params rp;
 
         clog << "hyper_parameters:" << endl;
         clog << hp << endl;
 
         // Create Datasets
-        const size_t min_training_samples_per_class = 500;
-        const size_t max_training_samples_per_class = 1'000;
+        const size_t training_samples_per_class = 20'000;
         const size_t test_samples_per_class = 200;
-        auto train_dataset = classified_point_dataset2 (train_filenames,
+        auto train_dataset = classified_point_dataset (train_filenames,
             hp.patch_rows,
             hp.patch_cols,
             hp.aspect_ratio,
             rp,
-            min_training_samples_per_class,
-            max_training_samples_per_class,
+            training_samples_per_class,
             true, // args.verbose,
             rng)
             .map(torch::data::transforms::Stack<>());

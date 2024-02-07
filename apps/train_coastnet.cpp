@@ -60,13 +60,13 @@ int main (int argc, char **argv)
         hyper_params hp;
 
         // Get other parameters
-        regularization_params rp;
+        augmentation_params rp;
 
         if (args.verbose)
         {
             clog << "hyper parameters:" << endl;
             clog << hp << endl;
-            clog << "regularization parameters:" << endl;
+            clog << "augmentation parameters:" << endl;
             clog << rp << endl;
             clog << "Creating dataset" << endl;
         }
