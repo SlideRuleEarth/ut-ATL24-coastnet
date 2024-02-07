@@ -170,8 +170,8 @@ int main (int argc, char **argv)
         prediction_cache cache;
 
         // Set augmentation parameters
-        augmentation_params rp;
-        rp.enabled = false;
+        augmentation_params ap;
+        ap.enabled = false;
         default_random_engine rng (0);
 
         // Keep track of cache usage
@@ -198,7 +198,7 @@ int main (int argc, char **argv)
                 // No, compute the prediction
                 //
                 // Create the raster at this point
-                auto r = create_raster (p, i, hp.patch_rows, hp.patch_cols, hp.aspect_ratio, rp, rng);
+                auto r = create_raster (p, i, hp.patch_rows, hp.patch_cols, hp.aspect_ratio, ap, rng);
 
                 // Create image Tensor from raster
                 auto t = torch::from_blob (&r[0],

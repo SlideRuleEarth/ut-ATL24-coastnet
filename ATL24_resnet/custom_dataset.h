@@ -144,7 +144,7 @@ class classified_point_dataset : public torch::data::datasets::Dataset<classifie
     }
 };
 
-class classified_point_dataset2 : public torch::data::datasets::Dataset<classified_point_dataset2>
+class single_class_dataset : public torch::data::datasets::Dataset<single_class_dataset>
 {
     using Example = torch::data::Example<>;
     std::vector<std::vector<ATL24_resnet::classified_point2d>> datasets;
@@ -153,15 +153,16 @@ class classified_point_dataset2 : public torch::data::datasets::Dataset<classifi
     size_t patch_cols;
     double aspect_ratio;
     augmentation_params ap;
+    unsigned cls;
     std::default_random_engine &rng;
 
     public:
-    classified_point_dataset2 (const std::vector<std::string> &fns,
+    single_class_dataset (const std::vector<std::string> &fns,
         const size_t patch_rows,
         const size_t patch_cols,
         const double aspect_ratio,
         const augmentation_params &ap,
-        const size_t min_samples_per_class,
+        const unsigned cls,
         const size_t max_samples_per_class,
         const bool verbose,
         std::default_random_engine &rng)
@@ -169,6 +170,7 @@ class classified_point_dataset2 : public torch::data::datasets::Dataset<classifi
         , patch_cols (patch_cols)
         , aspect_ratio (aspect_ratio)
         , ap (ap)
+        , cls (cls)
         , rng (rng)
     {
         using namespace std;
@@ -190,50 +192,67 @@ class classified_point_dataset2 : public torch::data::datasets::Dataset<classifi
             // Convert it to the correct format
             datasets[i] = convert_dataframe (df);
 
+            // Get a reference to this dataset
+            const auto &d = datasets[i];
+
             if (verbose)
-                clog << datasets[i].size () << " points read" << endl;
+                clog << d.size () << " points read" << endl;
 
             // Sort them by X
-            sort (datasets[i].begin (), datasets[i].end (),
+            sort (d.begin (), d.end (),
                 [](const auto &a, const auto &b)
                 { return a.x < b.x; });
 
             // Count each class
-            unordered_map<size_t,size_t> cls_sizes;
+            unordered_map<unsigned,size_t> cls_sizes;
 
-            for (size_t j = 0; j < datasets[i].size (); ++j)
-                ++cls_sizes[datasets[i][j].cls];
+            for (size_t j = 0; j < d.size (); ++j)
+                ++cls_sizes[d[j].cls];
 
-            for (auto j : cls_sizes)
+            // If this class is not represented in this dataset, skip
+            // the dataset
+            if (cls_sizes.find (cls) == cls_sizes.end ())
+                continue;
+
+            // If this class count is less than the max, then only add
+            // the number of samples from this class
+            const size_t total_samples_per_class =
+                cls_sizes.at (cls) < max_samples_per_class
+                ? cls_sizes.at (cls)
+                : max_samples_per_class;
+
+            // Keep track of how many have been added from each class
+            unordered_map<unsigned,size_t> added_counts;
+
+            // Indexes into the dataset points
+            vector<size_t> indexes (d.size ());
+
+            // 0, 1, 2, ...
+            iota (indexes.begin (), indexes.end (), 0);
+
+            // Go through the dataset in a random order
+            shuffle (indexes.begin (), indexes.end (), rng);
+
+            for (size_t j = 0; j < indexes.size (); ++j)
             {
-                if (verbose)
-                    clog << "Class\t" << j.first << "\t"
-                        << j.second << " photons" << endl;
+                // Get the index
+                const auto k = indexes[j];
 
-                // If there aren't enough, skip it
-                if (j.second < min_samples_per_class)
-                    continue;
+                // Get the point
+                const auto p = d[k];
 
-                // Determine how many to add
-                const size_t total_photons = j.second;
-                const size_t total_to_add = std::min (total_photons, max_samples_per_class);
+                // Get the class
+                const auto c = p.cls;
 
-                if (verbose)
-                    clog << "Adding\t" << total_to_add << " photons" << endl;
+                // Still more to add from this class?
+                if (added_counts[c] == total_samples_per_class)
+                    continue; // No, go to next point
 
-                // 0, 1, 2, ..., total_photons-1
-                vector<size_t> indexes (total_photons);
-                iota (indexes.begin (), indexes.end (), 0);
+                // Keep track of how many were added
+                ++added_counts[c];
 
-                // Randomize the order
-                shuffle (indexes.begin (), indexes.end (), rng);
-
-                // Only use as many as we need
-                indexes.resize (total_to_add);
-
-                // Append them to the end
-                for (auto k : indexes)
-                    sample_indexes.push_back (sample_index {i, k});
+                // Append it
+                sample_indexes.push_back (sample_index {i, k});
             }
         }
 
@@ -257,9 +276,6 @@ class classified_point_dataset2 : public torch::data::datasets::Dataset<classifi
             for (auto i : cls_counts)
                 clog << "\t" << i.first << "\t" << i.second << endl;
         }
-
-        // Randomize the order
-        shuffle (sample_indexes.begin (), sample_indexes.end (), rng);
 
         // Show results
         if (verbose)
@@ -293,8 +309,8 @@ class classified_point_dataset2 : public torch::data::datasets::Dataset<classifi
                 torch::kUInt8).to(torch::kFloat);
 
         // Create label Tensor
-        const long cls = label_map.at (datasets[dataset_index][point_index].cls);
-        auto label = torch::full ({1}, cls);
+        const long c = datasets[dataset_index][point_index].cls == this->cls ? 1 : 0;
+        auto label = torch::full ({1}, c);
 
         return {grayscale.clone(), label.clone()};
     }

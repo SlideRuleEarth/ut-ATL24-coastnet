@@ -60,26 +60,32 @@ int main (int argc, char **argv)
         hyper_params hp;
 
         // Get other parameters
-        augmentation_params rp;
+        augmentation_params ap {
+            true, // enabled
+            0.1, // jitter_std standard deviation in meters
+            0.9, // scale_x_min meters
+            0.1, // scale_x_max meters
+            2.0, // scale_z_min meters
+            0.1, // scale_z_max meters
+            true
+        };
 
         if (args.verbose)
         {
             clog << "hyper parameters:" << endl;
             clog << hp << endl;
             clog << "augmentation parameters:" << endl;
-            clog << rp << endl;
+            clog << ap << endl;
             clog << "Creating dataset" << endl;
         }
 
-        const size_t min_samples_per_class = 100;
-        const size_t max_samples_per_class = 1'000;
-        auto train_dataset = classified_point_dataset2 (fns,
+        auto train_dataset = single_class_dataset (fns,
             hp.patch_rows,
             hp.patch_cols,
             hp.aspect_ratio,
-            rp,
-            min_samples_per_class,
-            max_samples_per_class,
+            ap,
+            args.cls,
+            args.max_samples_per_class,
             args.verbose,
             rng)
             .map(torch::data::transforms::Stack<>());
@@ -95,7 +101,7 @@ int main (int argc, char **argv)
         torch::Device device (cuda_available ? torch::kCUDA : torch::kCPU);
 
         // Create the network
-        const size_t num_classes = 7;
+        const size_t num_classes = 2;
         std::array<int64_t, 3> layers{2, 2, 2};
         ResNet<ResidualBlock> network (layers, num_classes);
 

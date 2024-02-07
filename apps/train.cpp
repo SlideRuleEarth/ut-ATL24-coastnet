@@ -129,7 +129,7 @@ int main (int argc, char **argv)
         hyper_params hp;
 
         // Get other parameters
-        augmentation_params rp;
+        augmentation_params ap;
 
         clog << "hyper_parameters:" << endl;
         clog << hp << endl;
@@ -141,7 +141,7 @@ int main (int argc, char **argv)
             hp.patch_rows,
             hp.patch_cols,
             hp.aspect_ratio,
-            rp,
+            ap,
             training_samples_per_class,
             true, // args.verbose,
             rng)
@@ -150,7 +150,7 @@ int main (int argc, char **argv)
             hp.patch_rows,
             hp.patch_cols,
             hp.aspect_ratio,
-            rp,
+            ap,
             test_samples_per_class,
             false, // args.verbose,
             rng)

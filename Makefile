@@ -10,7 +10,7 @@ default: build test
 
 # Recreate Makefiles when CMakeLists.txt changes
 ./build/debug/Makefile: CMakeLists.txt
-	@bash ./run_cmake.sh
+	@./run_cmake.sh
 
 .PHONY: build # Build all targets
 build: ./build/debug/Makefile
@@ -61,19 +61,17 @@ train: build
 
 .PHONY: classify # Run classifier
 classify: build
-	@bash classify.sh | parallel --verbose --lb --jobs=15
-	@./get_bathy_scores.bash
+	@./classify.sh | parallel --verbose --lb --jobs=15
+	@./get_bathy_scores.sh
 
 .PHONY: train_coastnet # Train a model
 train_coastnet: build
-	@bash train_coastnet.sh
+	@./train_coastnet.sh
 
 .PHONY: classify_coastnet # Run classifier
 classify_coastnet: build
-	@bash classify_coastnet_surface.sh | parallel --verbose --lb --jobs=15
-	@./get_coastnet_surface_scores.bash
-	@bash classify_coastnet_bathy.sh | parallel --verbose --lb --jobs=15
-	@./get_coastnet_bathy_scores.bash
+	@./classify_coastnet.sh | parallel --verbose --lb --jobs=15
+	@./get_coastnet_scores.sh
 
 ##############################################################################
 #
