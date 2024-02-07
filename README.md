@@ -1,3 +1,7 @@
+# Coastal Deep Network
+
+Deep residual network for coastal feature extraction
+
 # Dependencies
 
 ``` bash

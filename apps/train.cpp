@@ -135,15 +135,17 @@ int main (int argc, char **argv)
         clog << hp << endl;
 
         // Create Datasets
-        const size_t training_samples_per_class = 10'000;
+        const size_t min_training_samples_per_class = 500;
+        const size_t max_training_samples_per_class = 1'000;
         const size_t test_samples_per_class = 200;
-        auto train_dataset = classified_point_dataset (train_filenames,
+        auto train_dataset = classified_point_dataset2 (train_filenames,
             hp.patch_rows,
             hp.patch_cols,
             hp.aspect_ratio,
             rp,
-            training_samples_per_class,
-            false, // args.verbose,
+            min_training_samples_per_class,
+            max_training_samples_per_class,
+            true, // args.verbose,
             rng)
             .map(torch::data::transforms::Stack<>());
         auto test_dataset = classified_point_dataset (test_filenames,
@@ -256,10 +258,10 @@ int main (int argc, char **argv)
             clog << "accuracy " << accuracy << endl;
 
             scheduler.step();
-        }
 
-        // Save the model
-        torch::save (network, args.network_filename);
+            // Save the model
+            torch::save (network, args.network_filename);
+        }
 
         // Test the network
         network->train (false);

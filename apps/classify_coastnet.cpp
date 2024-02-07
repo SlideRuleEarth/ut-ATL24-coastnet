@@ -3,8 +3,8 @@
 #include "ATL24_resnet/utils.h"
 #include "ATL24_utils/dataframe.h"
 #include "viper/raster.h"
-#include "resnet.h"
-#include "classifier_cmd.h"
+#include "coastnet.h"
+#include "classify_coastnet_cmd.h"
 
 const std::string usage {"ls *.csv | resnet [options]"};
 
