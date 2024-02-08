@@ -19,8 +19,8 @@ struct args
     bool help = false;
     bool verbose = false;
     size_t random_seed = 123;
-    unsigned cls = 0;
     size_t max_samples_per_class = 1'000;
+    size_t epochs = 10;
     std::string network_filename;
 };
 
@@ -30,8 +30,8 @@ std::ostream &operator<< (std::ostream &os, const args &args)
     os << "help: " << args.help << std::endl;
     os << "verbose: " << args.verbose << std::endl;
     os << "random-seed: " << args.random_seed << std::endl;
-    os << "class: " << args.cls << std::endl;
     os << "max-samples-per-class: " << args.max_samples_per_class << std::endl;
+    os << "epochs: " << args.epochs << std::endl;
     os << "network-filename: " << args.network_filename << std::endl;
     return os;
 }
@@ -46,13 +46,13 @@ args get_args (int argc, char **argv, const std::string &usage)
             {"help", no_argument, 0,  'h' },
             {"verbose", no_argument, 0,  'v' },
             {"random-seed", required_argument, 0,  's' },
-            {"class", required_argument, 0,  'c' },
             {"max-samples-per-class", required_argument, 0,  'm' },
+            {"epochs", required_argument, 0,  'e' },
             {"network-filename", required_argument, 0,  'f' },
             {0,      0,           0,  0 }
         };
 
-        int c = getopt_long(argc, argv, "hvs:c:m:f:", long_options, &option_index);
+        int c = getopt_long(argc, argv, "hvs:m:e:f:", long_options, &option_index);
         if (c == -1)
             break;
 
@@ -70,8 +70,8 @@ args get_args (int argc, char **argv, const std::string &usage)
             }
             case 'v': args.verbose = true; break;
             case 's': args.random_seed = atol(optarg); break;
-            case 'c': args.cls = std::atol(optarg); break;
             case 'm': args.max_samples_per_class = std::atol(optarg); break;
+            case 'e': args.epochs = std::atol(optarg); break;
             case 'f': args.network_filename = std::string(optarg); break;
         }
     }
@@ -83,10 +83,6 @@ args get_args (int argc, char **argv, const std::string &usage)
     // Check args
     if (args.network_filename.empty ())
         throw std::runtime_error ("No network filename was specified");
-
-    // Check args
-    if (args.cls == 0)
-        throw std::runtime_error ("You did not specify a class");
 
     return args;
 }

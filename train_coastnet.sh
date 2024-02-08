@@ -6,6 +6,6 @@ IFS=$'\n\t'
 
 find ./data/local/3DGL/*.csv | build/debug/train_coastnet \
     --verbose \
-    --class=41 \
+    --epochs=25 \
     --max-samples-per-class=1000 \
-    --network-filename=coastnet-bathy.pt
+    --network-filename=coastnet.pt

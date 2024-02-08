@@ -22,7 +22,7 @@ clean:
 	@rm -rf build
 
 .PHONY: everything # Full build/test/run
-everything: clean build test train classify
+everything: clean build test train_coastnet classify_coastnet
 
 ##############################################################################
 #
@@ -55,6 +55,7 @@ train: build
 			--num-classes=7 \
 			--test-dataset={} \
 			--random-seed=123 \
+			--epochs=30 \
 			--network-filename=resnet_network-{}.pt \
 			> resnet_test_files-{}.txt" \
 			::: $$(seq 0 4)

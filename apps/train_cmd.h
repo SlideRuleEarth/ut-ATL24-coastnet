@@ -21,6 +21,7 @@ struct args
     size_t random_seed = 123;
     std::string network_filename = std::string ("./resnet_network.pt");
     double train_test_split = 0.2;
+    size_t epochs = 20;
     size_t test_dataset = 0;
     size_t num_classes = 5;
 };
@@ -33,6 +34,7 @@ std::ostream &operator<< (std::ostream &os, const args &args)
     os << "random-seed: " << args.random_seed << std::endl;
     os << "network-filename: " << args.network_filename << std::endl;
     os << "train-test-split: " << args.train_test_split << std::endl;
+    os << "epochs: " << args.epochs << std::endl;
     os << "test-dataset: " << args.test_dataset << std::endl;
     os << "num-classes: " << args.num_classes << std::endl;
     return os;
@@ -50,12 +52,13 @@ args get_args (int argc, char **argv, const std::string &usage)
             {"random-seed", required_argument, 0,  's' },
             {"network-filename", required_argument, 0,  'f' },
             {"train-test-split", required_argument, 0,  't' },
+            {"epochs", required_argument, 0,  'e' },
             {"test-dataset", required_argument, 0,  'd' },
             {"num-classes", required_argument, 0,  'c' },
             {0,      0,           0,  0 }
         };
 
-        int c = getopt_long(argc, argv, "hvs:f:t:d:c:", long_options, &option_index);
+        int c = getopt_long(argc, argv, "hvs:f:t:e:d:c:", long_options, &option_index);
         if (c == -1)
             break;
 
@@ -75,6 +78,7 @@ args get_args (int argc, char **argv, const std::string &usage)
             case 's': args.random_seed = atol(optarg); break;
             case 'f': args.network_filename = std::string(optarg); break;
             case 't': args.train_test_split = atof(optarg); break;
+            case 'e': args.epochs = atol(optarg); break;
             case 'd': args.test_dataset = atol(optarg); break;
             case 'c': args.num_classes = atol(optarg); break;
         }

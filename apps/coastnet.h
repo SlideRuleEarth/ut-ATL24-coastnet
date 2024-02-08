@@ -12,7 +12,6 @@ struct hyper_params
     int64_t input_size = patch_rows * patch_cols;
     double aspect_ratio = 20.0;
     int64_t batch_size = 100;
-    size_t epochs = 40;
     double initial_learning_rate = 0.01;
 };
 
@@ -23,7 +22,6 @@ std::ostream &operator<< (std::ostream &os, const hyper_params &hp)
     os << "input_size: " << hp.input_size << std::endl;
     os << "aspect_ratio: " << hp.aspect_ratio << std::endl;
     os << "batch_size: " << hp.batch_size << std::endl;
-    os << "epochs: " << hp.epochs << std::endl;
     os << "initial_learning_rate: " << hp.initial_learning_rate << std::endl;
     return os;
 }

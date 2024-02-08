@@ -4,6 +4,7 @@
 #include "viper/raster.h"
 #include "resnet.h"
 #include "train_cmd.h"
+#include <opencv2/opencv.hpp>
 
 const std::string usage {"ls *.csv | resnet [options]"};
 
@@ -194,7 +195,7 @@ int main (int argc, char **argv)
         torch::optim::SGD optimizer (network->parameters (), torch::optim::SGDOptions (hp.initial_learning_rate));
         torch::optim::StepLR scheduler (optimizer, 10, 0.1);
 
-        for (size_t epoch = 0; epoch < hp.epochs; ++epoch)
+        for (size_t epoch = 0; epoch < args.epochs; ++epoch)
         {
             size_t batch_index = 0;
 

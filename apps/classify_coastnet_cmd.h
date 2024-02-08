@@ -17,7 +17,6 @@ struct args
 {
     bool help = false;
     bool verbose = false;
-    size_t num_classes = 5;
     std::string network_filename = std::string ("./resnet_network.pt");
     std::string results_filename = std::string ("./resnet_results.txt");
 };
@@ -27,7 +26,6 @@ std::ostream &operator<< (std::ostream &os, const args &args)
     os << std::boolalpha;
     os << "help: " << args.help << std::endl;
     os << "verbose: " << args.verbose << std::endl;
-    os << "num-classes: " << args.num_classes << std::endl;
     os << "network-filename: " << args.network_filename << std::endl;
     os << "results-filename: " << args.results_filename << std::endl;
     return os;
@@ -42,7 +40,6 @@ args get_args (int argc, char **argv, const std::string &usage)
         static struct option long_options[] = {
             {"help", no_argument, 0,  'h' },
             {"verbose", no_argument, 0,  'v' },
-            {"num-classes", required_argument, 0,  'c' },
             {"network-filename", required_argument, 0,  'f' },
             {"results-filename", required_argument, 0,  'r' },
             {0,      0,           0,  0 }
@@ -65,7 +62,6 @@ args get_args (int argc, char **argv, const std::string &usage)
                 return args;
             }
             case 'v': args.verbose = true; break;
-            case 'c': args.num_classes = atol(optarg); break;
             case 'f': args.network_filename = std::string(optarg); break;
             case 'r': args.results_filename = std::string(optarg); break;
         }

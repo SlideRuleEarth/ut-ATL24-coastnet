@@ -4,3 +4,4 @@ predictions/
 data
 resnet_test_files-*.txt
 resnet_network-*.pt
+coastnet.pt

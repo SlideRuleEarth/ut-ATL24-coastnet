@@ -8,72 +8,6 @@
 
 const std::string usage {"ls *.csv | resnet [options]"};
 
-struct photon_hash
-{
-    std::size_t operator() (const std::pair<long,long> &v) const
-    {
-        size_t hash = (v.first << 0) ^ (v.second << 32);
-        return hash;
-    }
-};
-
-class prediction_cache
-{
-    public:
-    template<typename T>
-    bool check (const T &p, const size_t i) const
-    {
-        // Get photon coordinate
-        const auto h = photon_coord (p, i);
-
-        // Check the map
-        if (m.find (h) != m.end ())
-            return true;
-        else
-            return false;
-    }
-    template<typename T>
-    long get_prediction (const T &p, const size_t i) const
-    {
-        // Get photon coordinate
-        const auto h = photon_coord (p, i);
-
-        // Check logic
-        assert (m.find (h) != m.end ());
-
-        // Get the value
-        return m.at (h);
-    }
-    template<typename T>
-    void update (const T &p, const size_t i, const long prediction)
-    {
-        // Get photon coordinate
-        const auto h = photon_coord (p, i);
-
-        // Set the value
-        m[h] = prediction;
-    }
-
-    private:
-    std::unordered_map<std::pair<long,long>, long, photon_hash> m;
-    const double x_resolution = 5.0;
-    const double z_resolution = 0.5;
-
-    // Compute a hash from a photon's location
-    template<typename T>
-    std::pair<long,long> photon_coord (const T &p, const size_t i) const
-    {
-        // Check invariants
-        assert (i < p.size ());
-
-        // Quantize
-        const long x = std::round (p[i].x / x_resolution);
-        const long z = std::round (p[i].z / z_resolution);
-
-        return std::make_pair (x, z);
-    };
-};
-
 int main (int argc, char **argv)
 {
     using namespace std;
@@ -104,8 +38,9 @@ int main (int argc, char **argv)
         hyper_params hp;
 
         // Create the network
+        const size_t num_classes = 3;
         std::array<int64_t, 3> layers{2, 2, 2};
-        ResNet<ResidualBlock> network (layers, args.num_classes);
+        ResNet<ResidualBlock> network (layers, num_classes);
 
         // Check the network
         if (args.verbose)
@@ -177,6 +112,12 @@ int main (int argc, char **argv)
         // Keep track of cache usage
         size_t cache_lookups = 0;
         size_t cache_hits = 0;
+
+        const std::unordered_map<long,long> reverse_label_map = {
+            {0, 0},
+            {1, 40},
+            {2, 41},
+        };
 
         // For each point
         for (size_t i = 0; i < p.size (); ++i)

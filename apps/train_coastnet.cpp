@@ -79,12 +79,11 @@ int main (int argc, char **argv)
             clog << "Creating dataset" << endl;
         }
 
-        auto train_dataset = single_class_dataset (fns,
+        auto train_dataset = coastnet_dataset (fns,
             hp.patch_rows,
             hp.patch_cols,
             hp.aspect_ratio,
             ap,
-            args.cls,
             args.max_samples_per_class,
             args.verbose,
             rng)
@@ -101,7 +100,7 @@ int main (int argc, char **argv)
         torch::Device device (cuda_available ? torch::kCUDA : torch::kCPU);
 
         // Create the network
-        const size_t num_classes = 2;
+        const size_t num_classes = 3;
         std::array<int64_t, 3> layers{2, 2, 2};
         ResNet<ResidualBlock> network (layers, num_classes);
 
@@ -111,7 +110,7 @@ int main (int argc, char **argv)
         torch::optim::SGD optimizer (network->parameters (), torch::optim::SGDOptions (hp.initial_learning_rate));
         torch::optim::StepLR scheduler (optimizer, 10, 0.1);
 
-        for (size_t epoch = 0; epoch < hp.epochs; ++epoch)
+        for (size_t epoch = 0; epoch < args.epochs; ++epoch)
         {
             size_t batch_index = 0;
 
@@ -134,24 +133,10 @@ int main (int argc, char **argv)
                 // Update number of correctly classified samples
                 total_correct += prediction.eq(target).sum().item<int64_t>();
 
-                static int timeout = 1;
-                const auto ch = cv::waitKey (timeout);
-
-                switch (ch)
-                {
-                    default:
-                    break;
-                    case 27: // quit
-                    return 0;
-                    break;
-                    case 32: // pause/unpause
-                    timeout = !timeout;
-                    break;
-                }
-
                 if (batch_index == 0)
                 {
-                    clog << "epoch: " << epoch;
+                    clog << "epoch: " << epoch + 1;
+                    clog << " of " << args.epochs;
                     clog << " loss " << loss.item<float>();
                     clog << endl;
                 }
@@ -172,6 +157,8 @@ int main (int argc, char **argv)
             clog << "accuracy " << accuracy << endl;
 
             scheduler.step();
+
+            clog << "Saving model..." << endl;
 
             // Save the model
             torch::save (network, args.network_filename);

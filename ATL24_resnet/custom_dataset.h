@@ -144,7 +144,11 @@ class classified_point_dataset : public torch::data::datasets::Dataset<classifie
     }
 };
 
-class single_class_dataset : public torch::data::datasets::Dataset<single_class_dataset>
+constexpr unsigned other_cls = 0;
+constexpr unsigned bathy_cls = 40;
+constexpr unsigned surface_cls = 41;
+
+class coastnet_dataset : public torch::data::datasets::Dataset<coastnet_dataset>
 {
     using Example = torch::data::Example<>;
     std::vector<std::vector<ATL24_resnet::classified_point2d>> datasets;
@@ -153,16 +157,14 @@ class single_class_dataset : public torch::data::datasets::Dataset<single_class_
     size_t patch_cols;
     double aspect_ratio;
     augmentation_params ap;
-    unsigned cls;
     std::default_random_engine &rng;
 
     public:
-    single_class_dataset (const std::vector<std::string> &fns,
+    coastnet_dataset (const std::vector<std::string> &fns,
         const size_t patch_rows,
         const size_t patch_cols,
         const double aspect_ratio,
         const augmentation_params &ap,
-        const unsigned cls,
         const size_t max_samples_per_class,
         const bool verbose,
         std::default_random_engine &rng)
@@ -170,7 +172,6 @@ class single_class_dataset : public torch::data::datasets::Dataset<single_class_
         , patch_cols (patch_cols)
         , aspect_ratio (aspect_ratio)
         , ap (ap)
-        , cls (cls)
         , rng (rng)
     {
         using namespace std;
@@ -193,7 +194,7 @@ class single_class_dataset : public torch::data::datasets::Dataset<single_class_
             datasets[i] = convert_dataframe (df);
 
             // Get a reference to this dataset
-            const auto &d = datasets[i];
+            auto &d = datasets[i];
 
             if (verbose)
                 clog << d.size () << " points read" << endl;
@@ -203,26 +204,27 @@ class single_class_dataset : public torch::data::datasets::Dataset<single_class_
                 [](const auto &a, const auto &b)
                 { return a.x < b.x; });
 
-            // Count each class
-            unordered_map<unsigned,size_t> cls_sizes;
+            // Force classifications to be one of three
+            for (auto &p : d)
+            {
+                switch (p.cls)
+                {
+                    default:
+                        // Force it to 'other'
+                        p.cls = 0;
+                    break;
+                    case bathy_cls:
+                    case surface_cls:
+                        // Leave it alone
+                    break;
+                }
+            }
 
-            for (size_t j = 0; j < d.size (); ++j)
-                ++cls_sizes[d[j].cls];
-
-            // If this class is not represented in this dataset, skip
-            // the dataset
-            if (cls_sizes.find (cls) == cls_sizes.end ())
-                continue;
-
-            // If this class count is less than the max, then only add
-            // the number of samples from this class
-            const size_t total_samples_per_class =
-                cls_sizes.at (cls) < max_samples_per_class
-                ? cls_sizes.at (cls)
-                : max_samples_per_class;
-
-            // Keep track of how many have been added from each class
-            unordered_map<unsigned,size_t> added_counts;
+            // Keep track of how many got added from each class
+            unordered_map<unsigned,size_t> left_to_add;
+            left_to_add[other_cls] = max_samples_per_class;
+            left_to_add[bathy_cls] = max_samples_per_class;
+            left_to_add[surface_cls] = max_samples_per_class;
 
             // Indexes into the dataset points
             vector<size_t> indexes (d.size ());
@@ -241,15 +243,12 @@ class single_class_dataset : public torch::data::datasets::Dataset<single_class_
                 // Get the point
                 const auto p = d[k];
 
-                // Get the class
-                const auto c = p.cls;
-
                 // Still more to add from this class?
-                if (added_counts[c] == total_samples_per_class)
+                if (left_to_add[p.cls] == 0)
                     continue; // No, go to next point
 
                 // Keep track of how many were added
-                ++added_counts[c];
+                --left_to_add[p.cls];
 
                 // Append it
                 sample_indexes.push_back (sample_index {i, k});
@@ -275,11 +274,9 @@ class single_class_dataset : public torch::data::datasets::Dataset<single_class_
             clog << "Class counts:" << endl;
             for (auto i : cls_counts)
                 clog << "\t" << i.first << "\t" << i.second << endl;
-        }
 
-        // Show results
-        if (verbose)
             clog << "Total samples: " << sample_indexes.size () << endl;
+        }
     }
 
     Example get (size_t index)
@@ -308,10 +305,22 @@ class single_class_dataset : public torch::data::datasets::Dataset<single_class_
                 { static_cast<int> (patch_rows), static_cast<int> (patch_cols) },
                 torch::kUInt8).to(torch::kFloat);
 
+        // Get the class
+        const auto cls = datasets[dataset_index][point_index].cls;
+
+        // Remap label
+        long c = 0;
+        switch (cls)
+        {
+            default: assert (cls == 0); break;
+            case bathy_cls: c = 1; break;
+            case surface_cls: c = 2; break;
+        }
+
         // Create label Tensor
-        const long c = datasets[dataset_index][point_index].cls == this->cls ? 1 : 0;
         auto label = torch::full ({1}, c);
 
+        // Return copies
         return {grayscale.clone(), label.clone()};
     }
 
