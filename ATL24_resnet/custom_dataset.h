@@ -204,6 +204,9 @@ class coastnet_dataset : public torch::data::datasets::Dataset<coastnet_dataset>
                 [](const auto &a, const auto &b)
                 { return a.x < b.x; });
 
+            // Count total in each class
+            std::map<size_t,size_t> cls_counts;
+
             // Force classifications to be one of three
             for (auto &p : d)
             {
@@ -218,13 +221,16 @@ class coastnet_dataset : public torch::data::datasets::Dataset<coastnet_dataset>
                         // Leave it alone
                     break;
                 }
+
+                // Count it
+                ++cls_counts[p.cls];
             }
 
             // Keep track of how many got added from each class
             unordered_map<unsigned,size_t> left_to_add;
-            left_to_add[other_cls] = max_samples_per_class;
-            left_to_add[bathy_cls] = max_samples_per_class;
-            left_to_add[surface_cls] = max_samples_per_class;
+            left_to_add[other_cls] = max_samples_per_class * 2;
+            left_to_add[bathy_cls] = max_samples_per_class * 1;
+            left_to_add[surface_cls] = max_samples_per_class * 3;
 
             // Indexes into the dataset points
             vector<size_t> indexes (d.size ());

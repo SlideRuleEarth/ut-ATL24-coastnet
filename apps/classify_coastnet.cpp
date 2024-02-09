@@ -113,7 +113,7 @@ int main (int argc, char **argv)
         size_t cache_lookups = 0;
         size_t cache_hits = 0;
 
-        const std::unordered_map<long,long> reverse_label_map = {
+        const std::unordered_map<long,long> relabel_map = {
             {0, 0},
             {1, 40},
             {2, 41},
@@ -146,14 +146,15 @@ int main (int argc, char **argv)
                     { static_cast<int> (hp.patch_rows), static_cast<int> (hp.patch_cols) },
                     torch::kUInt8).to(torch::kFloat);
 
-                // [32 32] -> [1 1 32 32]
+                // [rows cols] -> [1 1 rows cols]
                 t = t.unsqueeze(0).unsqueeze(0).to(device);
 
                 // Decode
-                auto prediction = network->forward (t).argmax(1);
+                const auto predictions = network->forward (t);
+                const auto prediction = predictions.argmax(1);
 
                 // Convert prediction from tensor to int
-                pred = reverse_label_map.at (prediction[0].item<long> ());
+                pred = relabel_map.at (prediction[0].item<long> ());
 
                 // Update the cache
                 cache.update (p, i, pred);

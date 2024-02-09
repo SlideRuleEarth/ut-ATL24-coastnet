@@ -64,9 +64,9 @@ int main (int argc, char **argv)
             true, // enabled
             0.1, // jitter_std standard deviation in meters
             0.9, // scale_x_min meters
-            0.1, // scale_x_max meters
-            2.0, // scale_z_min meters
-            0.1, // scale_z_max meters
+            1.1, // scale_x_max meters
+            0.9, // scale_z_min meters
+            1.1, // scale_z_max meters
             true
         };
 
@@ -133,11 +133,11 @@ int main (int argc, char **argv)
                 // Update number of correctly classified samples
                 total_correct += prediction.eq(target).sum().item<int64_t>();
 
-                if (batch_index == 0)
+                if (static_cast<int> (batch_index + 1) == hp.batch_size)
                 {
                     clog << "epoch: " << epoch + 1;
                     clog << " of " << args.epochs;
-                    clog << " loss " << loss.item<float>();
+                    clog << " loss " << loss.item<float>() << endl;
                     clog << endl;
                 }
 
