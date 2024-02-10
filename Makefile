@@ -65,14 +65,14 @@ classify: build
 	@./classify.sh | parallel --verbose --lb --jobs=15
 	@./get_bathy_scores.sh
 
-.PHONY: train_coastnet # Train a model
-train_coastnet: build
-	@./train_coastnet.sh
+.PHONY: train_coastnet_surface # Train a model
+train_coastnet_surface: build
+	@./train_coastnet_surface.sh
 
-.PHONY: classify_coastnet # Run classifier
-classify_coastnet: build
-	@./classify_coastnet.sh | parallel --verbose --lb --jobs=15
-	@./get_coastnet_scores.sh
+.PHONY: classify_coastnet_surface # Run classifier
+classify_coastnet_surface: build
+	@./classify_coastnet_surface.sh | parallel --verbose --lb --jobs=15
+	@./get_coastnet_surface_scores.sh
 
 ##############################################################################
 #

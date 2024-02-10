@@ -14,6 +14,12 @@
 namespace ATL24_resnet
 {
 
+constexpr unsigned other_cls = 0;
+constexpr unsigned bathy_cls = 40;
+constexpr unsigned surface_cls = 41;
+constexpr double surface_min_elevation = -20.0;
+constexpr double surface_max_elevation = 20.0;
+
 struct photon_hash
 {
     std::size_t operator() (const std::pair<long,long> &v) const
