@@ -6,7 +6,7 @@ IFS=$'\n\t'
 
 mkdir -p predictions
 
-find ./data/local/3DGL/*.csv | head -20 | \
+find ./data/local/3DGL/*.csv | \
 parallel --lb --dry-run \
     "build/debug/classify_coastnet_surface \
     --verbose \

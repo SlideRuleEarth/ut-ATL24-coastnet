@@ -59,6 +59,10 @@ int main (int argc, char **argv)
         // Get hyper-parameters
         hyper_params hp;
 
+        // Override batch-size if specified
+        if (args.batch_size != 0)
+            hp.batch_size = args.batch_size;
+
         // Get other parameters
         augmentation_params ap {
             true, // enabled
@@ -84,7 +88,7 @@ int main (int argc, char **argv)
             hp.patch_cols,
             hp.aspect_ratio,
             ap,
-            args.total_samples,
+            args.total_samples_per_class,
             args.verbose,
             rng)
             .map(torch::data::transforms::Stack<>());

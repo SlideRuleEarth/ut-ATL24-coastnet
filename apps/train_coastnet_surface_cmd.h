@@ -19,8 +19,9 @@ struct args
     bool help = false;
     bool verbose = false;
     size_t random_seed = 123;
-    size_t total_samples = 1'000;
+    size_t total_samples_per_class = 1'000;
     size_t epochs = 10;
+    size_t batch_size = 0;
     std::string network_filename;
 };
 
@@ -30,8 +31,9 @@ std::ostream &operator<< (std::ostream &os, const args &args)
     os << "help: " << args.help << std::endl;
     os << "verbose: " << args.verbose << std::endl;
     os << "random-seed: " << args.random_seed << std::endl;
-    os << "total-samples: " << args.total_samples << std::endl;
+    os << "total-samples-per-class: " << args.total_samples_per_class << std::endl;
     os << "epochs: " << args.epochs << std::endl;
+    os << "batch-size: " << args.batch_size << std::endl;
     os << "network-filename: " << args.network_filename << std::endl;
     return os;
 }
@@ -46,13 +48,14 @@ args get_args (int argc, char **argv, const std::string &usage)
             {"help", no_argument, 0,  'h' },
             {"verbose", no_argument, 0,  'v' },
             {"random-seed", required_argument, 0,  's' },
-            {"total-samples", required_argument, 0,  't' },
+            {"total-samples-per-class", required_argument, 0,  't' },
             {"epochs", required_argument, 0,  'e' },
+            {"batch-size", required_argument, 0,  'b' },
             {"network-filename", required_argument, 0,  'f' },
             {0,      0,           0,  0 }
         };
 
-        int c = getopt_long(argc, argv, "hvs:t:e:f:", long_options, &option_index);
+        int c = getopt_long(argc, argv, "hvs:t:e:b:f:", long_options, &option_index);
         if (c == -1)
             break;
 
@@ -70,8 +73,9 @@ args get_args (int argc, char **argv, const std::string &usage)
             }
             case 'v': args.verbose = true; break;
             case 's': args.random_seed = atol(optarg); break;
-            case 't': args.total_samples = std::atol(optarg); break;
+            case 't': args.total_samples_per_class = std::atol(optarg); break;
             case 'e': args.epochs = std::atol(optarg); break;
+            case 'b': args.batch_size = std::atol(optarg); break;
             case 'f': args.network_filename = std::string(optarg); break;
         }
     }

@@ -4,8 +4,9 @@
 set -eu
 IFS=$'\n\t'
 
-find ./data/local/3DGL/*.csv | head -20 | build/debug/train_coastnet_surface \
+find ./data/local/3DGL/*.csv |  build/debug/train_coastnet_surface \
     --verbose \
-    --epochs=20 \
-    --total-samples=20000 \
+    --epochs=40 \
+    --total-samples-per-class=250000 \
+    --batch-size=512 \
     --network-filename=coastnet-surface.pt
