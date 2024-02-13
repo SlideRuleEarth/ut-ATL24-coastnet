@@ -68,7 +68,7 @@ class prediction_cache
 
     private:
     std::unordered_map<std::pair<long,long>, long, photon_hash> m;
-    const double x_resolution = 5.0;
+    const double x_resolution = 0.5;
     const double z_resolution = 0.5;
 
     // Compute a hash from a photon's location
@@ -295,9 +295,12 @@ viper::raster::raster<unsigned char> create_raster (const T &p,
     const double aspect_ratio,
     const augmentation_params &ap,
     const bool ap_enabled,
-    std::default_random_engine &rng)
+    const size_t random_seed)
 {
     using namespace std;
+
+    // Create random number generator
+    std::default_random_engine rng (random_seed);
 
     // Check invariants
     assert (index < p.size ());
@@ -381,8 +384,8 @@ viper::raster::raster<unsigned char> create_raster (const T &p,
         }
 
         // Convert from meters to a patch index
-        const size_t patch_i = std::round (dz + (static_cast<double> (rows) / 2.0));
-        const size_t patch_j = std::round ((dx / aspect_ratio) + (static_cast<double> (cols) / 2.0));
+        const size_t patch_i = dz + rows / 2.0;
+        const size_t patch_j = (dx / aspect_ratio) + cols / 2.0;
 
         // Check bounds
         if (patch_j >= r.cols ())
