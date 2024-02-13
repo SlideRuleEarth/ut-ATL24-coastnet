@@ -56,30 +56,24 @@ int main (int argc, char **argv)
         // Create pseudo-RNG
         default_random_engine rng (args.random_seed);
 
-        // Get hyper-parameters
+        // Params
+        sampling_params sp;
         hyper_params hp;
+        augmentation_params ap;
+        const bool enable_augmentation = true;
+
+        // Override aspect-ratio if specified
+        if (args.aspect_ratio != 0)
+            sp.aspect_ratio = args.aspect_ratio;
 
         // Override batch-size if specified
         if (args.batch_size != 0)
             hp.batch_size = args.batch_size;
 
-        // Override aspect-ratio if specified
-        if (args.aspect_ratio != 0)
-            hp.aspect_ratio = args.aspect_ratio;
-
-        // Get other parameters
-        augmentation_params ap {
-            true, // enabled
-            0.1, // jitter_std standard deviation in meters
-            0.9, // scale_x_min meters
-            1.1, // scale_x_max meters
-            0.9, // scale_z_min meters
-            1.1, // scale_z_max meters
-            true // mirror
-        };
-
         if (args.verbose)
         {
+            clog << "sampling parameters:" << endl;
+            clog << sp << endl;
             clog << "hyper parameters:" << endl;
             clog << hp << endl;
             clog << "augmentation parameters:" << endl;
@@ -88,10 +82,11 @@ int main (int argc, char **argv)
         }
 
         auto train_dataset = coastnet_surface_dataset (fns,
-            hp.patch_rows,
-            hp.patch_cols,
-            hp.aspect_ratio,
+            sp.patch_rows,
+            sp.patch_cols,
+            sp.aspect_ratio,
             ap,
+            enable_augmentation,
             args.total_samples_per_class,
             args.verbose,
             rng)

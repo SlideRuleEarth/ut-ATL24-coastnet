@@ -5,22 +5,31 @@
 namespace ATL24_resnet
 {
 
-struct hyper_params
+struct sampling_params
 {
-    size_t patch_rows = 76;
-    size_t patch_cols = 48;
+    size_t patch_rows = 63;
+    size_t patch_cols = 63;
     int64_t input_size = patch_rows * patch_cols;
-    double aspect_ratio = 20.0;
-    int64_t batch_size = 100;
-    double initial_learning_rate = 0.01;
+    double aspect_ratio = 1.0;
 };
 
-std::ostream &operator<< (std::ostream &os, const hyper_params &hp)
+std::ostream &operator<< (std::ostream &os, const sampling_params &hp)
 {
     os << "patch_rows: " << hp.patch_rows << std::endl;
     os << "patch_cols: " << hp.patch_cols << std::endl;
     os << "input_size: " << hp.input_size << std::endl;
     os << "aspect_ratio: " << hp.aspect_ratio << std::endl;
+    return os;
+}
+
+struct hyper_params
+{
+    int64_t batch_size = 64;
+    double initial_learning_rate = 0.01;
+};
+
+std::ostream &operator<< (std::ostream &os, const hyper_params &hp)
+{
     os << "batch_size: " << hp.batch_size << std::endl;
     os << "initial_learning_rate: " << hp.initial_learning_rate << std::endl;
     return os;

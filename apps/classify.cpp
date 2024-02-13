@@ -29,13 +29,23 @@ int main (int argc, char **argv)
 
         if (args.verbose)
         {
-            // Show the args
             clog << "cmd_line_parameters:" << endl;
             clog << args;
         }
 
-        // Get hyper-parameters
+        // Params
+        sampling_params sp;
         hyper_params hp;
+        augmentation_params ap;
+        const bool enable_augmentation = false;
+
+        if (args.verbose)
+        {
+            clog << "sampling parameters:" << endl;
+            clog << sp << endl;
+            clog << "hyper parameters:" << endl;
+            clog << hp << endl;
+        }
 
         // Create the network
         std::array<int64_t, 3> layers{2, 2, 2};
@@ -103,9 +113,6 @@ int main (int argc, char **argv)
         // Setup the prediction cache
         prediction_cache cache;
 
-        // Set augmentation parameters
-        augmentation_params ap;
-        ap.enabled = false;
         default_random_engine rng (0);
 
         // Keep track of cache usage
@@ -132,11 +139,11 @@ int main (int argc, char **argv)
                 // No, compute the prediction
                 //
                 // Create the raster at this point
-                auto r = create_raster (p, i, hp.patch_rows, hp.patch_cols, hp.aspect_ratio, ap, rng);
+                auto r = create_raster (p, i, sp.patch_rows, sp.patch_cols, sp.aspect_ratio, ap, enable_augmentation, rng);
 
                 // Create image Tensor from raster
                 auto t = torch::from_blob (&r[0],
-                    { static_cast<int> (hp.patch_rows), static_cast<int> (hp.patch_cols) },
+                    { static_cast<int> (sp.patch_rows), static_cast<int> (sp.patch_cols) },
                     torch::kUInt8).to(torch::kFloat);
 
                 // [32 32] -> [1 1 32 32]
