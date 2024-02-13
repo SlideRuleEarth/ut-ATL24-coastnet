@@ -375,8 +375,8 @@ viper::raster::raster<unsigned char> create_raster (const T &p,
         }
 
         // Convert from meters to a patch index
-        const size_t patch_i = dz + (static_cast<double> (rows) / 2.0);
-        const size_t patch_j = (dx / aspect_ratio) + (static_cast<double> (cols) / 2.0);
+        const size_t patch_i = std::round (dz + (static_cast<double> (rows) / 2.0));
+        const size_t patch_j = std::round ((dx / aspect_ratio) + (static_cast<double> (cols) / 2.0));
 
         // Check bounds
         if (patch_j >= r.cols ())
