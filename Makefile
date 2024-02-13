@@ -21,9 +21,6 @@ build: ./build/debug/Makefile
 clean:
 	@rm -rf build
 
-.PHONY: everything # Full build/test/run
-everything: clean build test train_coastnet classify_coastnet
-
 ##############################################################################
 #
 # Test
@@ -80,7 +77,7 @@ classify_coastnet_surface: build
 #
 ##############################################################################
 
-TRUTH_FNS=$(shell find ./data/local/3DGL/??_A*.csv | head)
+TRUTH_FNS=$(shell find ./data/local/3DGL/ATL03_*.csv | head)
 
 .PHONY: view_truth # View truth labels
 view_truth:
@@ -88,13 +85,21 @@ view_truth:
 		"streamlit run ../ATL24_rasters/apps/view_classifications.py -- --verbose {}" \
 		::: ${TRUTH_FNS}
 
-PREDICTION_FNS=$(shell find ./predictions/??_A*_classified_?.csv | head)
+PREDICTION_FNS=$(shell find ./predictions/ATL03_*_classified_?.csv | head)
 
 .PHONY: view_predictions # View prediction labels
 view_predictions:
 	@parallel --lb --jobs=100 \
 		"streamlit run ../ATL24_rasters/apps/view_classifications.py -- --verbose {}" \
 		::: ${PREDICTION_FNS}
+
+WS_PREDICTION_FNS=$(shell find ./predictions/ATL03_*_classified_ws.csv | tail)
+
+.PHONY: view_surface_predictions # View water surface prediction labels
+view_surface_predictions:
+	@parallel --lb --jobs=100 \
+		"streamlit run ../ATL24_rasters/apps/view_classifications.py -- --verbose {}" \
+		::: ${WS_PREDICTION_FNS}
 
 ##############################################################################
 #
