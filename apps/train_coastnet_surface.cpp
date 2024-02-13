@@ -63,6 +63,10 @@ int main (int argc, char **argv)
         if (args.batch_size != 0)
             hp.batch_size = args.batch_size;
 
+        // Override aspect-ratio if specified
+        if (args.aspect_ratio != 0)
+            hp.aspect_ratio = args.aspect_ratio;
+
         // Get other parameters
         augmentation_params ap {
             true, // enabled
@@ -71,7 +75,7 @@ int main (int argc, char **argv)
             1.1, // scale_x_max meters
             0.9, // scale_z_min meters
             1.1, // scale_z_max meters
-            true
+            true // mirror
         };
 
         if (args.verbose)
