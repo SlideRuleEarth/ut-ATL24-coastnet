@@ -266,24 +266,24 @@ std::pair<size_t,size_t> get_grid_location (const auto &p,
 
 struct augmentation_params
 {
-    bool enabled = true;
-    double jitter_std = 0.1; // standard deviation in meters
-    double scale_x_min = 0.9; // meters
-    double scale_x_max = 1.1; // meters
-    double scale_z_min = 0.9; // meters
-    double scale_z_max = 1.1; // meters
-    bool mirror = true;
+    double jitter_x_std = 0.0001; // standard deviation in meters
+    double jitter_z_std = 0.1; // standard deviation in meters
+    double scale_x_min = 0.9; // scale factor
+    double scale_x_max = 1.1; // scale factor
+    double scale_z_min = 0.9; // scale factor
+    double scale_z_max = 1.1; // scale factor
+    double mirror_probabilty = 0.5;
 };
 
 std::ostream &operator<< (std::ostream &os, const augmentation_params &ap)
 {
-    os << "enabled: " << ap.enabled << std::endl;
-    os << "jitter_std: " << ap.jitter_std << std::endl;
+    os << "jitter_x_std: " << ap.jitter_x_std << std::endl;
+    os << "jitter_z_std: " << ap.jitter_z_std << std::endl;
     os << "scale_x_min: " << ap.scale_x_min << std::endl;
     os << "scale_x_max: " << ap.scale_x_max << std::endl;
     os << "scale_z_min: " << ap.scale_z_min << std::endl;
     os << "scale_z_max: " << ap.scale_z_max << std::endl;
-    os << "mirror: " << ap.mirror << std::endl;
+    os << "mirror_probabilty: " << ap.mirror_probabilty << std::endl;
     return os;
 }
 
@@ -294,6 +294,7 @@ viper::raster::raster<unsigned char> create_raster (const T &p,
     const size_t cols,
     const double aspect_ratio,
     const augmentation_params &ap,
+    const bool ap_enabled,
     std::default_random_engine &rng)
 {
     using namespace std;
@@ -340,13 +341,18 @@ viper::raster::raster<unsigned char> create_raster (const T &p,
     }
 
     // Create augmentation distributions
-    normal_distribution<double> jitter_dist (0.0, ap.jitter_std);
+    normal_distribution<double> jitter_x_dist (0.0, ap.jitter_x_std);
+    normal_distribution<double> jitter_z_dist (0.0, ap.jitter_z_std);
     uniform_real_distribution<double> scale_x_dist (ap.scale_x_min, ap.scale_x_max);
-    uniform_real_distribution<double> scale_y_dist (ap.scale_z_min, ap.scale_z_max);
-    bernoulli_distribution mirror_dist (ap.mirror ? 0.5 : 0.0);
+    uniform_real_distribution<double> scale_z_dist (ap.scale_z_min, ap.scale_z_max);
+    bernoulli_distribution mirror_dist (ap.mirror_probabilty);
 
     // Mirror all points or none
     const auto mirror = mirror_dist (rng);
+
+    // Scale all points the same
+    const auto scale_x = scale_x_dist (rng);
+    const auto scale_z = scale_z_dist (rng);
 
     // Get location of center point of the patch
     const double x0 = p[index].x;
@@ -365,12 +371,12 @@ viper::raster::raster<unsigned char> create_raster (const T &p,
         double dz = z - z0;
 
         // Apply augmentation
-        if (ap.enabled)
+        if (ap_enabled)
         {
-            dx += jitter_dist (rng);
-            dz += jitter_dist (rng);
-            dx *= scale_x_dist (rng);
-            dz *= scale_y_dist (rng);
+            dx += jitter_x_dist (rng);
+            dz += jitter_z_dist (rng);
+            dx *= scale_x;
+            dz *= scale_z;
             dx = mirror ? -dx : dx;
         }
 

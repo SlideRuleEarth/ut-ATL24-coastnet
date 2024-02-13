@@ -24,6 +24,7 @@ class classified_point_dataset : public torch::data::datasets::Dataset<classifie
     size_t patch_cols;
     double aspect_ratio;
     augmentation_params ap;
+    const bool ap_enabled;
     std::default_random_engine &rng;
 
     public:
@@ -32,6 +33,7 @@ class classified_point_dataset : public torch::data::datasets::Dataset<classifie
         const size_t patch_cols,
         const double aspect_ratio,
         const augmentation_params &ap,
+        const bool ap_enabled,
         const size_t samples_per_class,
         const bool verbose,
         std::default_random_engine &rng)
@@ -39,6 +41,7 @@ class classified_point_dataset : public torch::data::datasets::Dataset<classifie
         , patch_cols (patch_cols)
         , aspect_ratio (aspect_ratio)
         , ap (ap)
+        , ap_enabled (ap_enabled)
         , rng (rng)
     {
         using namespace std;
@@ -123,6 +126,7 @@ class classified_point_dataset : public torch::data::datasets::Dataset<classifie
                 patch_cols,
                 aspect_ratio,
                 ap,
+                ap_enabled,
                 rng);
         }
 
@@ -169,6 +173,7 @@ class coastnet_surface_dataset : public torch::data::datasets::Dataset<coastnet_
     size_t patch_cols;
     double aspect_ratio;
     augmentation_params ap;
+    const bool ap_enabled;
     std::default_random_engine &rng;
 
     public:
@@ -177,6 +182,7 @@ class coastnet_surface_dataset : public torch::data::datasets::Dataset<coastnet_
         const size_t patch_cols,
         const double aspect_ratio,
         const augmentation_params &ap,
+        const bool ap_enabled,
         const size_t samples_per_class,
         const bool verbose,
         std::default_random_engine &rng)
@@ -184,6 +190,7 @@ class coastnet_surface_dataset : public torch::data::datasets::Dataset<coastnet_
         , patch_cols (patch_cols)
         , aspect_ratio (aspect_ratio)
         , ap (ap)
+        , ap_enabled (ap_enabled)
         , rng (rng)
     {
         using namespace std;
@@ -291,6 +298,7 @@ class coastnet_surface_dataset : public torch::data::datasets::Dataset<coastnet_
                 patch_cols,
                 aspect_ratio,
                 ap,
+                ap_enabled,
                 rng);
         }
 
