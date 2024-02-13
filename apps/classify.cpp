@@ -101,9 +101,6 @@ int main (int argc, char **argv)
             [](const auto &a, const auto &b)
             { return a.x < b.x; });
 
-        // Keep track of performance
-        unordered_map<long,confusion_matrix> cm;
-
         if (args.verbose)
             clog << "Classifying points" << endl;
 
@@ -164,13 +161,15 @@ int main (int argc, char **argv)
 
             // Save predicted value
             q[i].cls = pred;
-
-            // Get actual value
-            const long actual = p[i].cls;
-
-            // Allocate confusion matrix for this classification
-            cm[actual];
         }
+
+        // Keep track of performance
+        unordered_map<long,confusion_matrix> cm;
+
+        // Allocate confusion matrix for each classification
+        cm[0] = confusion_matrix ();
+        cm[40] = confusion_matrix ();
+        cm[41] = confusion_matrix ();
 
         // Get results
         //
