@@ -110,6 +110,11 @@ class classified_point_dataset : public torch::data::datasets::Dataset<classifie
         // Allocate vector
         rasters.resize (sample_indexes.size ());
 
+        // Create seeds
+        vector<size_t> random_seeds (rasters.size ());
+        for (size_t i = 0; i < random_seeds.size (); ++i)
+            random_seeds[i] = rng ();
+
         using namespace viper::raster;
 
 #pragma omp parallel for
@@ -127,7 +132,7 @@ class classified_point_dataset : public torch::data::datasets::Dataset<classifie
                 aspect_ratio,
                 ap,
                 ap_enabled,
-                rng);
+                random_seeds[i]);
         }
 
         // Show results
@@ -282,6 +287,11 @@ class coastnet_surface_dataset : public torch::data::datasets::Dataset<coastnet_
         // Allocate vector
         rasters.resize (sample_indexes.size ());
 
+        // Create seeds
+        vector<size_t> random_seeds (rasters.size ());
+        for (size_t i = 0; i < random_seeds.size (); ++i)
+            random_seeds[i] = rng ();
+
         using namespace viper::raster;
 
 #pragma omp parallel for
@@ -299,7 +309,7 @@ class coastnet_surface_dataset : public torch::data::datasets::Dataset<coastnet_
                 aspect_ratio,
                 ap,
                 ap_enabled,
-                rng);
+                random_seeds[i]);
         }
 
         // Show results

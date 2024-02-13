@@ -153,7 +153,7 @@ int main (int argc, char **argv)
                 else
                 {
                     // Create the raster at this point
-                    auto r = create_raster (p, i, sp.patch_rows, sp.patch_cols, sp.aspect_ratio, ap, enable_augmentation, rng);
+                    auto r = create_raster (p, i, sp.patch_rows, sp.patch_cols, sp.aspect_ratio, ap, enable_augmentation, rng ());
 
                     // Create image Tensor from raster
                     auto t = torch::from_blob (&r[0],
