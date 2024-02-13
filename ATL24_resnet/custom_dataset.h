@@ -19,6 +19,7 @@ class classified_point_dataset : public torch::data::datasets::Dataset<classifie
     using Example = torch::data::Example<>;
     std::vector<std::vector<ATL24_resnet::classified_point2d>> datasets;
     std::vector<sample_index> sample_indexes;
+    std::vector<viper::raster::raster<unsigned char>> rasters;
     size_t patch_rows;
     size_t patch_cols;
     double aspect_ratio;
@@ -100,6 +101,31 @@ class classified_point_dataset : public torch::data::datasets::Dataset<classifie
         // Randomize the order
         shuffle (sample_indexes.begin (), sample_indexes.end (), rng);
 
+        if (verbose)
+            clog << "Creating rasters..." << endl;
+
+        // Allocate vector
+        rasters.resize (sample_indexes.size ());
+
+        using namespace viper::raster;
+
+#pragma omp parallel for
+        for (size_t i = 0; i < rasters.size (); ++i)
+        {
+            const auto dataset_index = sample_indexes[i].dataset_index;
+            const auto point_index = sample_indexes[i].point_index;
+            assert (dataset_index < datasets.size ());
+            assert (point_index < datasets[dataset_index].size ());
+            rasters[i] = create_raster (
+                datasets[dataset_index],
+                point_index,
+                patch_rows,
+                patch_cols,
+                aspect_ratio,
+                ap,
+                rng);
+        }
+
         // Show results
         if (verbose)
             clog << "Total samples: " << sample_indexes.size () << endl;
@@ -108,28 +134,17 @@ class classified_point_dataset : public torch::data::datasets::Dataset<classifie
     Example get (size_t index)
     {
         using namespace std;
-        using namespace viper::raster;
-
-        assert (index < sample_indexes.size ());
-
-        // Create image raster
-        const auto dataset_index = sample_indexes[index].dataset_index;
-        const auto point_index = sample_indexes[index].point_index;
-        assert (dataset_index < datasets.size ());
-        assert (point_index < datasets[dataset_index].size ());
-        auto p = create_raster (
-            datasets[dataset_index],
-            point_index,
-            patch_rows,
-            patch_cols,
-            aspect_ratio,
-            ap,
-            rng);
 
         // Create image Tensor from raster
+        assert (index < rasters.size ());
+        auto &p = rasters[index];
         auto grayscale = torch::from_blob (&p[0],
                 { static_cast<int> (patch_rows), static_cast<int> (patch_cols) },
                 torch::kUInt8).to(torch::kFloat);
+
+        // Get sample indexes
+        const auto dataset_index = sample_indexes[index].dataset_index;
+        const auto point_index = sample_indexes[index].point_index;
 
         // Create label Tensor
         const long cls = label_map.at (datasets[dataset_index][point_index].cls);
@@ -149,6 +164,7 @@ class coastnet_surface_dataset : public torch::data::datasets::Dataset<coastnet_
     using Example = torch::data::Example<>;
     std::vector<std::vector<ATL24_resnet::classified_point2d>> datasets;
     std::vector<sample_index> sample_indexes;
+    std::vector<viper::raster::raster<unsigned char>> rasters;
     size_t patch_rows;
     size_t patch_cols;
     double aspect_ratio;
@@ -253,6 +269,31 @@ class coastnet_surface_dataset : public torch::data::datasets::Dataset<coastnet_
         // Randomize the order
         shuffle (sample_indexes.begin (), sample_indexes.end (), rng);
 
+        if (verbose)
+            clog << "Creating rasters..." << endl;
+
+        // Allocate vector
+        rasters.resize (sample_indexes.size ());
+
+        using namespace viper::raster;
+
+#pragma omp parallel for
+        for (size_t i = 0; i < rasters.size (); ++i)
+        {
+            const auto dataset_index = sample_indexes[i].dataset_index;
+            const auto point_index = sample_indexes[i].point_index;
+            assert (dataset_index < datasets.size ());
+            assert (point_index < datasets[dataset_index].size ());
+            rasters[i] = create_raster (
+                datasets[dataset_index],
+                point_index,
+                patch_rows,
+                patch_cols,
+                aspect_ratio,
+                ap,
+                rng);
+        }
+
         // Show results
         if (verbose)
             clog << "Total samples: " << sample_indexes.size () << endl;
@@ -261,28 +302,17 @@ class coastnet_surface_dataset : public torch::data::datasets::Dataset<coastnet_
     Example get (size_t index)
     {
         using namespace std;
-        using namespace viper::raster;
-
-        assert (index < sample_indexes.size ());
-
-        // Create image raster
-        const auto dataset_index = sample_indexes[index].dataset_index;
-        const auto point_index = sample_indexes[index].point_index;
-        assert (dataset_index < datasets.size ());
-        assert (point_index < datasets[dataset_index].size ());
-        auto p = create_raster (
-            datasets[dataset_index],
-            point_index,
-            patch_rows,
-            patch_cols,
-            aspect_ratio,
-            ap,
-            rng);
 
         // Create image Tensor from raster
+        assert (index < rasters.size ());
+        auto &p = rasters[index];
         auto grayscale = torch::from_blob (&p[0],
                 { static_cast<int> (patch_rows), static_cast<int> (patch_cols) },
                 torch::kUInt8).to(torch::kFloat);
+
+        // Get sample indexes
+        const auto dataset_index = sample_indexes[index].dataset_index;
+        const auto point_index = sample_indexes[index].point_index;
 
         // Create label Tensor
         const long cls = label_map.at (datasets[dataset_index][point_index].cls);
