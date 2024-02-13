@@ -37,6 +37,10 @@ int main (int argc, char **argv)
         // Get hyper-parameters
         hyper_params hp;
 
+        // Override aspect-ratio if specified
+        if (args.aspect_ratio != 0)
+            hp.aspect_ratio = args.aspect_ratio;
+
         // Create the network
         const size_t num_classes = 7;
         std::array<int64_t, 3> layers{2, 2, 2};

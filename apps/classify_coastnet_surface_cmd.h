@@ -17,7 +17,7 @@ struct args
 {
     bool help = false;
     bool verbose = false;
-    bool water_surface = false;
+    size_t aspect_ratio = 0;
     std::string network_filename = std::string ("./resnet_network.pt");
     std::string results_filename = std::string ("./resnet_results.txt");
 };
@@ -27,8 +27,7 @@ std::ostream &operator<< (std::ostream &os, const args &args)
     os << std::boolalpha;
     os << "help: " << args.help << std::endl;
     os << "verbose: " << args.verbose << std::endl;
-    os << "water-surface: " << args.water_surface << std::endl;
-    os << "network-filename: " << args.network_filename << std::endl;
+    os << "aspect-ratio: " << args.aspect_ratio << std::endl;
     os << "results-filename: " << args.results_filename << std::endl;
     return os;
 }
@@ -42,13 +41,13 @@ args get_args (int argc, char **argv, const std::string &usage)
         static struct option long_options[] = {
             {"help", no_argument, 0,  'h' },
             {"verbose", no_argument, 0,  'v' },
-            {"water-surface", no_argument, 0,  'w' },
+            {"aspect-ratio", required_argument, 0,  'a' },
             {"network-filename", required_argument, 0,  'f' },
             {"results-filename", required_argument, 0,  'r' },
             {0,      0,           0,  0 }
         };
 
-        int c = getopt_long(argc, argv, "hvc:w:f:r:", long_options, &option_index);
+        int c = getopt_long(argc, argv, "hva:f:r:", long_options, &option_index);
         if (c == -1)
             break;
 
@@ -65,7 +64,7 @@ args get_args (int argc, char **argv, const std::string &usage)
                 return args;
             }
             case 'v': args.verbose = true; break;
-            case 'w': args.water_surface = true; break;
+            case 'a': args.aspect_ratio = std::atol(optarg); break;
             case 'f': args.network_filename = std::string(optarg); break;
             case 'r': args.results_filename = std::string(optarg); break;
         }
