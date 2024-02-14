@@ -16,4 +16,4 @@ find $1 | \
     --total-samples-per-class=250000 \
     --batch-size=512 \
     --aspect-ratio=1 \
-    --network-filename=coastnet-surface.pt
+    --network-filename=$2

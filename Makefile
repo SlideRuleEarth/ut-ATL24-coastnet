@@ -64,11 +64,17 @@ classify: build
 
 .PHONY: train_coastnet_surface # Train a model
 train_coastnet_surface: build
-	@build=release ./train_coastnet_surface.sh "./data/local/3DGL/*.csv"
+	@build=release ./train_coastnet_surface.sh \
+		"./data/local/3DGL/*.csv" \
+		./coastnet-surface.pt
 
 .PHONY: classify_coastnet_surface # Run classifier
 classify_coastnet_surface: build
-	@build=release ./classify_coastnet_surface.sh "./data/local/3DGL/*.csv"
+	@mkdir -p ./predictions
+	@build=release ./classify_coastnet_surface.sh \
+		"./data/local/3DGL/*.csv" \
+		./coastnet-surface.pt \
+		./predictions
 
 .PHONY: score_coastnet_surface # Get surface scores
 score_coastnet_surface:
@@ -76,7 +82,7 @@ score_coastnet_surface:
 
 .PHONY: cross_validate_surface # Cross validate surface classifier
 cross_validate_surface: build
-	@python ./cross_validate_surface_commands.py "./data/local/3DGL/*.csv"
+	@./cross_validate_surface.sh "./data/local/3DGL/*.csv"
 
 ##############################################################################
 #
