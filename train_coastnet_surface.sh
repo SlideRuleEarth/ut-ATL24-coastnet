@@ -4,7 +4,13 @@
 set -eu
 IFS=$'\n\t'
 
-find ./data/local/3DGL/*.csv | build/debug/train_coastnet_surface \
+# Use debug build unless overridden from cmdline
+: ${build:=debug}
+
+echo build = ${build}
+
+find $1 | \
+    ./build/${build}/train_coastnet_surface \
     --verbose \
     --epochs=25 \
     --total-samples-per-class=250000 \

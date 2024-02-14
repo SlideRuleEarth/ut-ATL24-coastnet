@@ -64,12 +64,19 @@ classify: build
 
 .PHONY: train_coastnet_surface # Train a model
 train_coastnet_surface: build
-	@./train_coastnet_surface.sh
+	@build=release ./train_coastnet_surface.sh "./data/local/3DGL/*.csv"
 
 .PHONY: classify_coastnet_surface # Run classifier
 classify_coastnet_surface: build
-	@./classify_coastnet_surface.sh | parallel --verbose --lb --jobs=15
-	@./get_coastnet_surface_scores.sh
+	@build=release ./classify_coastnet_surface.sh "./data/local/3DGL/*.csv"
+
+.PHONY: score_coastnet_surface # Get surface scores
+score_coastnet_surface:
+	@./get_coastnet_surface_scores.sh "./predictions/*_surface.txt"
+
+.PHONY: cross_validate_surface # Cross validate surface classifier
+cross_validate_surface: build
+	@python ./cross_validate_surface_commands.py "./data/local/3DGL/*.csv"
 
 ##############################################################################
 #
