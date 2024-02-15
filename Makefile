@@ -52,7 +52,7 @@ train: build
 			--num-classes=7 \
 			--test-dataset={} \
 			--random-seed=123 \
-			--epochs=30 \
+			--epochs=40 \
 			--network-filename=resnet_network-{}.pt \
 			> resnet_test_files-{}.txt" \
 			::: $$(seq 0 4)
@@ -82,7 +82,7 @@ score_coastnet_surface:
 
 .PHONY: cross_validate_surface # Cross validate surface classifier
 cross_validate_surface: build
-	@./cross_validate_surface.sh "./data/local/3DGL/*.csv"
+	@./cross_validate_surface.sh "./data/local/3DGL/ATL03_*.csv"
 
 ##############################################################################
 #
@@ -106,13 +106,13 @@ view_predictions:
 		"streamlit run ../ATL24_rasters/apps/view_classifications.py -- --verbose {}" \
 		::: ${PREDICTION_FNS}
 
-WS_PREDICTION_FNS=$(shell find ./predictions/ATL03_*_classified_ws.csv | tail)
+SURFACE_PREDICTION_FNS=$(shell find ./predictions/ATL03_*_classified_surface.csv | tail)
 
 .PHONY: view_surface_predictions # View water surface prediction labels
 view_surface_predictions:
 	@parallel --lb --jobs=100 \
 		"streamlit run ../ATL24_rasters/apps/view_classifications.py -- --verbose {}" \
-		::: ${WS_PREDICTION_FNS}
+		::: ${SURFACE_PREDICTION_FNS}
 
 ##############################################################################
 #

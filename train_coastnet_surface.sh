@@ -12,7 +12,7 @@ echo build = ${build}
 find $1 | \
     ./build/${build}/train_coastnet_surface \
     --verbose \
-    --epochs=25 \
+    --epochs=40 \
     --total-samples-per-class=250000 \
     --batch-size=512 \
     --aspect-ratio=1 \
