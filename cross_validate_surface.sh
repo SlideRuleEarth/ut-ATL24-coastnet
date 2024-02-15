@@ -29,9 +29,9 @@ do
     echo fold $((fold+1)) of ${folds}
 
     # Setup directories
-    training_dir=${tmpdir}/training_files/
-    testing_dir=${tmpdir}/testing_files/
-    predictions_dir=${tmpdir}/predictions/
+    training_dir=${tmpdir}/training_files
+    testing_dir=${tmpdir}/testing_files
+    predictions_dir=${tmpdir}/predictions
     mkdir -p ${training_dir}
     mkdir -p ${testing_dir}
     mkdir -p ${predictions_dir}
@@ -55,18 +55,21 @@ do
     # Train
     build=${build} ./train_coastnet_surface.sh \
         "${training_dir}/*.csv" \
-        ./${tmpdir}/coastnet-surface.pt
+        ${tmpdir}/coastnet-surface.pt
 
 
     # Predict
     build=${build} ./classify_coastnet_surface.sh \
         "${testing_dir}/*.csv" \
-        ./${tmpdir}/coastnet-surface.pt \
-        ./${tmpdir}/predictions
+        ${tmpdir}/coastnet-surface.pt \
+        ${tmpdir}/predictions
 
     # Score
     ./get_coastnet_surface_scores.sh \
-        "./${tmpdir}/predictions/*_surface.txt" > ./fold${fold}_results.txt
+        "${tmpdir}/predictions/*_surface.txt" > ./fold${fold}_score.txt
+
+    # Save results
+    cat ${tmpdir}/predictions/*_surface.txt > ./fold${fold}_results.txt
 
     # Cleanup
     rm -rf ${training_dir}
