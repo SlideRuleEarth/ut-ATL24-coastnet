@@ -9,7 +9,7 @@
 #include <string>
 #include <vector>
 
-namespace ATL24_resnet
+namespace ATL24_coastnet
 {
 
 class confusion_matrix
@@ -109,4 +109,4 @@ class confusion_matrix
     double fn;
 };
 
-} // namespace ATL24_resnet
+} // namespace ATL24_coastnet

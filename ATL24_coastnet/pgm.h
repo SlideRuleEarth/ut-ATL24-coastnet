@@ -5,7 +5,7 @@
 #include <iostream>
 #include <stdexcept>
 
-namespace ATL24_resnet
+namespace ATL24_coastnet
 {
 
 namespace pgm
@@ -119,4 +119,4 @@ header read (std::istream &is, viper::raster::raster<unsigned char> &r)
 
 } // namespace pgm
 
-} // namespace ATL24_resnet
+} // namespace ATL24_coastnet

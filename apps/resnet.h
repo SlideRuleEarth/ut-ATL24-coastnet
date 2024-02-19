@@ -2,7 +2,7 @@
 
 #include <iostream>
 
-namespace ATL24_resnet
+namespace ATL24_coastnet
 {
 
 struct sampling_params
@@ -193,4 +193,4 @@ class ResNet : public torch::nn::ModuleHolder<ResNetImpl<Block>> {
     using torch::nn::ModuleHolder<ResNetImpl<Block>>::ModuleHolder;
 };
 
-} // namespace ATL24_resnet
+} // namespace ATL24_coastnet

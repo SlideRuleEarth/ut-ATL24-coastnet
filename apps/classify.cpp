@@ -1,6 +1,6 @@
-#include "ATL24_resnet/precompiled.h"
-#include "ATL24_resnet/confusion.h"
-#include "ATL24_resnet/utils.h"
+#include "ATL24_coastnet/precompiled.h"
+#include "ATL24_coastnet/confusion.h"
+#include "ATL24_coastnet/utils.h"
 #include "ATL24_utils/dataframe.h"
 #include "viper/raster.h"
 #include "resnet.h"
@@ -11,7 +11,7 @@ const std::string usage {"ls *.csv | resnet [options]"};
 int main (int argc, char **argv)
 {
     using namespace std;
-    using namespace ATL24_resnet;
+    using namespace ATL24_coastnet;
 
     try
     {

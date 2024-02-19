@@ -8,7 +8,7 @@
 #include <string>
 #include <vector>
 
-namespace ATL24_resnet
+namespace ATL24_coastnet
 {
 
 namespace sampler
@@ -155,4 +155,4 @@ std::vector<image> get_samples (const SP &sp,
 
 } // namespace sampler
 
-} // namespace ATL24_resnet
+} // namespace ATL24_coastnet

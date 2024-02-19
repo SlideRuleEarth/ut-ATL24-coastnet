@@ -5,9 +5,9 @@
 #include <iostream>
 #include <stdexcept>
 #include <string>
-#include "ATL24_resnet/cmd_utils.h"
+#include "ATL24_coastnet/cmd_utils.h"
 
-namespace ATL24_resnet
+namespace ATL24_coastnet
 {
 
 namespace cmd
@@ -18,8 +18,8 @@ struct args
     bool help = false;
     bool verbose = false;
     size_t num_classes = 5;
-    std::string network_filename = std::string ("./resnet_network.pt");
-    std::string results_filename = std::string ("./resnet_results.txt");
+    std::string network_filename = std::string ("./coastnet_network.pt");
+    std::string results_filename = std::string ("./coastnet_results.txt");
 };
 
 std::ostream &operator<< (std::ostream &os, const args &args)
@@ -80,6 +80,6 @@ args get_args (int argc, char **argv, const std::string &usage)
 
 } // namespace cmd
 
-} // namespace ATL24_resnet
+} // namespace ATL24_coastnet
 
 #endif // CMD_H

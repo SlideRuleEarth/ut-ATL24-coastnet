@@ -1,11 +1,11 @@
 #pragma once
 
-#include "ATL24_resnet/pgm.h"
-#include "ATL24_resnet/utils.h"
+#include "ATL24_coastnet/pgm.h"
+#include "ATL24_coastnet/utils.h"
 #include "ATL24_utils/dataframe.h"
 #include <map>
 
-namespace ATL24_resnet
+namespace ATL24_coastnet
 {
 
 struct sample_index
@@ -17,7 +17,7 @@ struct sample_index
 class classified_point_dataset : public torch::data::datasets::Dataset<classified_point_dataset>
 {
     using Example = torch::data::Example<>;
-    std::vector<std::vector<ATL24_resnet::classified_point2d>> datasets;
+    std::vector<std::vector<ATL24_coastnet::classified_point2d>> datasets;
     std::vector<sample_index> sample_indexes;
     std::vector<viper::raster::raster<unsigned char>> rasters;
     size_t patch_rows;
@@ -171,7 +171,7 @@ class classified_point_dataset : public torch::data::datasets::Dataset<classifie
 class coastnet_surface_dataset : public torch::data::datasets::Dataset<coastnet_surface_dataset>
 {
     using Example = torch::data::Example<>;
-    std::vector<std::vector<ATL24_resnet::classified_point2d>> datasets;
+    std::vector<std::vector<ATL24_coastnet::classified_point2d>> datasets;
     std::vector<sample_index> sample_indexes;
     std::vector<viper::raster::raster<unsigned char>> rasters;
     size_t patch_rows;
@@ -345,4 +345,4 @@ class coastnet_surface_dataset : public torch::data::datasets::Dataset<coastnet_
     }
 };
 
-} // namespace ATL24_resnet
+} // namespace ATL24_coastnet

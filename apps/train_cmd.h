@@ -6,9 +6,9 @@
 #include <cmath>
 #include <stdexcept>
 #include <string>
-#include "ATL24_resnet/cmd_utils.h"
+#include "ATL24_coastnet/cmd_utils.h"
 
-namespace ATL24_resnet
+namespace ATL24_coastnet
 {
 
 namespace cmd
@@ -19,7 +19,7 @@ struct args
     bool help = false;
     bool verbose = false;
     size_t random_seed = 123;
-    std::string network_filename = std::string ("./resnet_network.pt");
+    std::string network_filename = std::string ("./coastnet_network.pt");
     double train_test_split = 0.2;
     size_t epochs = 20;
     size_t test_dataset = 0;
@@ -108,6 +108,6 @@ args get_args (int argc, char **argv, const std::string &usage)
 
 } // namespace cmd
 
-} // namespace ATL24_resnet
+} // namespace ATL24_coastnet
 
 #endif // CMD_H

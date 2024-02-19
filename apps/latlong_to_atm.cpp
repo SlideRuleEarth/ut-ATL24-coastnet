@@ -1,4 +1,4 @@
-#include "ATL24_resnet/utils.h"
+#include "ATL24_coastnet/utils.h"
 #include "viper/geotiff.h"
 #include "viper/raster.h"
 #include <iomanip>
@@ -11,7 +11,7 @@
 using namespace std;
 using namespace viper::geotiff;
 using namespace viper::raster;
-using namespace ATL24_resnet;
+using namespace ATL24_coastnet;
 
 template<typename T>
 geotiff_raster<T> read (const string &fn)

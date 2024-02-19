@@ -53,8 +53,8 @@ train: build
 			--test-dataset={} \
 			--random-seed=123 \
 			--epochs=40 \
-			--network-filename=resnet_network-{}.pt \
-			> resnet_test_files-{}.txt" \
+			--network-filename=coastnet_network-{}.pt \
+			> coastnet_test_files-{}.txt" \
 			::: $$(seq 0 4)
 
 .PHONY: classify # Run classifier

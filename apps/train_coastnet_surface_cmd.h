@@ -6,9 +6,9 @@
 #include <cmath>
 #include <stdexcept>
 #include <string>
-#include "ATL24_resnet/cmd_utils.h"
+#include "ATL24_coastnet/cmd_utils.h"
 
-namespace ATL24_resnet
+namespace ATL24_coastnet
 {
 
 namespace cmd
@@ -97,6 +97,6 @@ args get_args (int argc, char **argv, const std::string &usage)
 
 } // namespace cmd
 
-} // namespace ATL24_resnet
+} // namespace ATL24_coastnet
 
 #endif // CMD_H

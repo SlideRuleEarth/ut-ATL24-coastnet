@@ -1,12 +1,12 @@
-#include "ATL24_resnet/pgm.h"
-#include "ATL24_resnet/verify.h"
+#include "ATL24_coastnet/pgm.h"
+#include "ATL24_coastnet/verify.h"
 #include <iostream>
 #include <stdexcept>
 #include <sstream>
 
 using namespace std;
 using namespace viper::raster;
-using namespace ATL24_resnet::pgm;
+using namespace ATL24_coastnet::pgm;
 
 void test_bad_headers ()
 {

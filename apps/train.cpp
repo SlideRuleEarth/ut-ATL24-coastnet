@@ -1,6 +1,6 @@
-#include "ATL24_resnet/precompiled.h"
-#include "ATL24_resnet/custom_dataset.h"
-#include "ATL24_resnet/utils.h"
+#include "ATL24_coastnet/precompiled.h"
+#include "ATL24_coastnet/custom_dataset.h"
+#include "ATL24_coastnet/utils.h"
 #include "viper/raster.h"
 #include "resnet.h"
 #include "train_cmd.h"
@@ -44,7 +44,7 @@ void show_samples (
 int main (int argc, char **argv)
 {
     using namespace std;
-    using namespace ATL24_resnet;
+    using namespace ATL24_coastnet;
 
     try
     {

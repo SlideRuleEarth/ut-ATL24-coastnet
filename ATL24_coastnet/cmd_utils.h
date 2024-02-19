@@ -5,7 +5,7 @@
 #include <string>
 #include <iostream>
 
-namespace ATL24_resnet
+namespace ATL24_coastnet
 {
 
 namespace cmd
@@ -37,6 +37,6 @@ void print_help (std::ostream &os, const std::string &usage, const size_t noptio
 
 } // namespace cmd
 
-} // namespace ATL24_resnet
+} // namespace ATL24_coastnet
 
 #endif // CMD_UTILS_H

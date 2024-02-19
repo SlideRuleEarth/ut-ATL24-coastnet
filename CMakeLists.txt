@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.14 FATAL_ERROR)
 
-project(ATL24_resnet VERSION 1.0.0 LANGUAGES CXX)
+project(ATL24_coastnet VERSION 1.0.0 LANGUAGES CXX)
 
 find_package(OpenMP REQUIRED)
 find_package(OpenCV REQUIRED)
@@ -41,19 +41,19 @@ target_link_libraries(latlong_to_atm gmp gdal)
 add_executable(train ./apps/train.cpp)
 target_link_libraries(train ${TORCH_LIBRARIES} gmp ${OpenCV_LIBS})
 target_include_directories(train PUBLIC ${OpenCV_INCLUDE_DIRS})
-target_precompile_headers(train PUBLIC ATL24_resnet/precompiled.h)
+target_precompile_headers(train PUBLIC ATL24_coastnet/precompiled.h)
 
 add_executable(classify ./apps/classify.cpp)
 target_link_libraries(classify ${TORCH_LIBRARIES} gmp)
 target_include_directories(classify PUBLIC)
-target_precompile_headers(classify PUBLIC ATL24_resnet/precompiled.h)
+target_precompile_headers(classify PUBLIC ATL24_coastnet/precompiled.h)
 
 add_executable(train_coastnet_surface ./apps/train_coastnet_surface.cpp)
 target_link_libraries(train_coastnet_surface ${TORCH_LIBRARIES} gmp)
 target_include_directories(train_coastnet_surface PUBLIC)
-target_precompile_headers(train_coastnet_surface PUBLIC ATL24_resnet/precompiled.h)
+target_precompile_headers(train_coastnet_surface PUBLIC ATL24_coastnet/precompiled.h)
 
 add_executable(classify_coastnet_surface ./apps/classify_coastnet_surface.cpp)
 target_link_libraries(classify_coastnet_surface ${TORCH_LIBRARIES} gmp)
 target_include_directories(classify_coastnet_surface PUBLIC)
-target_precompile_headers(classify_coastnet_surface PUBLIC ATL24_resnet/precompiled.h)
+target_precompile_headers(classify_coastnet_surface PUBLIC ATL24_coastnet/precompiled.h)

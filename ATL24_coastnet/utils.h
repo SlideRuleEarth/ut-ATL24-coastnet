@@ -11,7 +11,7 @@
 #include <unordered_map>
 #include <vector>
 
-namespace ATL24_resnet
+namespace ATL24_coastnet
 {
 
 constexpr unsigned other_cls = 0;
@@ -406,7 +406,7 @@ viper::raster::raster<unsigned char> create_raster (const T &p,
 }
 
 template<typename T>
-std::vector<ATL24_resnet::classified_point2d> convert_dataframe (const T &df)
+std::vector<ATL24_coastnet::classified_point2d> convert_dataframe (const T &df)
 {
     using namespace std;
 
@@ -454,7 +454,7 @@ std::vector<ATL24_resnet::classified_point2d> convert_dataframe (const T &df)
     assert (cls_index < df.columns.size ());
 
     // Stuff values into the vector
-    std::vector<ATL24_resnet::classified_point2d> dataset (nrows);
+    std::vector<ATL24_coastnet::classified_point2d> dataset (nrows);
 
     for (size_t j = 0; j < nrows; ++j)
     {
@@ -474,4 +474,4 @@ std::vector<ATL24_resnet::classified_point2d> convert_dataframe (const T &df)
     return dataset;
 }
 
-} // namespace ATL24_resnet
+} // namespace ATL24_coastnet
