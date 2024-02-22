@@ -66,14 +66,14 @@ classify: build
 train_coastnet_surface: build
 	@build=release ./train_coastnet_surface.sh \
 		"./data/local/3DGL/*.csv" \
-		./coastnet-surface.pt
+		./models/coastnet-surface.pt
 
 .PHONY: classify_coastnet_surface # Run classifier
 classify_coastnet_surface: build
 	@mkdir -p ./predictions
 	@build=release ./classify_coastnet_surface.sh \
 		"./data/local/3DGL/*.csv" \
-		./coastnet-surface.pt \
+		./models/coastnet-surface.pt \
 		./predictions
 
 .PHONY: score_coastnet_surface # Get surface scores

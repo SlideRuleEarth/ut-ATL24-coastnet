@@ -1,1 +1,2 @@
 assets/us_nga_egm2008_1.tif filter=lfs diff=lfs merge=lfs -text
+models/coastnet-surface.pt filter=lfs diff=lfs merge=lfs -text
