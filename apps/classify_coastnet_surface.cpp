@@ -110,8 +110,8 @@ int main (int argc, char **argv)
         if (args.verbose)
             clog << "Classifying points" << endl;
 
-        // Copy the points
-        auto q (p);
+        // Allocate space for predictions
+        vector<size_t> q (p.size ());
 
         // Setup the prediction cache
         prediction_cache cache;
@@ -176,7 +176,7 @@ int main (int argc, char **argv)
             assert (pred != -1);
 
             // Save predicted value
-            q[i].cls = pred;
+            q[i] = pred;
         }
 
         // Keep track of performance
@@ -195,7 +195,7 @@ int main (int argc, char **argv)
             const long actual = p[i].cls;
 
             // Get predicted value
-            const long pred = q[i].cls;
+            const long pred = q[i];
 
             for (auto j : cm)
             {
@@ -274,7 +274,7 @@ int main (int argc, char **argv)
         }
 
         // Write classified output to stdout
-        write_classified_point2d (cout, q);
+        write_classified_point2d (cout, p, q);
 
         return 0;
     }

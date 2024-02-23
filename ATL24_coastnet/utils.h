@@ -216,6 +216,36 @@ void write_classified_point2d (std::ostream &os, const T &p)
     }
 }
 
+template<typename T,typename U>
+void write_classified_point2d (std::ostream &os, const T &p, const U &q)
+{
+    using namespace std;
+
+    // Check invariants
+    assert (p.size () == q.size ());
+
+    // Print along-track meters
+    os << "ph_index,along_track_dist,geoid_corrected_h,manual_label,surface_prediction" << endl;
+    for (size_t i = 0; i < p.size (); ++i)
+    {
+        // Write the index
+        os << setprecision (8) << fixed;
+        os << p[i].h5_index;
+        // Double has 15 decimal digits of precision
+        os << setprecision (15) << fixed;;
+        os << "," << p[i].x;
+        // Elevation was corrected from EGM, which is a 32 bit float,
+        // so it only has about 8 decimal digits of precision.
+        os << setprecision (8) << fixed;;
+        os << "," << p[i].z;
+        // Write the class
+        os << "," << p[i].cls;
+        // Write the prediction
+        os << "," << q[i];
+        os << endl;
+    }
+}
+
 struct point2d_extents
 {
     point2d minp;
