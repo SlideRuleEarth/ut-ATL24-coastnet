@@ -168,7 +168,7 @@ class classified_point_dataset : public torch::data::datasets::Dataset<classifie
     }
 };
 
-class coastnet_surface_dataset : public torch::data::datasets::Dataset<coastnet_surface_dataset>
+class coastnet_dataset : public torch::data::datasets::Dataset<coastnet_dataset>
 {
     using Example = torch::data::Example<>;
     std::vector<std::vector<ATL24_coastnet::classified_point2d>> datasets;
@@ -182,7 +182,7 @@ class coastnet_surface_dataset : public torch::data::datasets::Dataset<coastnet_
     std::default_random_engine &rng;
 
     public:
-    coastnet_surface_dataset (const std::vector<std::string> &fns,
+    coastnet_dataset (const std::vector<std::string> &fns,
         const size_t patch_rows,
         const size_t patch_cols,
         const double aspect_ratio,
@@ -190,6 +190,7 @@ class coastnet_surface_dataset : public torch::data::datasets::Dataset<coastnet_
         const bool ap_enabled,
         const size_t samples_per_class,
         const bool verbose,
+        const unsigned cls,
         std::default_random_engine &rng)
         : patch_rows (patch_rows)
         , patch_cols (patch_cols)
@@ -235,9 +236,9 @@ class coastnet_surface_dataset : public torch::data::datasets::Dataset<coastnet_
                 [](const auto &a, const auto &b)
                 { return a.x < b.x; });
 
-            // Force everything to be either surface or other
+            // Force everything to be either 'cls' or other
             for (auto &p : d)
-                p.cls = (p.cls != surface_cls) ? 0 : surface_cls;
+                p.cls = (p.cls != cls) ? 0 : cls;
 
         }
 

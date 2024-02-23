@@ -14,9 +14,6 @@
 namespace ATL24_coastnet
 {
 
-constexpr unsigned other_cls = 0;
-constexpr unsigned bathy_cls = 40;
-constexpr unsigned surface_cls = 41;
 constexpr double surface_min_elevation = -20.0;
 constexpr double surface_max_elevation = 20.0;
 
