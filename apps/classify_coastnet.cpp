@@ -4,9 +4,9 @@
 #include "ATL24_utils/dataframe.h"
 #include "viper/raster.h"
 #include "coastnet.h"
-#include "classify_coastnet_surface_cmd.h"
+#include "classify_coastnet_cmd.h"
 
-const std::string usage {"ls *.csv | resnet [options]"};
+const std::string usage {"ls *.csv | classify_coastnet [options]"};
 
 int main (int argc, char **argv)
 {
@@ -141,8 +141,9 @@ int main (int argc, char **argv)
             {
                 // No, compute the prediction
                 //
-                // Check the elevation
-                if (p[i].z < surface_min_elevation || p[i].z > surface_max_elevation)
+                // Are we predicting water surface?
+                if ((args.cls == 41) &&
+                    (p[i].z < surface_min_elevation || p[i].z > surface_max_elevation))
                 {
                     // Can't be water surface
                     pred = 0;

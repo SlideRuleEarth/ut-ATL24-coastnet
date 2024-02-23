@@ -3,7 +3,7 @@
 #include "ATL24_coastnet/utils.h"
 #include "viper/raster.h"
 #include "coastnet.h"
-#include "train_coastnet_surface_cmd.h"
+#include "train_coastnet_cmd.h"
 
 const std::string usage {"ls *.csv | resnet [options]"};
 
@@ -81,7 +81,7 @@ int main (int argc, char **argv)
             clog << "Creating dataset" << endl;
         }
 
-        auto train_dataset = coastnet_surface_dataset (fns,
+        auto train_dataset = coastnet_dataset (fns,
             sp.patch_rows,
             sp.patch_cols,
             sp.aspect_ratio,
@@ -89,6 +89,7 @@ int main (int argc, char **argv)
             enable_augmentation,
             args.total_samples_per_class,
             args.verbose,
+            args.cls,
             rng)
             .map(torch::data::transforms::Stack<>());
 

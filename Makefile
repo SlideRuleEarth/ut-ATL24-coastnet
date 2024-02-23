@@ -62,13 +62,13 @@ classify: build
 	@./classify.sh | parallel --verbose --lb --jobs=15
 	@./get_bathy_scores.sh
 
-.PHONY: train_coastnet_surface # Train a model
+.PHONY: train_coastnet_surface # Train water surface model
 train_coastnet_surface: build
 	@build=release ./train_coastnet_surface.sh \
 		"./data/local/3DGL/*.csv" \
 		./models/coastnet-surface.pt
 
-.PHONY: classify_coastnet_surface # Run classifier
+.PHONY: classify_coastnet_surface # Run water surface classifier
 classify_coastnet_surface: build
 	@mkdir -p ./predictions
 	@build=release ./classify_coastnet_surface.sh \
@@ -76,13 +76,35 @@ classify_coastnet_surface: build
 		./models/coastnet-surface.pt \
 		./predictions
 
-.PHONY: score_coastnet_surface # Get surface scores
+.PHONY: score_coastnet_surface # Get water surface scores
 score_coastnet_surface:
 	@./get_coastnet_surface_scores.sh "./predictions/*_surface.txt"
 
-.PHONY: cross_validate_surface # Cross validate surface classifier
+.PHONY: cross_validate_surface # Cross validate water surface classifier
 cross_validate_surface: build
 	@./cross_validate_surface.sh "./data/local/3DGL/ATL03_*.csv"
+
+.PHONY: train_coastnet_bathy # Train bathy model
+train_coastnet_bathy: build
+	@build=debug ./train_coastnet_bathy.sh \
+		"./data/local/3DGL/*.csv" \
+		./models/coastnet-bathy.pt
+
+.PHONY: classify_coastnet_bathy # Run bathy classifier
+classify_coastnet_bathy: build
+	@mkdir -p ./predictions
+	@build=release ./classify_coastnet_bathy.sh \
+		"./data/local/3DGL/*.csv" \
+		./models/coastnet-bathy.pt \
+		./predictions
+
+.PHONY: score_coastnet_bathy # Get bathy scores
+score_coastnet_bathy:
+	@./get_coastnet_bathy_scores.sh "./predictions/*_bathy.txt"
+
+.PHONY: cross_validate_bathy # Cross validate bathy classifier
+cross_validate_bathy: build
+	@./cross_validate_bathy.sh "./data/local/3DGL/ATL03_*.csv"
 
 ##############################################################################
 #

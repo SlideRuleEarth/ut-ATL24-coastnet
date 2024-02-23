@@ -13,7 +13,7 @@ find $1 | \
     parallel --verbose --lb --jobs=15 \
         "build/${build}/classify_coastnet \
         --verbose \
-        --class=41 \
+        --class=40 \
         --aspect-ratio=1 \
         --network-filename=$2 \
-        --results-filename=$3/{/.}_results_surface.txt < {} > $3/{/.}_classified_surface.csv"
+        --results-filename=$3/{/.}_results_bathy.txt < {} > $3/{/.}_classified_bathy.csv"

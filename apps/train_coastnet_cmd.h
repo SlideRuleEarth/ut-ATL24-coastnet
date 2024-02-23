@@ -3,6 +3,7 @@
 
 #include <getopt.h>
 #include <iostream>
+#include <cmath>
 #include <stdexcept>
 #include <string>
 #include "ATL24_coastnet/cmd_utils.h"
@@ -17,9 +18,13 @@ struct args
 {
     bool help = false;
     bool verbose = false;
+    int cls = -1;
+    size_t random_seed = 123;
+    size_t total_samples_per_class = 1'000;
+    size_t epochs = 10;
+    size_t batch_size = 0;
     size_t aspect_ratio = 0;
-    std::string network_filename = std::string ("./coastnet_network.pt");
-    std::string results_filename = std::string ("./coastnet_results.txt");
+    std::string network_filename;
 };
 
 std::ostream &operator<< (std::ostream &os, const args &args)
@@ -27,8 +32,13 @@ std::ostream &operator<< (std::ostream &os, const args &args)
     os << std::boolalpha;
     os << "help: " << args.help << std::endl;
     os << "verbose: " << args.verbose << std::endl;
+    os << "class: " << args.cls << std::endl;
+    os << "random-seed: " << args.random_seed << std::endl;
+    os << "total-samples-per-class: " << args.total_samples_per_class << std::endl;
+    os << "epochs: " << args.epochs << std::endl;
+    os << "batch-size: " << args.batch_size << std::endl;
     os << "aspect-ratio: " << args.aspect_ratio << std::endl;
-    os << "results-filename: " << args.results_filename << std::endl;
+    os << "network-filename: " << args.network_filename << std::endl;
     return os;
 }
 
@@ -41,13 +51,17 @@ args get_args (int argc, char **argv, const std::string &usage)
         static struct option long_options[] = {
             {"help", no_argument, 0,  'h' },
             {"verbose", no_argument, 0,  'v' },
+            {"class", required_argument, 0,  'c' },
+            {"random-seed", required_argument, 0,  's' },
+            {"total-samples-per-class", required_argument, 0,  't' },
+            {"epochs", required_argument, 0,  'e' },
+            {"batch-size", required_argument, 0,  'b' },
             {"aspect-ratio", required_argument, 0,  'a' },
             {"network-filename", required_argument, 0,  'f' },
-            {"results-filename", required_argument, 0,  'r' },
             {0,      0,           0,  0 }
         };
 
-        int c = getopt_long(argc, argv, "hva:f:r:", long_options, &option_index);
+        int c = getopt_long(argc, argv, "hvc:s:t:e:b:a:f:", long_options, &option_index);
         if (c == -1)
             break;
 
@@ -64,15 +78,27 @@ args get_args (int argc, char **argv, const std::string &usage)
                 return args;
             }
             case 'v': args.verbose = true; break;
+            case 'c': args.cls = atol(optarg); break;
+            case 's': args.random_seed = atol(optarg); break;
+            case 't': args.total_samples_per_class = std::atol(optarg); break;
+            case 'e': args.epochs = std::atol(optarg); break;
+            case 'b': args.batch_size = std::atol(optarg); break;
             case 'a': args.aspect_ratio = std::atol(optarg); break;
             case 'f': args.network_filename = std::string(optarg); break;
-            case 'r': args.results_filename = std::string(optarg); break;
         }
     }
 
     // Check command line
     if (optind != argc)
         throw std::runtime_error ("Too many arguments on command line");
+
+    // Check args
+    if (args.cls == -1)
+        throw std::runtime_error ("No class was specified");
+
+    // Check args
+    if (args.network_filename.empty ())
+        throw std::runtime_error ("No network filename was specified");
 
     return args;
 }
