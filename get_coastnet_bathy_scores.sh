@@ -4,6 +4,8 @@
 set -euo pipefail
 IFS=$'\n\t'
 
+printf "Bathy Acc = "
+cat $1 | grep "^40" | cut -f 2 | grep -v nan | datamash mean 1
 printf "Bathy F1 = "
 cat $1 | grep "^40" | cut -f 3 | grep -v nan | datamash mean 1
 printf "Bathy BA = "

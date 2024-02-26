@@ -4,6 +4,8 @@
 set -euo pipefail
 IFS=$'\n\t'
 
+printf "Surface Acc = "
+cat $1 | grep "^41" | cut -f 2 | grep -v nan | datamash mean 1
 printf "Surface F1 = "
 cat $1 | grep "^41" | cut -f 3 | grep -v nan | datamash mean 1
 printf "Surface BA = "
