@@ -14,7 +14,7 @@ find $1 | \
     --verbose \
     --class=40 \
     --epochs=50 \
-    --total-samples-per-class=250000 \
+    --total-samples-per-class=500000 \
     --batch-size=512 \
     --aspect-ratio=1 \
     --network-filename=$2
