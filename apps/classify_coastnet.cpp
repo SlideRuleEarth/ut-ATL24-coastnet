@@ -185,7 +185,7 @@ int main (int argc, char **argv)
 
         // Allocate confusion matrix for each classification
         cm[0] = confusion_matrix ();
-        cm[41] = confusion_matrix ();
+        cm[args.cls] = confusion_matrix ();
 
         // Get results
         //
