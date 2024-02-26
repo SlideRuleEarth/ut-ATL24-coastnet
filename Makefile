@@ -106,6 +106,17 @@ score_coastnet_bathy:
 cross_validate_bathy: build
 	@./cross_validate_bathy.sh "./data/local/3DGL/ATL03_*.csv"
 
+.PHONY: everything # All machine learning models, classifiers, x-val
+everything:
+	@$(MAKE) train_coastnet_surface
+	@$(MAKE) train_coastnet_bathy
+	@$(MAKE) classify_coastnet_surface
+	@$(MAKE) classify_coastnet_bathy
+	@$(MAKE) cross_validate_surface
+	@$(MAKE) cross_validate_bathy
+	@$(MAKE) score_coastnet_surface
+	@$(MAKE) score_coastnet_bathy
+
 ##############################################################################
 #
 # View data
