@@ -44,10 +44,15 @@ test:
 #
 ##############################################################################
 
+.PHONY: preprocess # Preprocess input data
+preprocess:
+	@mkdir -p ./input
+	@./preprocess.sh  "./data/local/3DGL/*.csv" ./input
+
 .PHONY: train # Train a model
 train: build
 	@parallel --lb --jobs=15 \
-		"find ./data/local/3DGL/*.csv | build/debug/train \
+		"find ./input/*.csv | build/debug/train \
 			--verbose \
 			--num-classes=7 \
 			--test-dataset={} \
@@ -65,14 +70,14 @@ classify: build
 .PHONY: train_coastnet_surface # Train water surface model
 train_coastnet_surface: build
 	@build=release ./train_coastnet_surface.sh \
-		"./data/local/3DGL/*.csv" \
+		"./input/*.csv" \
 		./models/coastnet-surface.pt
 
 .PHONY: classify_coastnet_surface # Run water surface classifier
 classify_coastnet_surface: build
 	@mkdir -p ./predictions
 	@build=release ./classify_coastnet_surface.sh \
-		"./data/local/3DGL/*.csv" \
+		"./input/*.csv" \
 		./models/coastnet-surface.pt \
 		./predictions
 
@@ -82,19 +87,19 @@ score_coastnet_surface:
 
 .PHONY: cross_validate_surface # Cross validate water surface classifier
 cross_validate_surface: build
-	@./cross_validate_surface.sh "./data/local/3DGL/ATL03_*.csv"
+	@./cross_validate_surface.sh "./input/ATL03_*.csv"
 
 .PHONY: train_coastnet_bathy # Train bathy model
 train_coastnet_bathy: build
-	@build=debug ./train_coastnet_bathy.sh \
-		"./data/local/3DGL/*.csv" \
+	@build=release ./train_coastnet_bathy.sh \
+		"./input/*.csv" \
 		./models/coastnet-bathy.pt
 
 .PHONY: classify_coastnet_bathy # Run bathy classifier
 classify_coastnet_bathy: build
 	@mkdir -p ./predictions
 	@build=release ./classify_coastnet_bathy.sh \
-		"./data/local/3DGL/*.csv" \
+		"./input/*.csv" \
 		./models/coastnet-bathy.pt \
 		./predictions
 
@@ -104,10 +109,11 @@ score_coastnet_bathy:
 
 .PHONY: cross_validate_bathy # Cross validate bathy classifier
 cross_validate_bathy: build
-	@./cross_validate_bathy.sh "./data/local/3DGL/ATL03_*.csv"
+	@./cross_validate_bathy.sh "./input/ATL03_*.csv"
 
 .PHONY: everything # All machine learning models, classifiers, x-val
 everything:
+	@$(MAKE) preprocess
 	@$(MAKE) train_coastnet_surface
 	@$(MAKE) train_coastnet_bathy
 	@$(MAKE) classify_coastnet_surface
@@ -123,7 +129,7 @@ everything:
 #
 ##############################################################################
 
-TRUTH_FNS=$(shell find ./data/local/3DGL/ATL03_*.csv | head)
+TRUTH_FNS=$(shell find ./input/ATL03_*.csv | head)
 
 .PHONY: view_truth # View truth labels
 view_truth:
@@ -146,6 +152,14 @@ view_surface_predictions:
 	@parallel --lb --jobs=100 \
 		"streamlit run ../ATL24_rasters/apps/view_classifications.py -- --verbose {}" \
 		::: ${SURFACE_PREDICTION_FNS}
+
+BATHY_PREDICTION_FNS=$(shell find ./predictions/ATL03_*_classified_bathy.csv | tail)
+
+.PHONY: view_bathy_predictions # View bathy prediction labels
+view_bathy_predictions:
+	@parallel --lb --jobs=100 \
+		"streamlit run ../ATL24_rasters/apps/view_classifications.py -- --verbose {}" \
+		::: ${BATHY_PREDICTION_FNS}
 
 ##############################################################################
 #
