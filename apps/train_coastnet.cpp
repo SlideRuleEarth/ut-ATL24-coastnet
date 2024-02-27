@@ -139,10 +139,10 @@ int main (int argc, char **argv)
 
                 if (static_cast<int> (batch_index + 1) == hp.batch_size)
                 {
+                    clog << endl;
                     clog << "epoch: " << epoch + 1;
                     clog << " of " << args.epochs;
                     clog << " loss " << loss.item<float>() << endl;
-                    clog << endl;
                 }
 
                 // Zero gradients
