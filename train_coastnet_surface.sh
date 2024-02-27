@@ -13,7 +13,7 @@ find $1 | \
     ./build/${build}/train_coastnet \
     --verbose \
     --class=41 \
-    --epochs=40 \
+    --epochs=30 \
     --total-samples-per-class=1000000 \
     --batch-size=512 \
     --aspect-ratio=1 \
