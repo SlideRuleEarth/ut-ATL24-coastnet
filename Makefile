@@ -129,7 +129,7 @@ everything:
 #
 ##############################################################################
 
-TRUTH_FNS=$(shell find ./input/ATL03_*.csv | head)
+TRUTH_FNS=$(shell find ./input/ATL03_*.csv | tail)
 
 .PHONY: view_truth # View truth labels
 view_truth:
@@ -158,7 +158,7 @@ BATHY_PREDICTION_FNS=$(shell find ./predictions/ATL03_*_classified_bathy.csv | t
 .PHONY: view_bathy_predictions # View bathy prediction labels
 view_bathy_predictions:
 	@parallel --lb --jobs=100 \
-		"streamlit run ../ATL24_rasters/apps/view_classifications.py -- --verbose {}" \
+		"streamlit run ../ATL24_rasters/apps/view_predictions.py -- --verbose {}" \
 		::: ${BATHY_PREDICTION_FNS}
 
 ##############################################################################
