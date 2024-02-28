@@ -120,6 +120,7 @@ int main (int argc, char **argv)
 
             if (args.verbose)
             {
+                clog << "epoch: " << epoch + 1 << " of " << args.epochs << endl;
                 for (const auto &p : optimizer.param_groups ())
                     clog << "Optimizer learning rate = "<< p.options ().get_lr () << endl;
             }
@@ -137,13 +138,11 @@ int main (int argc, char **argv)
                 // Update number of correctly classified samples
                 total_correct += prediction.eq(target).sum().item<int64_t>();
 
+                if (static_cast<int> (batch_index) == 0)
+                    clog << "batch " << batch_index << " loss " << loss.item<float>() << endl;
+
                 if (static_cast<int> (batch_index + 1) == hp.batch_size)
-                {
-                    clog << endl;
-                    clog << "epoch: " << epoch + 1;
-                    clog << " of " << args.epochs;
-                    clog << " loss " << loss.item<float>() << endl;
-                }
+                    clog << "batch " << batch_index << " loss " << loss.item<float>() << endl;
 
                 // Zero gradients
                 optimizer.zero_grad();
