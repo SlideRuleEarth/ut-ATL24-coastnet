@@ -222,7 +222,7 @@ void write_classified_point2d (std::ostream &os, const T &p, const U &q)
     assert (p.size () == q.size ());
 
     // Print along-track meters
-    os << "ph_index,along_track_dist,geoid_corrected_h,manual_label,surface_prediction" << endl;
+    os << "ph_index,along_track_dist,geoid_corrected_h,manual_label,prediction" << endl;
     for (size_t i = 0; i < p.size (); ++i)
     {
         // Write the index
