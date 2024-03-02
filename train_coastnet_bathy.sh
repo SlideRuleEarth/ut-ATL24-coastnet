@@ -16,5 +16,5 @@ find $1 | \
     --epochs=20 \
     --total-samples-per-class=500000 \
     --batch-size=512 \
-    --aspect-ratio=1 \
+    --aspect-ratio=4 \
     --network-filename=$2

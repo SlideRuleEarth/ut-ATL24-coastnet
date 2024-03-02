@@ -14,6 +14,6 @@ find $1 | \
         "build/${build}/classify_coastnet \
         --verbose \
         --class=41 \
-        --aspect-ratio=1 \
+        --aspect-ratio=4 \
         --network-filename=$2 \
         --results-filename=$3/{/.}_results_surface.txt < {} > $3/{/.}_classified_surface.csv"
