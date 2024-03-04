@@ -183,7 +183,7 @@ int main (int argc, char **argv)
         // Keep track of performance
         unordered_map<long,confusion_matrix> cm;
 
-        // Allocate confusion matrix for each classification
+        // Also allocate cm's even if the point cloud does not contain these classes
         cm[0] = confusion_matrix ();
         cm[args.cls] = confusion_matrix ();
 
@@ -193,10 +193,15 @@ int main (int argc, char **argv)
         for (size_t i = 0; i < p.size (); ++i)
         {
             // Get actual value
-            const long actual = p[i].cls;
+            //
+            // Force it to be either 0 or the class we are predicting
+            const long actual = static_cast<int> (p[i].cls) != args.cls ? 0 : args.cls;
 
             // Get predicted value
             const long pred = q[i];
+
+            // Check logic
+            assert (pred == 0 || pred == args.cls);
 
             for (auto j : cm)
             {
@@ -251,8 +256,8 @@ int main (int argc, char **argv)
             if (!isnan (cm[key].balanced_accuracy ()))
                 weighted_bal_acc += cm[key].balanced_accuracy () * cm[key].support () / cm[key].total ();
         }
-        ss << "weighted_F1 = " << weighted_f1 << endl;
         ss << "weighted_accuracy = " << weighted_accuracy << endl;
+        ss << "weighted_F1 = " << weighted_f1 << endl;
         ss << "weighted_bal_acc = " << weighted_bal_acc << endl;
         ss << "cache usage = " << 100.0 * cache_hits / cache_lookups << "%" << endl;
 
