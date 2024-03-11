@@ -2,7 +2,7 @@
 #include "ATL24_coastnet/custom_dataset.h"
 #include "ATL24_coastnet/utils.h"
 #include "viper/raster.h"
-#include "coastnet.h"
+#include "coastnet_network.h"
 #include "train_coastnet_cmd.h"
 
 const std::string usage {"ls *.csv | resnet [options]"};

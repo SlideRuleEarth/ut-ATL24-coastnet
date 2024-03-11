@@ -3,7 +3,7 @@
 #include "ATL24_coastnet/utils.h"
 #include "ATL24_utils/dataframe.h"
 #include "viper/raster.h"
-#include "coastnet.h"
+#include "coastnet_network.h"
 #include "classify_coastnet_cmd.h"
 
 const std::string usage {"ls *.csv | classify_coastnet [options]"};
