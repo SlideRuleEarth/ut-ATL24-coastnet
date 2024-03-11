@@ -30,6 +30,7 @@ endmacro()
 
 add_test(test_pgm)
 add_test(test_gpu)
+add_test(test_blunder_detection)
 
 ############################################################
 # Applications
@@ -57,3 +58,8 @@ add_executable(classify_coastnet ./apps/classify_coastnet.cpp)
 target_link_libraries(classify_coastnet ${TORCH_LIBRARIES} gmp)
 target_include_directories(classify_coastnet PUBLIC)
 target_precompile_headers(classify_coastnet PUBLIC ATL24_coastnet/precompiled.h)
+
+add_executable(blunder_detection ./apps/blunder_detection.cpp)
+target_link_libraries(blunder_detection ${TORCH_LIBRARIES} gmp)
+target_include_directories(blunder_detection PUBLIC)
+target_precompile_headers(blunder_detection PUBLIC ATL24_coastnet/precompiled.h)
