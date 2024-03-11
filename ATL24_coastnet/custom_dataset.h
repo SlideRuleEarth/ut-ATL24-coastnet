@@ -1,5 +1,6 @@
 #pragma once
 
+#include "ATL24_coastnet/coastnet.h"
 #include "ATL24_coastnet/pgm.h"
 #include "ATL24_coastnet/utils.h"
 #include "ATL24_utils/dataframe.h"
