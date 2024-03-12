@@ -46,13 +46,17 @@ int main (int argc, char **argv)
         const auto df = ATL24_utils::dataframe::read (cin);
 
         // Convert it to the correct format
-        auto p = convert_dataframe (df);
+        bool has_predictions = false;
+        auto p = convert_dataframe (df, has_predictions);
 
         if (args.verbose)
-        {
             clog << p.size () << " points read" << endl;
+
+        if (has_predictions == false)
+            throw runtime_error ("Expected the dataframe to have predictions, but none were found");
+
+        if (args.verbose)
             clog << "Sorting points" << endl;
-        }
 
         // Sort them by X
         sort (p.begin (), p.end (),

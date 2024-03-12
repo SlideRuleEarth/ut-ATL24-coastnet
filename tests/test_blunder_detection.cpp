@@ -17,7 +17,7 @@ bool about_equal (double a, double b, unsigned precision = 3)
 void test_empty ()
 {
     vector<classified_point2d> p;
-    const auto x1 = get_nearest_along_track_photon (p, 0);
+    const auto x1 = get_nearest_along_track_prediction (p, 0);
     VERIFY (x1.empty ());
     const auto x2 = get_surface_estimate (p);
     VERIFY (x2.empty ());
@@ -29,17 +29,17 @@ void test_get_nearest_along_track_photon ()
 {
     vector<classified_point2d> p;
 
-    //  h5_index, x, z, cls
-    p.push_back ({0, 1, 0, 41});
-    p.push_back ({1, 2, 100, 0});
-    p.push_back ({2, 3, 100, 0});
-    p.push_back ({3, 10, 200, 40});
-    p.push_back ({4, 11, 300, 0});
+    //  h5_index, x, z, cls, pred
+    p.push_back ({0, 1, 0, 0, 41});
+    p.push_back ({1, 2, 100, 0, 0});
+    p.push_back ({2, 3, 100, 0, 0});
+    p.push_back ({3, 10, 200, 0, 40});
+    p.push_back ({4, 11, 300, 0, 0});
 
-    const auto indexes_0 = get_nearest_along_track_photon (p, 0);
-    const auto indexes_40 = get_nearest_along_track_photon (p, 40);
-    const auto indexes_41 = get_nearest_along_track_photon (p, 41);
-    const auto indexes_123 = get_nearest_along_track_photon (p, 123);
+    const auto indexes_0 = get_nearest_along_track_prediction (p, 0);
+    const auto indexes_40 = get_nearest_along_track_prediction (p, 40);
+    const auto indexes_41 = get_nearest_along_track_prediction (p, 41);
+    const auto indexes_123 = get_nearest_along_track_prediction (p, 123);
 
     VERIFY (indexes_0[0] == 1);
     VERIFY (indexes_0[1] == 1);
@@ -67,31 +67,31 @@ void test_count_photons ()
 {
     vector<classified_point2d> p;
 
-    //  h5_index, x, z, cls
-    p.push_back ({0, 1, 0, 41});
-    p.push_back ({1, 2, 100, 0});
-    p.push_back ({2, 3, 100, 0});
-    p.push_back ({3, 10, 200, 40});
-    p.push_back ({4, 11, 300, 0});
+    //  h5_index, x, z, cls, pred
+    p.push_back ({0, 1, 0, 0, 41});
+    p.push_back ({1, 2, 100, 0, 0});
+    p.push_back ({2, 3, 100, 0, 0});
+    p.push_back ({3, 10, 200, 0, 40});
+    p.push_back ({4, 11, 300, 0, 0});
 
-    VERIFY (count_photons (p, 0) == 3);
-    VERIFY (count_photons (p, 40) == 1);
-    VERIFY (count_photons (p, 41) == 1);
+    VERIFY (count_predictions (p, 0) == 3);
+    VERIFY (count_predictions (p, 40) == 1);
+    VERIFY (count_predictions (p, 41) == 1);
 }
 
 void test_get_quantized_average ()
 {
     vector<classified_point2d> p;
 
-    //  h5_index, x, z, cls
-    p.push_back ({0, 1.1, 100, 0});
-    p.push_back ({1, 2.0, 101, 0});
-    p.push_back ({2, 3.1, 102, 0});
-    p.push_back ({3, 3.2, 103, 1});
-    p.push_back ({4, 3.5, 104, 0});
-    p.push_back ({5, 3.6, 105, 0});
-    p.push_back ({6, 3.7, 106, 0});
-    p.push_back ({7, 4.6, 107, 0});
+    //  h5_index, x, z, cls, pred
+    p.push_back ({0, 1.1, 100, 0, 0});
+    p.push_back ({1, 2.0, 101, 0, 0});
+    p.push_back ({2, 3.1, 102, 0, 0});
+    p.push_back ({3, 3.2, 103, 0, 1});
+    p.push_back ({4, 3.5, 104, 0, 0});
+    p.push_back ({5, 3.6, 105, 0, 0});
+    p.push_back ({6, 3.7, 106, 0, 0});
+    p.push_back ({7, 4.6, 107, 0, 0});
 
     auto a0 = get_quantized_average (p, 0);
     auto a1 = get_quantized_average (p, 1);
@@ -283,12 +283,12 @@ void test_get_surface_estimate ()
 {
     vector<classified_point2d> p;
 
-    //  h5_index, x, z, cls
-    p.push_back ({0, 1, 0, 41});
-    p.push_back ({1, 2, 100, 0});
-    p.push_back ({2, 3, 100, 41});
-    p.push_back ({3, 4, 200, 41});
-    p.push_back ({4, 5, 300, 0});
+    //  h5_index, x, z, cls, pred
+    p.push_back ({0, 1, 0, 0, 41});
+    p.push_back ({1, 2, 100, 0, 0});
+    p.push_back ({2, 3, 100, 0, 41});
+    p.push_back ({3, 4, 200, 0, 41});
+    p.push_back ({4, 5, 300, 0, 0});
 
     auto z = get_surface_estimate (p);
     VERIFY (!z.empty ());
@@ -303,12 +303,12 @@ void test_get_bathy_estimate ()
 {
     vector<classified_point2d> p;
 
-    //  h5_index, x, z, cls
-    p.push_back ({0, 1, 0, 40});
-    p.push_back ({1, 2, 100, 0});
-    p.push_back ({2, 3, 100, 40});
-    p.push_back ({3, 4, 200, 40});
-    p.push_back ({4, 5, 300, 0});
+    //  h5_index, x, z, cls, pred
+    p.push_back ({0, 1, 0, 0, 40});
+    p.push_back ({1, 2, 100, 0, 0});
+    p.push_back ({2, 3, 100, 0, 40});
+    p.push_back ({3, 4, 200, 0, 40});
+    p.push_back ({4, 5, 300, 0, 0});
 
     auto z = get_bathy_estimate (p);
     VERIFY (!z.empty ());
@@ -329,7 +329,7 @@ void test_no_surface ()
     auto z = get_surface_estimate (p);
     VERIFY (!z.empty ());
 
-    const auto x = get_nearest_along_track_photon (p, sea_surface_class);
+    const auto x = get_nearest_along_track_prediction (p, sea_surface_class);
     for (auto i : x)
         VERIFY (i == p.size ());
 }
@@ -344,7 +344,7 @@ void test_no_bathy ()
     auto z = get_surface_estimate (p);
     VERIFY (!z.empty ());
 
-    const auto x = get_nearest_along_track_photon (p, bathy_class);
+    const auto x = get_nearest_along_track_prediction (p, bathy_class);
     for (auto i : x)
         VERIFY (i == p.size ());
 }

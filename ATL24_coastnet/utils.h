@@ -380,7 +380,7 @@ viper::raster::raster<unsigned char> create_raster (const T &p,
 }
 
 template<typename T>
-std::vector<ATL24_coastnet::classified_point2d> convert_dataframe (const T &df)
+std::vector<ATL24_coastnet::classified_point2d> convert_dataframe (const T &df, bool &has_predictions)
 {
     using namespace std;
 
@@ -397,6 +397,7 @@ std::vector<ATL24_coastnet::classified_point2d> convert_dataframe (const T &df)
     auto x_it = find (df.headers.begin(), df.headers.end(), "along_track_dist");
     auto z_it = find (df.headers.begin(), df.headers.end(), "geoid_corrected_h");
     auto cls_it = find (df.headers.begin(), df.headers.end(), "manual_label");
+    auto prediction_it = find (df.headers.begin(), df.headers.end(), "prediction");
 
     assert (pi_it != df.headers.end ());
     assert (x_it != df.headers.end ());
@@ -416,16 +417,25 @@ std::vector<ATL24_coastnet::classified_point2d> convert_dataframe (const T &df)
     size_t x_index = x_it - df.headers.begin();
     size_t z_index = z_it - df.headers.begin();
     size_t cls_index = cls_it - df.headers.begin();
+    has_predictions = prediction_it != df.headers.end ();
+    size_t prediction_index = has_predictions ?
+        prediction_it - df.headers.begin() :
+        df.headers.size ();
 
     // Check logic
     assert (ph_index < df.headers.size ());
     assert (x_index < df.headers.size ());
     assert (z_index < df.headers.size ());
     assert (cls_index < df.headers.size ());
+    if (has_predictions)
+        assert (prediction_index < df.headers.size ());
+
     assert (ph_index < df.columns.size ());
     assert (x_index < df.columns.size ());
     assert (z_index < df.columns.size ());
     assert (cls_index < df.columns.size ());
+    if (has_predictions)
+        assert (prediction_index < df.columns.size ());
 
     // Stuff values into the vector
     std::vector<ATL24_coastnet::classified_point2d> dataset (nrows);
@@ -437,15 +447,26 @@ std::vector<ATL24_coastnet::classified_point2d> convert_dataframe (const T &df)
         assert (j < df.columns[x_index].size ());
         assert (j < df.columns[z_index].size ());
         assert (j < df.columns[cls_index].size ());
+        if (has_predictions)
+            assert (j < df.columns[prediction_index].size ());
 
         // Make assignments
         dataset[j].h5_index = df.columns[ph_index][j];
         dataset[j].x = df.columns[x_index][j];
         dataset[j].z = df.columns[z_index][j];
         dataset[j].cls = df.columns[cls_index][j];
+        if (has_predictions)
+            dataset[j].prediction = df.columns[prediction_index][j];
     }
 
     return dataset;
+}
+
+template<typename T>
+std::vector<ATL24_coastnet::classified_point2d> convert_dataframe (const T &df)
+{
+    bool has_predictions;
+    return convert_dataframe (df, has_predictions);
 }
 
 } // namespace ATL24_coastnet

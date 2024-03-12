@@ -14,10 +14,10 @@ T blunder_detection (T p, const U &args)
         return p;
 
     // Count classes
-    const size_t total_surface = count_photons (p, sea_surface_class);
-    const size_t total_bathy = count_photons (p, bathy_class);
+    const size_t total_surface = count_predictions (p, sea_surface_class);
+    const size_t total_bathy = count_predictions (p, bathy_class);
 
-    // If there's not bathy or surface, there's nothing to do
+    // If there's no bathy or surface, there's nothing to do
     if (total_surface == 0 && total_bathy == 0)
         return p;
 
@@ -53,7 +53,7 @@ T blunder_detection (T p, const U &args)
     }
 
     // Bathy can only be 'under' the surface if there is a surface photon nearby
-    const auto nearby_surface_indexes = get_nearest_along_track_photon (p, 41);
+    const auto nearby_surface_indexes = get_nearest_along_track_prediction (p, 41);
 
     // Bathy photons can't be above the sea surface
     for (size_t i = 0; i < p.size (); ++i)

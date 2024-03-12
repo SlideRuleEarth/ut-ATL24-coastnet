@@ -61,6 +61,7 @@ struct classified_point2d
     double x;
     double z;
     size_t cls;
+    size_t prediction;
 };
 
 struct classified_point3d
@@ -71,7 +72,7 @@ struct classified_point3d
 };
 
 template<typename T>
-std::vector<size_t> get_nearest_along_track_photon (const T &p, const unsigned c)
+std::vector<size_t> get_nearest_along_track_prediction (const T &p, const unsigned c)
 {
     // At each point in 'p', what is the index of the closest point
     // with the label 'c'?
@@ -90,7 +91,7 @@ std::vector<size_t> get_nearest_along_track_photon (const T &p, const unsigned c
     for (size_t i = 0; i < p.size (); ++i)
     {
         // Ignore ones that are the right class
-        if (p[i].cls != c)
+        if (p[i].prediction != c)
             continue;
 
         // Only set it if its the first
@@ -125,7 +126,7 @@ std::vector<size_t> get_nearest_along_track_photon (const T &p, const unsigned c
     for (size_t i = first_index; i < last_index; ++i)
     {
         // Is this a label that we are interested in?
-        if (p[i].cls == c)
+        if (p[i].prediction == c)
         {
             // Closest point with label 'c' is itself
             indexes[i] = i;
@@ -141,7 +142,7 @@ std::vector<size_t> get_nearest_along_track_photon (const T &p, const unsigned c
         {
             for (size_t j = i; j <= last_index; ++j)
             {
-                if (p[j].cls == c)
+                if (p[j].prediction == c)
                 {
                     right_index = j;
                     break;
@@ -173,10 +174,10 @@ std::vector<size_t> get_nearest_along_track_photon (const T &p, const unsigned c
 }
 
 template<typename T>
-size_t count_photons (const T &p, const unsigned cls)
+size_t count_predictions (const T &p, const unsigned cls)
 {
     return std::count_if (p.begin (), p.end (), [&](auto i)
-    { return i.cls == cls; });
+    { return i.prediction == cls; });
 }
 
 template<typename T>
@@ -200,7 +201,7 @@ std::vector<double> get_quantized_average (const T &p, const unsigned cls)
     for (size_t i = 0; i < p.size (); ++i)
     {
         // Skip non-'cls' photons
-        if (p[i].cls != cls)
+        if (p[i].prediction != cls)
             continue;
 
         // Get along-track index
@@ -381,8 +382,8 @@ std::vector<double> get_elevation_estimate (const T &p, const double sigma, cons
     // Return value
     vector<double> z (p.size (), numeric_limits<double>::max ());
 
-    // Count number of 'cls'  photons
-    const size_t total = count_photons (p, cls);
+    // Count number of 'cls' predictions
+    const size_t total = count_predictions (p, cls);
 
     // Degenerate case
     if (total == 0)
