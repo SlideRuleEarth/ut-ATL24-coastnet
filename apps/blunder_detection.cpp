@@ -19,7 +19,17 @@ int main (int argc, char **argv)
         clog << "Debug is " << (is_debug ? "ON" : "OFF") << endl;
 
         // Parse the args
-        const auto args = cmd::get_args (argc, argv, usage);
+        auto args = cmd::get_args (argc, argv, usage);
+
+        // Set defaults
+        if (std::isnan (args.surface_min_elevation))
+            args.surface_min_elevation = surface_min_elevation;
+        if (std::isnan (args.surface_max_elevation))
+            args.surface_max_elevation = surface_max_elevation;
+        if (std::isnan (args.bathy_min_elevation))
+            args.bathy_min_elevation = bathy_min_elevation;
+        if (std::isnan (args.water_column_width))
+            args.water_column_width = water_column_width;
 
         // If you are getting help, exit without an error
         if (args.help)
@@ -52,7 +62,7 @@ int main (int argc, char **argv)
         if (args.verbose)
             clog << "Re-classifying points" << endl;
 
-        const auto q = blunder_detection (p);
+        const auto q = blunder_detection (p, args);
 
         // Check logic
         assert (p.size () == q.size ());
@@ -62,13 +72,13 @@ int main (int argc, char **argv)
             size_t changed = 0;
 
             for (size_t i = 0; i < p.size (); ++i)
-                if (p[i].cls != q[i])
+                if (p[i].cls != q[i].cls)
                     ++changed;
             clog << changed << " point classifications changed" << endl;
         }
 
         // Write re-classified output to stdout
-        write_classified_point2d (cout, p, q);
+        write_classified_point2d (cout, q);
 
         return 0;
     }

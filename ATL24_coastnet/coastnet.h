@@ -12,8 +12,10 @@
 namespace ATL24_coastnet
 {
 
-constexpr double surface_min_elevation = -20.0;
-constexpr double surface_max_elevation = 20.0;
+constexpr double surface_min_elevation = -20.0; // meters
+constexpr double surface_max_elevation = 20.0; // meters
+constexpr double bathy_min_elevation = -100.0; // meters
+constexpr double water_column_width = 10.0; // meters
 constexpr unsigned bathy_class = 40;
 constexpr unsigned sea_surface_class = 41;
 constexpr unsigned water_column_class = 45;

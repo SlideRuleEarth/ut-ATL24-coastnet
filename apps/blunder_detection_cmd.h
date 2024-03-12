@@ -1,6 +1,7 @@
 #ifndef CMD_H
 #define CMD_H
 
+#include <cmath>
 #include <getopt.h>
 #include <iostream>
 #include <stdexcept>
@@ -17,10 +18,10 @@ struct args
 {
     bool help = false;
     bool verbose = false;
-    int cls = -1;
-    size_t aspect_ratio = 0;
-    std::string network_filename = std::string ("./coastnet_network.pt");
-    std::string results_filename = std::string ("./coastnet_results.txt");
+    double surface_min_elevation = NAN;
+    double surface_max_elevation = NAN;
+    double bathy_min_elevation = NAN;
+    double water_column_width = NAN;
 };
 
 std::ostream &operator<< (std::ostream &os, const args &args)
@@ -28,14 +29,17 @@ std::ostream &operator<< (std::ostream &os, const args &args)
     os << std::boolalpha;
     os << "help: " << args.help << std::endl;
     os << "verbose: " << args.verbose << std::endl;
-    os << "class: " << args.cls << std::endl;
-    os << "aspect-ratio: " << args.aspect_ratio << std::endl;
-    os << "results-filename: " << args.results_filename << std::endl;
+    os << "surface_min_elevation: " << args.surface_min_elevation << std::endl;
+    os << "surface_max_elevation: " << args.surface_max_elevation << std::endl;
+    os << "bathy_min_elevation: " << args.bathy_min_elevation << std::endl;
+    os << "water_column_width: " << args.water_column_width << std::endl;
     return os;
 }
 
 args get_args (int argc, char **argv, const std::string &usage)
 {
+    using namespace std;
+
     args args;
     while (1)
     {
@@ -43,14 +47,14 @@ args get_args (int argc, char **argv, const std::string &usage)
         static struct option long_options[] = {
             {"help", no_argument, 0,  'h' },
             {"verbose", no_argument, 0,  'v' },
-            {"class", required_argument, 0,  'c' },
-            {"aspect-ratio", required_argument, 0,  'a' },
-            {"network-filename", required_argument, 0,  'f' },
-            {"results-filename", required_argument, 0,  'r' },
+            {"surface-min-elevation", required_argument, 0,  'n' },
+            {"surface-max-elevation", required_argument, 0,  'x' },
+            {"bathy-min-elevation", required_argument, 0,  'b' },
+            {"water-column-width", required_argument, 0,  'w' },
             {0,      0,           0,  0 }
         };
 
-        int c = getopt_long(argc, argv, "hvc:a:f:r:", long_options, &option_index);
+        int c = getopt_long(argc, argv, "hvn:x:b:w:", long_options, &option_index);
         if (c == -1)
             break;
 
@@ -67,20 +71,16 @@ args get_args (int argc, char **argv, const std::string &usage)
                 return args;
             }
             case 'v': args.verbose = true; break;
-            case 'c': args.cls = atol(optarg); break;
-            case 'a': args.aspect_ratio = std::atol(optarg); break;
-            case 'f': args.network_filename = std::string(optarg); break;
-            case 'r': args.results_filename = std::string(optarg); break;
+            case 'n': args.surface_min_elevation = atof(optarg); break;
+            case 'x': args.surface_max_elevation = atof(optarg); break;
+            case 'b': args.bathy_min_elevation = atof(optarg); break;
+            case 'w': args.water_column_width = atof(optarg); break;
         }
     }
 
     // Check command line
     if (optind != argc)
         throw std::runtime_error ("Too many arguments on command line");
-
-    // Check args
-    if (args.cls == -1)
-        throw std::runtime_error ("No class was specified");
 
     return args;
 }
