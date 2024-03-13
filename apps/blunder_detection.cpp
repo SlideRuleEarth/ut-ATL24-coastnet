@@ -47,7 +47,8 @@ int main (int argc, char **argv)
 
         // Convert it to the correct format
         bool has_predictions = false;
-        auto p = convert_dataframe (df, has_predictions);
+        bool has_sea_surface = false;
+        auto p = convert_dataframe (df, has_predictions, has_sea_surface);
 
         if (args.verbose)
             clog << p.size () << " points read" << endl;
