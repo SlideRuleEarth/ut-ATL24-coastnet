@@ -19,9 +19,9 @@ void test_empty ()
     vector<classified_point2d> p;
     const auto x1 = get_nearest_along_track_prediction (p, 0);
     VERIFY (x1.empty ());
-    const auto x2 = get_surface_estimate (p);
+    const auto x2 = get_surface_estimates (p, 2.0);
     VERIFY (x2.empty ());
-    const auto x3 = get_bathy_estimate (p);
+    const auto x3 = get_bathy_estimates (p, 2.0);
     VERIFY (x3.empty ());
 }
 
@@ -279,7 +279,7 @@ void test_box_filter ()
     VERIFY (!about_equal (p[10], 7.0));
 }
 
-void test_get_surface_estimate ()
+void test_get_surface_estimates ()
 {
     vector<classified_point2d> p;
 
@@ -290,7 +290,7 @@ void test_get_surface_estimate ()
     p.push_back ({3, 4, 200, 0, 41});
     p.push_back ({4, 5, 300, 0, 0});
 
-    auto z = get_surface_estimate (p);
+    auto z = get_surface_estimates (p, 2.0);
     VERIFY (!z.empty ());
     VERIFY (z[0] > 0.0 && z[0] < 100);
     VERIFY (z[1] > 0.0 && z[1] < 100);
@@ -299,7 +299,7 @@ void test_get_surface_estimate ()
     VERIFY (z[4] > 100.0 && z[4] < 200);
 }
 
-void test_get_bathy_estimate ()
+void test_get_bathy_estimates ()
 {
     vector<classified_point2d> p;
 
@@ -310,7 +310,7 @@ void test_get_bathy_estimate ()
     p.push_back ({3, 4, 200, 0, 40});
     p.push_back ({4, 5, 300, 0, 0});
 
-    auto z = get_bathy_estimate (p);
+    auto z = get_bathy_estimates (p, 2.0);
     VERIFY (!z.empty ());
     VERIFY (z[0] > 0.0 && z[0] < 100);
     VERIFY (z[1] > 0.0 && z[1] < 100);
@@ -326,7 +326,7 @@ void test_no_surface ()
     for (size_t i = 0; i < 10; ++i)
         p.push_back ({0, 1, 0, 40});
 
-    auto z = get_surface_estimate (p);
+    auto z = get_surface_estimates (p, 2.0);
     VERIFY (!z.empty ());
 
     const auto x = get_nearest_along_track_prediction (p, sea_surface_class);
@@ -341,7 +341,7 @@ void test_no_bathy ()
     for (size_t i = 0; i < 10; ++i)
         p.push_back ({0, 1, 0, 41});
 
-    auto z = get_surface_estimate (p);
+    auto z = get_surface_estimates (p, 2.0);
     VERIFY (!z.empty ());
 
     const auto x = get_nearest_along_track_prediction (p, bathy_class);
@@ -361,8 +361,8 @@ int main ()
         test_get_nan_pairs ();
         test_interpolate_nans ();
         test_box_filter ();
-        test_get_surface_estimate ();
-        test_get_bathy_estimate ();
+        test_get_surface_estimates ();
+        test_get_bathy_estimates ();
         test_no_surface ();
         test_no_bathy ();
 
