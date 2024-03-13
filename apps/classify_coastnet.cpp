@@ -95,11 +95,15 @@ int main (int argc, char **argv)
         const auto df = ATL24_utils::dataframe::read (cin);
 
         // Convert it to the correct format
-        auto p = convert_dataframe (df);
+        bool has_predictions = false;
+        bool has_sea_surface = false;
+        auto p = convert_dataframe (df, has_predictions, has_sea_surface);
 
         if (args.verbose)
         {
             clog << p.size () << " points read" << endl;
+            if (has_predictions)
+                clog << "Dataframe contains predictions" << endl;
             clog << "Sorting points" << endl;
         }
 
@@ -130,6 +134,13 @@ int main (int argc, char **argv)
             long pred = -1;
 
             ++cache_lookups;
+
+            // Don't override non-noise predictions
+            if (has_predictions && p[i].prediction != 0)
+            {
+                q[i] = p[i].prediction;
+                continue;
+            }
 
             // Do we already have a prediction near this point?
             if (cache.check (p, i))
@@ -280,8 +291,21 @@ int main (int argc, char **argv)
                 ofs << ss.str ();
         }
 
+        // Assign predictions
+        assert (p.size () == q.size ());
+        for (size_t i = 0; i < p.size (); ++i)
+            p[i].prediction = q[i];
+
+        // Get surface estimates
+        const auto s = get_surface_estimates (p);
+
+        // Assign surface estimates
+        assert (p.size () == s.size ());
+        for (size_t i = 0; i < p.size (); ++i)
+            p[i].sea_surface = s[i];
+
         // Write classified output to stdout
-        write_classified_point2d (cout, p, q);
+        write_classified_point2d (cout, p);
 
         return 0;
     }
