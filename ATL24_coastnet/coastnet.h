@@ -62,6 +62,7 @@ struct classified_point2d
     double z;
     size_t cls;
     size_t prediction;
+    double sea_surface;
 };
 
 struct classified_point3d
@@ -90,11 +91,11 @@ std::vector<size_t> get_nearest_along_track_prediction (const T &p, const unsign
     size_t last_index = p.size ();
     for (size_t i = 0; i < p.size (); ++i)
     {
-        // Ignore ones that are the right class
+        // Ignore ones that are the wrong class
         if (p[i].prediction != c)
             continue;
 
-        // Only set it if its the first
+        // Only set it if it's the first
         if (first_index == p.size ())
             first_index = i;
 
@@ -375,7 +376,7 @@ T box_filter (const T &p, const int filter_width)
 }
 
 template<typename T>
-std::vector<double> get_elevation_estimate (const T &p, const double sigma, const unsigned cls)
+std::vector<double> get_elevation_estimates (const T &p, const double sigma, const unsigned cls)
 {
     using namespace std;
 
@@ -433,17 +434,15 @@ std::vector<double> get_elevation_estimate (const T &p, const double sigma, cons
 }
 
 template<typename T>
-std::vector<double> get_surface_estimate (const T &p)
+std::vector<double> get_surface_estimates (const T &p, const double sigma = 2.0)
 {
-    const double sigma = 2.0;
-    return get_elevation_estimate (p, sigma, sea_surface_class);
+    return get_elevation_estimates (p, sigma, sea_surface_class);
 }
 
 template<typename T>
-std::vector<double> get_bathy_estimate (const T &p)
+std::vector<double> get_bathy_estimates (const T &p, const double sigma = 2.0)
 {
-    const double sigma = 2.0;
-    return get_elevation_estimate (p, sigma, bathy_class);
+    return get_elevation_estimates (p, sigma, bathy_class);
 }
 
 } // namespace coastnet
