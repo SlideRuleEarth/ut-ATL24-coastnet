@@ -105,7 +105,13 @@ std::vector<classified_point2d> read_classified_point2d (std::istream &is)
         ss.get (); // ignore ','
         size_t cls;
         ss >> cls;
-        p.push_back (classified_point2d {h5_index, x, z, cls});
+        ss.get (); // ignore ','
+        size_t prediction;
+        ss >> prediction;
+        ss.get (); // ignore ','
+        double sea_surface;
+        ss >> sea_surface;
+        p.push_back (classified_point2d {h5_index, x, z, cls, prediction, sea_surface});
     }
 
     return p;
@@ -115,6 +121,9 @@ template<typename T>
 void write_point2d (std::ostream &os, const T &p)
 {
     using namespace std;
+
+    // Save precision
+    const auto pr = os.precision ();
 
     // Print along-track meters
     os << "ph_index,along_track_dist,geoid_corrected_h,manual_label" << endl;
@@ -133,12 +142,18 @@ void write_point2d (std::ostream &os, const T &p)
         os << ",0"; // 0=unlabeled
         os << endl;
     }
+
+    // Restore precision
+    os.precision (pr);
 }
 
 template<typename T>
 void write_classified_point2d (std::ostream &os, const T &p)
 {
     using namespace std;
+
+    // Save precision
+    const auto pr = os.precision ();
 
     // Print along-track meters
     os << "ph_index,along_track_dist,geoid_corrected_h,manual_label" << endl;
@@ -155,39 +170,19 @@ void write_classified_point2d (std::ostream &os, const T &p)
         os << setprecision (8) << fixed;;
         os << "," << p[i].z;
         // Write the class
-        os << "," << p[i].cls;
-        os << endl;
-    }
-}
-
-template<typename T,typename U>
-void write_classified_point2d (std::ostream &os, const T &p, const U &q)
-{
-    using namespace std;
-
-    // Check invariants
-    assert (p.size () == q.size ());
-
-    // Print along-track meters
-    os << "ph_index,along_track_dist,geoid_corrected_h,manual_label,prediction" << endl;
-    for (size_t i = 0; i < p.size (); ++i)
-    {
-        // Write the index
-        os << setprecision (8) << fixed;
-        os << p[i].h5_index;
-        // Double has 15 decimal digits of precision
-        os << setprecision (15) << fixed;;
-        os << "," << p[i].x;
-        // Elevation was corrected from EGM, which is a 32 bit float,
-        // so it only has about 8 decimal digits of precision.
-        os << setprecision (8) << fixed;;
-        os << "," << p[i].z;
-        // Write the class
+        os << setprecision (0) << fixed;;
         os << "," << p[i].cls;
         // Write the prediction
-        os << "," << q[i];
+        os << setprecision (0) << fixed;
+        os << "," << p[i].prediction;
+        // Write the surface estimate
+        os << setprecision (15) << fixed;
+        os << "," << p[i].sea_surface;
         os << endl;
     }
+
+    // Restore precision
+    os.precision (pr);
 }
 
 struct point2d_extents
@@ -380,7 +375,7 @@ viper::raster::raster<unsigned char> create_raster (const T &p,
 }
 
 template<typename T>
-std::vector<ATL24_coastnet::classified_point2d> convert_dataframe (const T &df, bool &has_predictions)
+std::vector<ATL24_coastnet::classified_point2d> convert_dataframe (const T &df, bool &has_predictions, bool &has_sea_surface)
 {
     using namespace std;
 
@@ -398,6 +393,7 @@ std::vector<ATL24_coastnet::classified_point2d> convert_dataframe (const T &df, 
     auto z_it = find (df.headers.begin(), df.headers.end(), "geoid_corrected_h");
     auto cls_it = find (df.headers.begin(), df.headers.end(), "manual_label");
     auto prediction_it = find (df.headers.begin(), df.headers.end(), "prediction");
+    auto sea_surface_it = find (df.headers.begin(), df.headers.end(), "sea_surface_h");
 
     assert (pi_it != df.headers.end ());
     assert (x_it != df.headers.end ());
@@ -421,6 +417,10 @@ std::vector<ATL24_coastnet::classified_point2d> convert_dataframe (const T &df, 
     size_t prediction_index = has_predictions ?
         prediction_it - df.headers.begin() :
         df.headers.size ();
+    has_sea_surface = sea_surface_it != df.headers.end ();
+    size_t sea_surface_index = has_sea_surface ?
+        sea_surface_it - df.headers.begin() :
+        df.headers.size ();
 
     // Check logic
     assert (ph_index < df.headers.size ());
@@ -429,6 +429,8 @@ std::vector<ATL24_coastnet::classified_point2d> convert_dataframe (const T &df, 
     assert (cls_index < df.headers.size ());
     if (has_predictions)
         assert (prediction_index < df.headers.size ());
+    if (has_sea_surface)
+        assert (sea_surface_index < df.headers.size ());
 
     assert (ph_index < df.columns.size ());
     assert (x_index < df.columns.size ());
@@ -436,6 +438,8 @@ std::vector<ATL24_coastnet::classified_point2d> convert_dataframe (const T &df, 
     assert (cls_index < df.columns.size ());
     if (has_predictions)
         assert (prediction_index < df.columns.size ());
+    if (has_sea_surface)
+        assert (sea_surface_index < df.columns.size ());
 
     // Stuff values into the vector
     std::vector<ATL24_coastnet::classified_point2d> dataset (nrows);
@@ -449,6 +453,8 @@ std::vector<ATL24_coastnet::classified_point2d> convert_dataframe (const T &df, 
         assert (j < df.columns[cls_index].size ());
         if (has_predictions)
             assert (j < df.columns[prediction_index].size ());
+        if (has_sea_surface)
+            assert (j < df.columns[sea_surface_index].size ());
 
         // Make assignments
         dataset[j].h5_index = df.columns[ph_index][j];
@@ -457,6 +463,8 @@ std::vector<ATL24_coastnet::classified_point2d> convert_dataframe (const T &df, 
         dataset[j].cls = df.columns[cls_index][j];
         if (has_predictions)
             dataset[j].prediction = df.columns[prediction_index][j];
+        if (has_sea_surface)
+            dataset[j].sea_surface = df.columns[sea_surface_index][j];
     }
 
     return dataset;
@@ -466,7 +474,8 @@ template<typename T>
 std::vector<ATL24_coastnet::classified_point2d> convert_dataframe (const T &df)
 {
     bool has_predictions;
-    return convert_dataframe (df, has_predictions);
+    bool has_sea_surface;
+    return convert_dataframe (df, has_predictions, has_sea_surface);
 }
 
 } // namespace ATL24_coastnet
