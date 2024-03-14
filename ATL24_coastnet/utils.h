@@ -130,14 +130,11 @@ void write_point2d (std::ostream &os, const T &p)
     for (size_t i = 0; i < p.size (); ++i)
     {
         // Write the index
-        os << setprecision (8) << fixed;
+        os << fixed;
         os << p[i].h5_index;
-        // Double has 15 decimal digits of precision
-        os << setprecision (15) << fixed;
+        os << setprecision (4) << fixed;
         os << "," << p[i].x;
-        // Elevation was corrected from EGM, which is a 32 bit float,
-        // so it only has about 8 decimal digits of precision.
-        os << setprecision (8) << fixed;;
+        os << setprecision (4) << fixed;;
         os << "," << p[i].z;
         os << ",0"; // 0=unlabeled
         os << endl;
@@ -156,18 +153,15 @@ void write_classified_point2d (std::ostream &os, const T &p)
     const auto pr = os.precision ();
 
     // Print along-track meters
-    os << "ph_index,along_track_dist,geoid_corrected_h,manual_label" << endl;
+    os << "ph_index,along_track_dist,geoid_corrected_h,manual_label,prediction,sea_surface_h" << endl;
     for (size_t i = 0; i < p.size (); ++i)
     {
         // Write the index
-        os << setprecision (8) << fixed;
+        os << fixed;
         os << p[i].h5_index;
-        // Double has 15 decimal digits of precision
-        os << setprecision (15) << fixed;;
+        os << setprecision (4) << fixed;;
         os << "," << p[i].x;
-        // Elevation was corrected from EGM, which is a 32 bit float,
-        // so it only has about 8 decimal digits of precision.
-        os << setprecision (8) << fixed;;
+        os << setprecision (4) << fixed;;
         os << "," << p[i].z;
         // Write the class
         os << setprecision (0) << fixed;;
@@ -176,7 +170,7 @@ void write_classified_point2d (std::ostream &os, const T &p)
         os << setprecision (0) << fixed;
         os << "," << p[i].prediction;
         // Write the surface estimate
-        os << setprecision (15) << fixed;
+        os << setprecision (4) << fixed;
         os << "," << p[i].sea_surface;
         os << endl;
     }
