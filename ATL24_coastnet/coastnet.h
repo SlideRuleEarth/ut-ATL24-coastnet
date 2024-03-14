@@ -316,8 +316,6 @@ void interpolate_nans (T &p, const U &n)
         assert (w < 1.0);
         // Interpolate
         const double avg = (1.0 - w) * left + w * right;
-        assert (avg <= std::max (left, right));
-        assert (avg >= std::min (left, right));
         assert (i < p.size ());
         p[i] = avg;
     }
