@@ -49,6 +49,11 @@ preprocess:
 	@mkdir -p ./input
 	@./preprocess.sh  "./data/local/3DGL/*.csv" ./input
 
+.PHONY: preprocess_synthetic # Preprocess input data
+preprocess_synthetic:
+	@mkdir -p ./input/synthetic
+	@./preprocess.sh  "./data/local/3DGL/synthetic/*.csv" ./input/synthetic
+
 .PHONY: train # Train a model
 train: build
 	@parallel --lb --jobs=15 \
@@ -87,7 +92,7 @@ score_coastnet_surface:
 
 .PHONY: cross_validate_surface # Cross validate water surface classifier
 cross_validate_surface: build
-	@./cross_validate_surface.sh "./input/ATL03_*.csv"
+	@./cross_validate_surface.sh "./input/*.csv"
 
 .PHONY: train_coastnet_bathy # Train bathy model
 train_coastnet_bathy: build
@@ -99,7 +104,7 @@ train_coastnet_bathy: build
 classify_coastnet_bathy: build
 	@mkdir -p ./predictions
 	@build=release ./classify_coastnet_bathy.sh \
-		"./input/*.csv" \
+		"./predictions/*_classified_surface.csv" \
 		./models/coastnet-bathy.pt \
 		./predictions
 
@@ -109,7 +114,7 @@ score_coastnet_bathy:
 
 .PHONY: cross_validate_bathy # Cross validate bathy classifier
 cross_validate_bathy: build
-	@./cross_validate_bathy.sh "./input/ATL03_*.csv"
+	@./cross_validate_bathy.sh "./input/*.csv"
 
 .PHONY: everything # All machine learning models, classifiers, x-val
 everything:
@@ -142,18 +147,18 @@ PREDICTION_FNS=$(shell find ./predictions/ATL03_*_classified_?.csv | head)
 .PHONY: view_predictions # View prediction labels
 view_predictions:
 	@parallel --lb --jobs=100 \
-		"streamlit run ../ATL24_rasters/apps/view_classifications.py -- --verbose {}" \
+		"streamlit run ../ATL24_rasters/apps/view_predictions.py -- --verbose {}" \
 		::: ${PREDICTION_FNS}
 
-SURFACE_PREDICTION_FNS=$(shell find ./predictions/ATL03_*_classified_surface.csv | tail)
+SURFACE_PREDICTION_FNS=$(shell find ./predictions/*_classified_surface.csv | tail)
 
 .PHONY: view_surface_predictions # View water surface prediction labels
 view_surface_predictions:
 	@parallel --lb --jobs=100 \
-		"streamlit run ../ATL24_rasters/apps/view_classifications.py -- --verbose {}" \
+		"streamlit run ../ATL24_rasters/apps/view_predictions.py -- --verbose {}" \
 		::: ${SURFACE_PREDICTION_FNS}
 
-BATHY_PREDICTION_FNS=$(shell find ./predictions/ATL03_*_classified_bathy.csv | tail)
+BATHY_PREDICTION_FNS=$(shell find ./predictions/*_classified_bathy.csv | shuf | tail)
 
 .PHONY: view_bathy_predictions # View bathy prediction labels
 view_bathy_predictions:
