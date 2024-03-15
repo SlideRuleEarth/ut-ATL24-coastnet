@@ -15,7 +15,12 @@ namespace ATL24_coastnet
 constexpr double surface_min_elevation = -20.0; // meters
 constexpr double surface_max_elevation = 20.0; // meters
 constexpr double bathy_min_elevation = -100.0; // meters
-constexpr double water_column_width = 10.0; // meters
+constexpr double water_column_width = 100.0; // meters
+constexpr double surface_range = 3.0; // +-meters
+constexpr double bathy_range = 3.0; // +-meters
+
+// ASPRS Definitions
+constexpr unsigned unclassified_class = 1;
 constexpr unsigned bathy_class = 40;
 constexpr unsigned sea_surface_class = 41;
 constexpr unsigned water_column_class = 45;
@@ -154,8 +159,8 @@ std::vector<size_t> get_nearest_along_track_prediction (const T &p, const unsign
         // Logic check
         assert (left_index < i);
         assert (i < right_index);
-        assert (p[left_index].x < p[i].x);
-        assert (p[i].x < p[right_index].x);
+        assert (p[left_index].x <= p[i].x);
+        assert (p[i].x <= p[right_index].x);
 
         // Set the index of the closer of the two
         const double d_left = p[i].x - p[left_index].x;
@@ -432,13 +437,13 @@ std::vector<double> get_elevation_estimates (const T &p, const double sigma, con
 }
 
 template<typename T>
-std::vector<double> get_surface_estimates (const T &p, const double sigma = 2.0)
+std::vector<double> get_surface_estimates (const T &p, const double sigma = 4.0)
 {
     return get_elevation_estimates (p, sigma, sea_surface_class);
 }
 
 template<typename T>
-std::vector<double> get_bathy_estimates (const T &p, const double sigma = 2.0)
+std::vector<double> get_bathy_estimates (const T &p, const double sigma = 4.0)
 {
     return get_elevation_estimates (p, sigma, bathy_class);
 }
