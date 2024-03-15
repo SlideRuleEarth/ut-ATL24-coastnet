@@ -30,6 +30,10 @@ int main (int argc, char **argv)
             args.bathy_min_elevation = bathy_min_elevation;
         if (std::isnan (args.water_column_width))
             args.water_column_width = water_column_width;
+        if (std::isnan (args.surface_range))
+            args.surface_range = surface_range;
+        if (std::isnan (args.bathy_range))
+            args.bathy_range = bathy_range;
 
         // If you are getting help, exit without an error
         if (args.help)
@@ -77,7 +81,7 @@ int main (int argc, char **argv)
             size_t changed = 0;
 
             for (size_t i = 0; i < p.size (); ++i)
-                if (p[i].cls != q[i].cls)
+                if (p[i].prediction != q[i].prediction)
                     ++changed;
             clog << changed << " point classifications changed" << endl;
         }

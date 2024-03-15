@@ -22,6 +22,8 @@ struct args
     double surface_max_elevation = NAN;
     double bathy_min_elevation = NAN;
     double water_column_width = NAN;
+    double surface_range = NAN;
+    double bathy_range = NAN;
 };
 
 std::ostream &operator<< (std::ostream &os, const args &args)
@@ -33,6 +35,8 @@ std::ostream &operator<< (std::ostream &os, const args &args)
     os << "surface_max_elevation: " << args.surface_max_elevation << std::endl;
     os << "bathy_min_elevation: " << args.bathy_min_elevation << std::endl;
     os << "water_column_width: " << args.water_column_width << std::endl;
+    os << "surface_range: " << args.surface_range << std::endl;
+    os << "bathy_range: " << args.bathy_range << std::endl;
     return os;
 }
 
@@ -51,10 +55,12 @@ args get_args (int argc, char **argv, const std::string &usage)
             {"surface-max-elevation", required_argument, 0,  'x' },
             {"bathy-min-elevation", required_argument, 0,  'b' },
             {"water-column-width", required_argument, 0,  'w' },
+            {"surface-range", required_argument, 0,  's' },
+            {"bathy-range", required_argument, 0,  'a' },
             {0,      0,           0,  0 }
         };
 
-        int c = getopt_long(argc, argv, "hvn:x:b:w:", long_options, &option_index);
+        int c = getopt_long(argc, argv, "hvn:x:b:w:s:a:", long_options, &option_index);
         if (c == -1)
             break;
 
@@ -75,6 +81,8 @@ args get_args (int argc, char **argv, const std::string &usage)
             case 'x': args.surface_max_elevation = atof(optarg); break;
             case 'b': args.bathy_min_elevation = atof(optarg); break;
             case 'w': args.water_column_width = atof(optarg); break;
+            case 's': args.surface_range = atof(optarg); break;
+            case 'a': args.bathy_range = atof(optarg); break;
         }
     }
 
