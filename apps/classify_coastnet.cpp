@@ -104,6 +104,8 @@ int main (int argc, char **argv)
             clog << p.size () << " points read" << endl;
             if (has_predictions)
                 clog << "Dataframe contains predictions" << endl;
+            if (has_sea_surface)
+                clog << "Dataframe contains sea surface estimates" << endl;
             clog << "Sorting points" << endl;
         }
 
