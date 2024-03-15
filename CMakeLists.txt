@@ -59,6 +59,11 @@ target_link_libraries(classify_coastnet ${TORCH_LIBRARIES} gmp)
 target_include_directories(classify_coastnet PUBLIC)
 target_precompile_headers(classify_coastnet PUBLIC ATL24_coastnet/precompiled.h)
 
+add_executable(score_coastnet ./apps/score_coastnet.cpp)
+target_link_libraries(score_coastnet ${TORCH_LIBRARIES} gmp)
+target_include_directories(score_coastnet PUBLIC)
+target_precompile_headers(score_coastnet PUBLIC ATL24_coastnet/precompiled.h)
+
 add_executable(blunder_detection ./apps/blunder_detection.cpp)
 target_link_libraries(blunder_detection ${TORCH_LIBRARIES} gmp)
 target_include_directories(blunder_detection PUBLIC)
