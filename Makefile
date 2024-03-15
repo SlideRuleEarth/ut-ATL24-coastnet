@@ -102,10 +102,15 @@ train_coastnet_bathy: build
 
 .PHONY: classify_coastnet_bathy # Run bathy classifier
 classify_coastnet_bathy: build
-	@mkdir -p ./predictions
 	@build=release ./classify_coastnet_bathy.sh \
 		"./predictions/*_classified_surface.csv" \
 		./models/coastnet-bathy.pt \
+		./predictions
+
+.PHONY: check_coastnet_bathy # Run blunder detection
+check_coastnet_bathy: build
+	@build=debug ./check_coastnet_bathy.sh \
+		"./predictions/*_classified_bathy.csv" \
 		./predictions
 
 .PHONY: score_coastnet_bathy # Get bathy scores
@@ -165,6 +170,14 @@ view_bathy_predictions:
 	@parallel --lb --jobs=100 \
 		"streamlit run ../ATL24_rasters/apps/view_predictions.py -- --verbose {}" \
 		::: ${BATHY_PREDICTION_FNS}
+
+CHECKED_PREDICTION_FNS=$(shell find ./predictions/*_checked_bathy.csv | shuf | tail)
+
+.PHONY: view_checked_predictions # View checked prediction labels
+view_checked_predictions:
+	@parallel --lb --jobs=100 \
+		"streamlit run ../ATL24_rasters/apps/view_predictions.py -- --verbose {}" \
+		::: ${CHECKED_PREDICTION_FNS}
 
 ##############################################################################
 #
