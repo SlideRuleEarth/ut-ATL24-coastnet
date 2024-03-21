@@ -40,24 +40,35 @@ test:
 
 ##############################################################################
 #
-# Machine Learning
+# Preprocessing
 #
 ##############################################################################
 
 .PHONY: preprocess # Preprocess input data
 preprocess:
-	@mkdir -p ./input
-	@./preprocess.sh  "./data/local/3DGL/*.csv" ./input
-
-.PHONY: preprocess_synthetic # Preprocess input data
-preprocess_synthetic:
+	@mkdir -p ./input/manual
 	@mkdir -p ./input/synthetic
-	@./preprocess.sh  "./data/local/3DGL/synthetic/*.csv" ./input/synthetic
+	@./preprocess.sh  "./data/local/3DGL/*.csv" ./input/manual
+	@./preprocess.sh  "./data/local/synthetic/*.csv" ./input/synthetic
 
-.PHONY: train # Train a model
-train: build
+##############################################################################
+#
+# Machine Learning
+#
+##############################################################################
+
+##############################################################################
+#
+# Cross-validated models
+#
+##############################################################################
+
+XVAL_INPUT=./input/manual/*.csv
+
+.PHONY: train_xval # Train a model with cross-validation
+train_xval: build
 	@parallel --lb --jobs=15 \
-		"find ./input/*.csv | build/debug/train \
+		"find $(XVAL_INPUT) | build/debug/train \
 			--verbose \
 			--num-classes=7 \
 			--test-dataset={} \
@@ -67,71 +78,94 @@ train: build
 			> coastnet_test_files-{}.txt" \
 			::: $$(seq 0 4)
 
-.PHONY: classify # Run classifier
-classify: build
+.PHONY: classify_xval # Run classifier with cross-validation
+classify_xval: build
 	@./classify.sh | parallel --verbose --lb --jobs=15
 	@./get_bathy_scores.sh
 
-.PHONY: train_coastnet_surface # Train water surface model
-train_coastnet_surface: build
+##############################################################################
+#
+# Deployable models
+#
+##############################################################################
+
+DEPLOY_INPUT=./input/manual/*.csv
+
+##############################################################################
+# Surface
+##############################################################################
+
+.PHONY: train_surface # Train water surface model
+train_surface: build
 	@build=release ./train_coastnet_surface.sh \
-		"./input/*.csv" \
+		"$(DEPLOY_INPUT)" \
 		./models/coastnet-surface.pt
 
-.PHONY: classify_coastnet_surface # Run water surface classifier
-classify_coastnet_surface: build
+.PHONY: classify_surface # Run water surface classifier
+classify_surface: build
 	@mkdir -p ./predictions
 	@build=release ./classify_coastnet_surface.sh \
-		"./input/*.csv" \
+		"$(DEPLOY_INPUT)" \
 		./models/coastnet-surface.pt \
 		./predictions
 
-.PHONY: score_coastnet_surface # Get water surface scores
-score_coastnet_surface:
-	@./get_coastnet_surface_scores.sh "./predictions/*_surface.txt"
+.PHONY: score_surface # Get water surface scores
+score_surface:
+	@./get_coastnet_surface_scores.sh "./predictions/*_results_surface.txt"
 
-.PHONY: cross_validate_surface # Cross validate water surface classifier
-cross_validate_surface: build
-	@./cross_validate_surface.sh "./input/*.csv"
+.PHONY: cross_val_surface # Cross validate water surface classifier
+cross_val_surface: build
+	@./cross_validate_surface.sh "$(DEPLOY_INPUT)"
 
-.PHONY: train_coastnet_bathy # Train bathy model
-train_coastnet_bathy: build
+##############################################################################
+# Bathy
+##############################################################################
+
+.PHONY: train_bathy # Train bathy model
+train_bathy: build
 	@build=release ./train_coastnet_bathy.sh \
-		"./input/*.csv" \
+		"$(DEPLOY_INPUT)" \
 		./models/coastnet-bathy.pt
 
-.PHONY: classify_coastnet_bathy # Run bathy classifier
-classify_coastnet_bathy: build
+.PHONY: classify_bathy # Run bathy classifier
+classify_bathy: build
 	@build=release ./classify_coastnet_bathy.sh \
-		"./predictions/*_classified_surface.csv" \
+		"$(DEPLOY_INPUT)" \
 		./models/coastnet-bathy.pt \
 		./predictions
 
-.PHONY: check_coastnet_bathy # Run blunder detection
-check_coastnet_bathy: build
+.PHONY: score_bathy # Get bathy scores
+score_bathy:
+	@./get_coastnet_bathy_scores.sh "./predictions/*_results_bathy.txt"
+
+.PHONY: cross_val_bathy # Cross validate bathy classifier
+cross_val_bathy: build
+	@./cross_validate_bathy.sh "$(DEPLOY_INPUT)"
+
+##############################################################################
+# Blunder detection
+##############################################################################
+
+.PHONY: check_surface # Run blunder detection
+check_surface: build
+	@build=debug ./check_coastnet_surface.sh \
+		"./predictions/*_classified_surface.csv" \
+		./predictions
+
+.PHONY: check_bathy # Run blunder detection
+check_bathy: build
 	@build=debug ./check_coastnet_bathy.sh \
 		"./predictions/*_classified_bathy.csv" \
 		./predictions
 
-.PHONY: score_coastnet_bathy # Get bathy scores
-score_coastnet_bathy:
-	@./get_coastnet_bathy_scores.sh "./predictions/*_bathy.txt"
-
-.PHONY: cross_validate_bathy # Cross validate bathy classifier
-cross_validate_bathy: build
-	@./cross_validate_bathy.sh "./input/*.csv"
-
-.PHONY: everything # All machine learning models, classifiers, x-val
-everything:
-	@$(MAKE) preprocess
-	@$(MAKE) train_coastnet_surface
-	@$(MAKE) train_coastnet_bathy
-	@$(MAKE) classify_coastnet_surface
-	@$(MAKE) classify_coastnet_bathy
-	@$(MAKE) cross_validate_surface
-	@$(MAKE) cross_validate_bathy
-	@$(MAKE) score_coastnet_surface
-	@$(MAKE) score_coastnet_bathy
+.PHONY: get_checked_scores # Generate scores on checked files
+get_checked_scores: build
+	@build=debug ./get_checked_surface_scores.sh \
+		"./predictions/*_classified_surface.csv" \
+		./predictions
+	@build=debug ./get_checked_bathy_scores.sh \
+		"./predictions/*_classified_bathy.csv" \
+		./predictions
 
 ##############################################################################
 #
@@ -157,24 +191,24 @@ view_predictions:
 
 SURFACE_PREDICTION_FNS=$(shell find ./predictions/*_classified_surface.csv | tail)
 
-.PHONY: view_surface_predictions # View water surface prediction labels
-view_surface_predictions:
+.PHONY: view_surface # View water surface prediction labels
+view_surface:
 	@parallel --lb --jobs=100 \
 		"streamlit run ../ATL24_rasters/apps/view_predictions.py -- --verbose {}" \
 		::: ${SURFACE_PREDICTION_FNS}
 
 BATHY_PREDICTION_FNS=$(shell find ./predictions/*_classified_bathy.csv | shuf | tail)
 
-.PHONY: view_bathy_predictions # View bathy prediction labels
-view_bathy_predictions:
+.PHONY: view_bathy # View bathy prediction labels
+view_bathy:
 	@parallel --lb --jobs=100 \
 		"streamlit run ../ATL24_rasters/apps/view_predictions.py -- --verbose {}" \
 		::: ${BATHY_PREDICTION_FNS}
 
 CHECKED_PREDICTION_FNS=$(shell find ./predictions/*_checked_bathy.csv | shuf | tail)
 
-.PHONY: view_checked_predictions # View checked prediction labels
-view_checked_predictions:
+.PHONY: view_checked # View checked prediction labels
+view_checked:
 	@parallel --lb --jobs=100 \
 		"streamlit run ../ATL24_rasters/apps/view_predictions.py -- --verbose {}" \
 		::: ${CHECKED_PREDICTION_FNS}

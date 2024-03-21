@@ -13,4 +13,4 @@ find $1 | \
     parallel --verbose --lb --jobs=15 \
         "build/${build}/blunder_detection \
         --verbose \
-        < {} > $2/{/.}_checked_bathy.csv"
+        < {} > $2/{/.}_checked_surface.csv"
