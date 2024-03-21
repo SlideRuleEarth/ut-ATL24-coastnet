@@ -234,7 +234,7 @@ manual_full_run:
 	@$(MAKE) --no-print-directory classify_bathy
 	@$(MAKE) --no-print-directory score_bathy
 
-.PHONY: synthetic_full_run # Run everything with manually labelled inputs
+.PHONY: synthetic_full_run # Run everything with synthetically labelled inputs
 synthetic_full_run:
 	@$(MAKE) ID=synthetic --no-print-directory train_surface
 	@$(MAKE) ID=synthetic --no-print-directory classify_surface
@@ -242,6 +242,16 @@ synthetic_full_run:
 	@$(MAKE) ID=synthetic --no-print-directory train_bathy
 	@$(MAKE) ID=synthetic --no-print-directory classify_bathy
 	@$(MAKE) ID=synthetic --no-print-directory score_bathy
+
+.PHONY: manual_cross_val # Cross validate manually labelled inputs
+manual_cross_val:
+	@$(MAKE) --no-print-directory cross_val_surface
+	@$(MAKE) --no-print-directory cross_val_bathy
+
+.PHONY: synthetic_cross_val # Cross validate synthetically labelled inputs
+synthetic_cross_val:
+	@$(MAKE) ID=synthetic --no-print-directory cross_val_surface
+	@$(MAKE) ID=synthetic --no-print-directory cross_val_bathy
 
 ##############################################################################
 #
