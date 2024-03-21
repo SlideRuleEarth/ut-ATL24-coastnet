@@ -16,4 +16,4 @@ find $1 | \
         --class=40 \
         --aspect-ratio=4 \
         --network-filename=$2 \
-        --results-filename=$3/{/.}_results_bathy.txt < {} > $3/{/.}_classified_bathy.csv"
+        < {} > $3/{/.}_classified_bathy.csv"

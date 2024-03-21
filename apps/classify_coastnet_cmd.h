@@ -20,7 +20,6 @@ struct args
     int cls = -1;
     size_t aspect_ratio = 0;
     std::string network_filename = std::string ("./coastnet_network.pt");
-    std::string results_filename = std::string ("./coastnet_results.txt");
 };
 
 std::ostream &operator<< (std::ostream &os, const args &args)
@@ -30,7 +29,6 @@ std::ostream &operator<< (std::ostream &os, const args &args)
     os << "verbose: " << args.verbose << std::endl;
     os << "class: " << args.cls << std::endl;
     os << "aspect-ratio: " << args.aspect_ratio << std::endl;
-    os << "results-filename: " << args.results_filename << std::endl;
     return os;
 }
 
@@ -46,11 +44,10 @@ args get_args (int argc, char **argv, const std::string &usage)
             {"class", required_argument, 0,  'c' },
             {"aspect-ratio", required_argument, 0,  'a' },
             {"network-filename", required_argument, 0,  'f' },
-            {"results-filename", required_argument, 0,  'r' },
             {0,      0,           0,  0 }
         };
 
-        int c = getopt_long(argc, argv, "hvc:a:f:r:", long_options, &option_index);
+        int c = getopt_long(argc, argv, "hvc:a:f:", long_options, &option_index);
         if (c == -1)
             break;
 
@@ -70,7 +67,6 @@ args get_args (int argc, char **argv, const std::string &usage)
             case 'c': args.cls = atol(optarg); break;
             case 'a': args.aspect_ratio = std::atol(optarg); break;
             case 'f': args.network_filename = std::string(optarg); break;
-            case 'r': args.results_filename = std::string(optarg); break;
         }
     }
 

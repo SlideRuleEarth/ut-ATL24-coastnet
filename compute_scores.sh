@@ -11,6 +11,7 @@ echo build = ${build}
 
 find $1 | \
     parallel --verbose --lb --jobs=15 \
-        "build/${build}/blunder_detection \
+        "build/${build}/score_coastnet \
         --verbose \
-        < {} > $2/{/.}_checked_bathy.csv"
+        --class=$2 \
+        < {} > {.}_results.txt"

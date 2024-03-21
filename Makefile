@@ -59,16 +59,16 @@ preprocess:
 
 ##############################################################################
 #
-# Cross-validated models
+# Multi-class models
 #
 ##############################################################################
 
-XVAL_INPUT=./input/manual/*.csv
+MC_INPUT=./input/manual/*.csv
 
-.PHONY: train_xval # Train a model with cross-validation
-train_xval: build
+.PHONY: train_mc # Train a multi-class model
+train_mc: build
 	@parallel --lb --jobs=15 \
-		"find $(XVAL_INPUT) | build/debug/train \
+		"find $(MC_INPUT) | build/debug/train \
 			--verbose \
 			--num-classes=7 \
 			--test-dataset={} \
@@ -78,18 +78,17 @@ train_xval: build
 			> coastnet_test_files-{}.txt" \
 			::: $$(seq 0 4)
 
-.PHONY: classify_xval # Run classifier with cross-validation
-classify_xval: build
+.PHONY: classify_mc # Run multi-class classifier
+classify_mc: build
 	@./classify.sh | parallel --verbose --lb --jobs=15
-	@./get_bathy_scores.sh
 
 ##############################################################################
 #
-# Deployable models
+# Binary models
 #
 ##############################################################################
 
-DEPLOY_INPUT=./input/manual/*.csv
+BINARY_INPUT=./input/manual/*.csv
 
 ##############################################################################
 # Surface
@@ -97,25 +96,27 @@ DEPLOY_INPUT=./input/manual/*.csv
 
 .PHONY: train_surface # Train water surface model
 train_surface: build
-	@build=release ./train_coastnet_surface.sh \
-		"$(DEPLOY_INPUT)" \
+	@build=release ./train_surface.sh \
+		"$(BINARY_INPUT)" \
 		./models/coastnet-surface.pt
 
 .PHONY: classify_surface # Run water surface classifier
 classify_surface: build
 	@mkdir -p ./predictions
-	@build=release ./classify_coastnet_surface.sh \
-		"$(DEPLOY_INPUT)" \
+	@build=release ./classify_surface.sh \
+		"$(BINARY_INPUT)" \
 		./models/coastnet-surface.pt \
 		./predictions
+	@./compute_scores.sh "./predictions/*_classified_surface.csv" 41
 
 .PHONY: score_surface # Get water surface scores
 score_surface:
-	@./get_coastnet_surface_scores.sh "./predictions/*_results_surface.txt"
+	@echo "Surface Scores"
+	@./summarize_scores.sh "./predictions/*_classified_surface_results.txt" 41
 
 .PHONY: cross_val_surface # Cross validate water surface classifier
 cross_val_surface: build
-	@./cross_validate_surface.sh "$(DEPLOY_INPUT)"
+	@./cross_validate_surface.sh "$(BINARY_INPUT)"
 
 ##############################################################################
 # Bathy
@@ -124,23 +125,25 @@ cross_val_surface: build
 .PHONY: train_bathy # Train bathy model
 train_bathy: build
 	@build=release ./train_coastnet_bathy.sh \
-		"$(DEPLOY_INPUT)" \
+		"$(BINARY_INPUT)" \
 		./models/coastnet-bathy.pt
 
 .PHONY: classify_bathy # Run bathy classifier
 classify_bathy: build
-	@build=release ./classify_coastnet_bathy.sh \
-		"$(DEPLOY_INPUT)" \
+	@build=release ./classify_bathy.sh \
+		"$(BINARY_INPUT)" \
 		./models/coastnet-bathy.pt \
 		./predictions
+	@./compute_scores.sh "./predictions/*_classified_bathy.csv" 40
 
 .PHONY: score_bathy # Get bathy scores
 score_bathy:
-	@./get_coastnet_bathy_scores.sh "./predictions/*_results_bathy.txt"
+	@echo "Bathy Scores"
+	@./summarize_scores.sh "./predictions/*_classified_bathy_results.txt" 40
 
 .PHONY: cross_val_bathy # Cross validate bathy classifier
 cross_val_bathy: build
-	@./cross_validate_bathy.sh "$(DEPLOY_INPUT)"
+	@./cross_validate_bathy.sh "$(BINARY_INPUT)"
 
 ##############################################################################
 # Blunder detection
@@ -148,24 +151,24 @@ cross_val_bathy: build
 
 .PHONY: check_surface # Run blunder detection
 check_surface: build
-	@build=debug ./check_coastnet_surface.sh \
+	@build=debug ./check.sh \
 		"./predictions/*_classified_surface.csv" \
 		./predictions
+	@./compute_scores.sh "./predictions/*_classified_surface_checked.csv" 41
 
 .PHONY: check_bathy # Run blunder detection
 check_bathy: build
-	@build=debug ./check_coastnet_bathy.sh \
+	@build=debug ./check.sh \
 		"./predictions/*_classified_bathy.csv" \
 		./predictions
+	@./compute_scores.sh "./predictions/*_classified_bathy_checked.csv" 40
 
-.PHONY: get_checked_scores # Generate scores on checked files
-get_checked_scores: build
-	@build=debug ./get_checked_surface_scores.sh \
-		"./predictions/*_classified_surface.csv" \
-		./predictions
-	@build=debug ./get_checked_bathy_scores.sh \
-		"./predictions/*_classified_bathy.csv" \
-		./predictions
+.PHONY: score_checked # Generate scores on checked files
+score_checked:
+	@echo "Checked Surface Scores"
+	@./summarize_scores.sh "./predictions/*_classified_surface_checked_results.txt" 41
+	@echo "Checked Bathy Scores"
+	@./summarize_scores.sh "./predictions/*_classified_bathy_checked_results.txt" 40
 
 ##############################################################################
 #
