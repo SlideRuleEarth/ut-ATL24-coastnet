@@ -256,9 +256,9 @@ viper::raster::raster<unsigned char> create_raster (const T &p,
     const size_t rows,
     const size_t cols,
     const double aspect_ratio,
-    const augmentation_params &ap,
-    const bool ap_enabled,
-    const size_t random_seed)
+    const augmentation_params &ap = augmentation_params {},
+    const bool ap_enabled = false,
+    const size_t random_seed = 0)
 {
     using namespace std;
 

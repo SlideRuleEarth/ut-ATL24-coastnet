@@ -6,4 +6,4 @@ IFS=$'\n\t'
 
 find $1 | \
     parallel --verbose --lb --jobs=15 \
-        "python ./preprocess.py {} $2/{/}"
+        "python ./scripts/preprocess.py {} $2/{/}"

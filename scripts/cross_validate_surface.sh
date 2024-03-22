@@ -37,7 +37,7 @@ do
     mkdir -p ${predictions_dir}
 
     # Get the commands to copy files into training and testing folders
-    python3 ./get_copy_commands.py \
+    python3 ./scripts/get_copy_commands.py \
         --fold=${fold} \
         --folds=${folds} \
         --training_dir=${training_dir} \
@@ -53,19 +53,19 @@ do
     # Run the cross-validation for this fold
 
     # Train
-    build=${build} ./train_coastnet_surface.sh \
+    build=${build} ./scripts/train_coastnet_surface.sh \
         "${training_dir}/*.csv" \
         ${tmpdir}/coastnet-surface.pt
 
 
     # Predict
-    build=${build} ./classify_coastnet_surface.sh \
+    build=${build} ./scripts/classify_coastnet_surface.sh \
         "${testing_dir}/*.csv" \
         ${tmpdir}/coastnet-surface.pt \
         ${tmpdir}/predictions
 
     # Score
-    ./get_coastnet_surface_scores.sh \
+    ./scripts/get_coastnet_surface_scores.sh \
         "${tmpdir}/predictions/*_surface.txt" > ./surface_fold${fold}_score.txt
 
     # Save results

@@ -15,7 +15,8 @@ struct sample_index
     size_t point_index;
 };
 
-class classified_point_dataset : public torch::data::datasets::Dataset<classified_point_dataset>
+template<typename RNG>
+class classified_point_dataset : public torch::data::datasets::Dataset<classified_point_dataset<RNG>>
 {
     using Example = torch::data::Example<>;
     std::vector<std::vector<ATL24_coastnet::classified_point2d>> datasets;
@@ -26,7 +27,7 @@ class classified_point_dataset : public torch::data::datasets::Dataset<classifie
     double aspect_ratio;
     augmentation_params ap;
     const bool ap_enabled;
-    std::default_random_engine &rng;
+    RNG &rng;
 
     public:
     classified_point_dataset (const std::vector<std::string> &fns,
@@ -37,7 +38,7 @@ class classified_point_dataset : public torch::data::datasets::Dataset<classifie
         const bool ap_enabled,
         const size_t samples_per_class,
         const bool verbose,
-        std::default_random_engine &rng)
+        RNG &rng)
         : patch_rows (patch_rows)
         , patch_cols (patch_cols)
         , aspect_ratio (aspect_ratio)
@@ -169,7 +170,8 @@ class classified_point_dataset : public torch::data::datasets::Dataset<classifie
     }
 };
 
-class coastnet_dataset : public torch::data::datasets::Dataset<coastnet_dataset>
+template<typename RNG>
+class coastnet_dataset : public torch::data::datasets::Dataset<coastnet_dataset<RNG>>
 {
     using Example = torch::data::Example<>;
     std::vector<std::vector<ATL24_coastnet::classified_point2d>> datasets;
@@ -180,7 +182,7 @@ class coastnet_dataset : public torch::data::datasets::Dataset<coastnet_dataset>
     double aspect_ratio;
     augmentation_params ap;
     const bool ap_enabled;
-    std::default_random_engine &rng;
+    RNG &rng;
 
     public:
     coastnet_dataset (const std::vector<std::string> &fns,
@@ -192,7 +194,7 @@ class coastnet_dataset : public torch::data::datasets::Dataset<coastnet_dataset>
         const size_t samples_per_class,
         const bool verbose,
         const unsigned cls,
-        std::default_random_engine &rng)
+        RNG &rng)
         : patch_rows (patch_rows)
         , patch_cols (patch_cols)
         , aspect_ratio (aspect_ratio)

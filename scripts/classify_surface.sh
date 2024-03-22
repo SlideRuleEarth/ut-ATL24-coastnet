@@ -12,7 +12,6 @@ echo build = ${build}
 find $1 | \
     parallel --verbose --lb --jobs=15 \
         "build/${build}/classify_coastnet \
-        --verbose \
         --class=41 \
         --aspect-ratio=4 \
         --network-filename=$2 \
