@@ -66,10 +66,10 @@ do
 
     # Score
     ./scripts/get_coastnet_surface_scores.sh \
-        "${tmpdir}/predictions/*_surface.txt" > ./surface_fold${fold}_score.txt
+        "${tmpdir}/predictions/*_surface.txt" > ./$(ID)-surface_fold${fold}_score.txt
 
     # Save results
-    cat ${tmpdir}/predictions/*_surface.txt > ./surface_fold${fold}_results.txt
+    cat ${tmpdir}/predictions/*_surface.txt > ./$(ID)-surface_fold${fold}_results.txt
 
     # Cleanup
     rm -rf ${training_dir}

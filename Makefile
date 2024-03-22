@@ -118,7 +118,7 @@ score_surface:
 
 .PHONY: cross_val_surface # Cross validate water surface classifier
 cross_val_surface: build
-	@./scripts/cross_validate_surface.sh "$(INPUT_GLOB)"
+	@./scripts/cross_validate_surface.sh "$(INPUT_GLOB)" $(ID)
 
 ##############################################################################
 # Bathy
@@ -146,7 +146,7 @@ score_bathy:
 
 .PHONY: cross_val_bathy # Cross validate bathy classifier
 cross_val_bathy: build
-	@./scripts/cross_validate_bathy.sh "$(INPUT_GLOB)"
+	@./scripts/cross_validate_bathy.sh "$(INPUT_GLOB)" $(ID)
 
 ##############################################################################
 # Blunder detection

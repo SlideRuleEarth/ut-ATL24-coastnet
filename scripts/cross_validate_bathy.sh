@@ -66,10 +66,10 @@ do
 
     # Score
     ./scripts/get_coastnet_bathy_scores.sh \
-        "${tmpdir}/predictions/*_bathy.txt" > ./bathy_fold${fold}_score.txt
+        "${tmpdir}/predictions/*_bathy.txt" > ./$(ID)-bathy_fold${fold}_score.txt
 
     # Save results
-    cat ${tmpdir}/predictions/*_bathy.txt > ./bathy_fold${fold}_results.txt
+    cat ${tmpdir}/predictions/*_bathy.txt > ./$(ID)-bathy_fold${fold}_results.txt
 
     # Cleanup
     rm -rf ${training_dir}
