@@ -36,8 +36,6 @@ int main (int argc, char **argv)
         // Params
         sampling_params sp;
         hyper_params hp;
-        augmentation_params ap;
-        const bool enable_augmentation = false;
 
         if (args.verbose)
         {
@@ -110,8 +108,6 @@ int main (int argc, char **argv)
         // Setup the prediction cache
         prediction_cache cache;
 
-        default_random_engine rng (0);
-
         // Keep track of cache usage
         size_t cache_lookups = 0;
         size_t cache_hits = 0;
@@ -136,7 +132,7 @@ int main (int argc, char **argv)
                 // No, compute the prediction
                 //
                 // Create the raster at this point
-                auto r = create_raster (p, i, sp.patch_rows, sp.patch_cols, sp.aspect_ratio, ap, enable_augmentation, rng ());
+                auto r = create_raster (p, i, sp.patch_rows, sp.patch_cols, sp.aspect_ratio);
 
                 // Create image Tensor from raster
                 auto t = torch::from_blob (&r[0],

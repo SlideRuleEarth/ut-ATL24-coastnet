@@ -38,8 +38,6 @@ int main (int argc, char **argv)
         // Params
         sampling_params sp;
         hyper_params hp;
-        augmentation_params ap;
-        const bool enable_augmentation = false;
 
         // Override aspect-ratio if specified
         if (args.aspect_ratio != 0)
@@ -123,18 +121,18 @@ int main (int argc, char **argv)
         // Setup the prediction cache
         prediction_cache cache;
 
-        default_random_engine rng (0);
-
         // Keep track of cache usage
         size_t cache_lookups = 0;
         size_t cache_hits = 0;
 
         // For each point
+#pragma omp parallel for
         for (size_t i = 0; i < p.size (); ++i)
         {
             // Set sentinel
             long pred = -1;
 
+#pragma omp atomic
             ++cache_lookups;
 
             // Don't override non-noise predictions
@@ -149,6 +147,7 @@ int main (int argc, char **argv)
             {
                 // Yes, use the previous prediction
                 pred = cache.get_prediction (p, i);
+#pragma omp atomic
                 ++cache_hits;
             }
             else
@@ -165,7 +164,7 @@ int main (int argc, char **argv)
                 else
                 {
                     // Create the raster at this point
-                    auto r = create_raster (p, i, sp.patch_rows, sp.patch_cols, sp.aspect_ratio, ap, enable_augmentation, rng ());
+                    auto r = create_raster (p, i, sp.patch_rows, sp.patch_cols, sp.aspect_ratio);
 
                     // Create image Tensor from raster
                     auto t = torch::from_blob (&r[0],
@@ -184,6 +183,7 @@ int main (int argc, char **argv)
                 }
 
                 // Update the cache
+#pragma omp critical
                 cache.update (p, i, pred);
             }
 

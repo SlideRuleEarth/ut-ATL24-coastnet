@@ -53,8 +53,8 @@ int main (int argc, char **argv)
             clog << fns.size () << " total training files" << endl;
         }
 
-        // Create pseudo-RNG
-        default_random_engine rng (args.random_seed);
+        // Create the random number generator
+        mt19937_64 rng (args.random_seed);
 
         // Params
         sampling_params sp;

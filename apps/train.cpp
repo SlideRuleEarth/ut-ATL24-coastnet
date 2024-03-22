@@ -89,8 +89,10 @@ int main (int argc, char **argv)
         if (args.verbose)
             clog << fns.size () << " filenames read" << endl;
 
+        // Create the random number generator
+        mt19937_64 rng (args.random_seed);
+
         // Split into train/test datasets
-        default_random_engine rng (args.random_seed);
         shuffle (fns.begin (), fns.end (), rng);
         vector<string> train_filenames;
         vector<string> test_filenames;
