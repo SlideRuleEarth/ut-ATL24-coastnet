@@ -53,23 +53,26 @@ do
     # Run the cross-validation for this fold
 
     # Train
-    build=${build} ./scripts/train_coastnet_bathy.sh \
+    build=${build} ./scripts/train_bathy.sh \
         "${training_dir}/*.csv" \
         ${tmpdir}/coastnet-bathy.pt
 
 
     # Predict
-    build=${build} ./scripts/classify_coastnet_bathy.sh \
+    build=${build} ./scripts/classify_bathy.sh \
         "${testing_dir}/*.csv" \
         ${tmpdir}/coastnet-bathy.pt \
         ${tmpdir}/predictions
 
     # Score
-    ./scripts/get_coastnet_bathy_scores.sh \
-        "${tmpdir}/predictions/*_bathy.txt" > ./$(ID)-bathy_fold${fold}_score.txt
+    ./scripts/compute_scores.sh \
+        "${tmpdir}/predictions/*_bathy.csv" 40
 
     # Save results
-    cat ${tmpdir}/predictions/*_bathy.txt > ./$(ID)-bathy_fold${fold}_results.txt
+    ID=$2
+    cat ${tmpdir}/predictions/*_classified_bathy_results.txt > ./${ID}-bathy_fold${fold}_results.txt
+    ./scripts/summarize_scores.sh "${tmpdir}/predictions/*_classified_bathy_results.txt" 40 \
+        > ./${ID}-bathy_fold${fold}_summary.txt
 
     # Cleanup
     rm -rf ${training_dir}
