@@ -118,7 +118,7 @@ score_surface:
 
 .PHONY: cross_val_surface # Cross validate water surface classifier
 cross_val_surface: build
-	@./scripts/cross_validate_surface.sh "$(INPUT_GLOB)" $(ID)
+	@build=release ./scripts/cross_validate_surface.sh "$(INPUT_GLOB)" $(ID)
 
 ##############################################################################
 # Bathy
@@ -146,7 +146,7 @@ score_bathy:
 
 .PHONY: cross_val_bathy # Cross validate bathy classifier
 cross_val_bathy: build
-	@./scripts/cross_validate_bathy.sh "$(INPUT_GLOB)" $(ID)
+	@build=release ./scripts/cross_validate_bathy.sh "$(INPUT_GLOB)" $(ID)
 
 ##############################################################################
 # Blunder detection
@@ -172,6 +172,32 @@ score_checked:
 	@./scripts/summarize_scores.sh "./predictions/$(ID)/*_classified_surface_checked_results.txt" 41
 	@echo "Checked Bathy Scores"
 	@./scripts/summarize_scores.sh "./predictions/$(ID)/*_classified_bathy_checked_results.txt" 40
+
+##############################################################################
+#
+# Mix real and synthetic data
+#
+##############################################################################
+
+.PHONY: classify_surface_mixed # Run surface classifier using synthetic model
+classify_surface_mixed:
+	@mkdir -p ./predictions/mixed
+	@build=release ./scripts/classify_surface.sh \
+		"./input/manual/*.csv" \
+		./models/coastnet-surface-synthetic.pt \
+		./predictions/mixed
+	@./scripts/compute_scores.sh "./predictions/mixed/*_classified_surface.csv" 41
+	@./scripts/summarize_scores.sh "./predictions/mixed/*_classified_surface_results.txt" 41
+
+.PHONY: classify_bathy_mixed # Run bathy classifier using synthetic model
+classify_bathy_mixed:
+	@mkdir -p ./predictions/mixed
+	@build=release ./scripts/classify_bathy.sh \
+		"./input/manual/*.csv" \
+		./models/coastnet-bathy-synthetic.pt \
+		./predictions/mixed
+	@./scripts/compute_scores.sh "./predictions/mixed/*_classified_bathy.csv" 40
+	@./scripts/summarize_scores.sh "./predictions/mixed/*_classified_bathy_results.txt" 40
 
 ##############################################################################
 #
@@ -218,6 +244,10 @@ view_checked_bathy:
 	@parallel --lb --jobs=100 \
 		"streamlit run ../ATL24_rasters/apps/view_predictions.py -- --verbose {}" \
 		::: ${CHECKED_BATHY_PREDICTION_FNS}
+
+SELECTIONS=\
+		ATL03_20210704023000_01601201_005_01_gt3r \
+		ATL03_20230213042035_08341807_006_01_gt1l
 
 ##############################################################################
 #
