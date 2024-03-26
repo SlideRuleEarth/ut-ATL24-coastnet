@@ -79,6 +79,15 @@ class confusion_matrix
     // Average of specificity and recall
     double balanced_accuracy () const { return (specificity () + recall ()) / 2.0; }
 
+    // Calibrated F-score
+    double calibrated_F_beta (const double r0 = 0.5, const double beta = 1.0) const
+    {
+        const double tpr = true_positive_rate ();
+        const double fpr = false_positive_rate ();
+        const double f1 = (1.0 + beta * beta) * tpr / (tpr + (1.0 / r0) * fpr + beta * beta);
+        return f1;
+    }
+
     // Matthews correlation coefficient
     //
     // The correlation coefficient between the observed and predicted classifications
