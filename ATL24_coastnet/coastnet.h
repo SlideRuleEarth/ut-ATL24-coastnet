@@ -67,7 +67,8 @@ struct classified_point2d
     double z;
     size_t cls;
     size_t prediction;
-    double sea_surface;
+    double surface_elevation;
+    double bathy_elevation;
 };
 
 struct classified_point3d
