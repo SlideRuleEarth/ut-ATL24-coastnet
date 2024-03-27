@@ -39,8 +39,7 @@ int main (int argc, char **argv)
 
         // Convert it to the correct format
         bool has_predictions = false;
-        bool has_sea_surface = false;
-        auto p = convert_dataframe (df, has_predictions, has_sea_surface);
+        auto p = convert_dataframe (df, has_predictions);
 
         if (args.verbose)
         {
