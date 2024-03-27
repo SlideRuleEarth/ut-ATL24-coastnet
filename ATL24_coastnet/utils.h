@@ -109,9 +109,12 @@ std::vector<classified_point2d> read_classified_point2d (std::istream &is)
         size_t prediction;
         ss >> prediction;
         ss.get (); // ignore ','
-        double sea_surface;
-        ss >> sea_surface;
-        p.push_back (classified_point2d {h5_index, x, z, cls, prediction, sea_surface});
+        double surface_elevation;
+        ss >> surface_elevation;
+        p.push_back (classified_point2d {h5_index, x, z, cls, prediction, surface_elevation});
+        double bathy_elevation;
+        ss >> bathy_elevation;
+        p.push_back (classified_point2d {h5_index, x, z, cls, prediction, bathy_elevation});
     }
 
     return p;
@@ -153,7 +156,7 @@ void write_classified_point2d (std::ostream &os, const T &p)
     const auto pr = os.precision ();
 
     // Print along-track meters
-    os << "ph_index,along_track_dist,geoid_corrected_h,manual_label,prediction,sea_surface_h" << endl;
+    os << "ph_index,along_track_dist,geoid_corrected_h,manual_label,prediction,sea_surface_h,bathy_h" << endl;
     for (size_t i = 0; i < p.size (); ++i)
     {
         // Write the index
@@ -171,7 +174,10 @@ void write_classified_point2d (std::ostream &os, const T &p)
         os << "," << p[i].prediction;
         // Write the surface estimate
         os << setprecision (4) << fixed;
-        os << "," << p[i].sea_surface;
+        os << "," << p[i].surface_elevation;
+        // Write the bathy estimate
+        os << setprecision (4) << fixed;
+        os << "," << p[i].bathy_elevation;
         os << endl;
     }
 
@@ -369,7 +375,11 @@ viper::raster::raster<unsigned char> create_raster (const T &p,
 }
 
 template<typename T>
-std::vector<ATL24_coastnet::classified_point2d> convert_dataframe (const T &df, bool &has_predictions, bool &has_sea_surface)
+std::vector<ATL24_coastnet::classified_point2d> convert_dataframe (
+    const T &df,
+    bool &has_predictions,
+    bool &has_surface_elevations,
+    bool &has_bathy_elevations)
 {
     using namespace std;
 
@@ -387,7 +397,8 @@ std::vector<ATL24_coastnet::classified_point2d> convert_dataframe (const T &df, 
     auto z_it = find (df.headers.begin(), df.headers.end(), "geoid_corrected_h");
     auto cls_it = find (df.headers.begin(), df.headers.end(), "manual_label");
     auto prediction_it = find (df.headers.begin(), df.headers.end(), "prediction");
-    auto sea_surface_it = find (df.headers.begin(), df.headers.end(), "sea_surface_h");
+    auto surface_elevation_it = find (df.headers.begin(), df.headers.end(), "sea_surface_h");
+    auto bathy_elevation_it = find (df.headers.begin(), df.headers.end(), "bathy_h");
 
     assert (pi_it != df.headers.end ());
     assert (x_it != df.headers.end ());
@@ -411,9 +422,13 @@ std::vector<ATL24_coastnet::classified_point2d> convert_dataframe (const T &df, 
     size_t prediction_index = has_predictions ?
         prediction_it - df.headers.begin() :
         df.headers.size ();
-    has_sea_surface = sea_surface_it != df.headers.end ();
-    size_t sea_surface_index = has_sea_surface ?
-        sea_surface_it - df.headers.begin() :
+    has_surface_elevations = surface_elevation_it != df.headers.end ();
+    size_t surface_elevation_index = has_surface_elevations ?
+        surface_elevation_it - df.headers.begin() :
+        df.headers.size ();
+    has_bathy_elevations = bathy_elevation_it != df.headers.end ();
+    size_t bathy_elevation_index = has_bathy_elevations ?
+        bathy_elevation_it - df.headers.begin() :
         df.headers.size ();
 
     // Check logic
@@ -423,8 +438,10 @@ std::vector<ATL24_coastnet::classified_point2d> convert_dataframe (const T &df, 
     assert (cls_index < df.headers.size ());
     if (has_predictions)
         assert (prediction_index < df.headers.size ());
-    if (has_sea_surface)
-        assert (sea_surface_index < df.headers.size ());
+    if (has_surface_elevations)
+        assert (surface_elevation_index < df.headers.size ());
+    if (has_bathy_elevations)
+        assert (bathy_elevation_index < df.headers.size ());
 
     assert (ph_index < df.columns.size ());
     assert (x_index < df.columns.size ());
@@ -432,8 +449,10 @@ std::vector<ATL24_coastnet::classified_point2d> convert_dataframe (const T &df, 
     assert (cls_index < df.columns.size ());
     if (has_predictions)
         assert (prediction_index < df.columns.size ());
-    if (has_sea_surface)
-        assert (sea_surface_index < df.columns.size ());
+    if (has_surface_elevations)
+        assert (surface_elevation_index < df.columns.size ());
+    if (has_bathy_elevations)
+        assert (bathy_elevation_index < df.columns.size ());
 
     // Stuff values into the vector
     std::vector<ATL24_coastnet::classified_point2d> dataset (nrows);
@@ -447,8 +466,10 @@ std::vector<ATL24_coastnet::classified_point2d> convert_dataframe (const T &df, 
         assert (j < df.columns[cls_index].size ());
         if (has_predictions)
             assert (j < df.columns[prediction_index].size ());
-        if (has_sea_surface)
-            assert (j < df.columns[sea_surface_index].size ());
+        if (has_surface_elevations)
+            assert (j < df.columns[surface_elevation_index].size ());
+        if (has_bathy_elevations)
+            assert (j < df.columns[bathy_elevation_index].size ());
 
         // Make assignments
         dataset[j].h5_index = df.columns[ph_index][j];
@@ -457,8 +478,10 @@ std::vector<ATL24_coastnet::classified_point2d> convert_dataframe (const T &df, 
         dataset[j].cls = df.columns[cls_index][j];
         if (has_predictions)
             dataset[j].prediction = df.columns[prediction_index][j];
-        if (has_sea_surface)
-            dataset[j].sea_surface = df.columns[sea_surface_index][j];
+        if (has_surface_elevations)
+            dataset[j].surface_elevation = df.columns[surface_elevation_index][j];
+        if (has_bathy_elevations)
+            dataset[j].bathy_elevation = df.columns[bathy_elevation_index][j];
     }
 
     return dataset;
@@ -468,8 +491,17 @@ template<typename T>
 std::vector<ATL24_coastnet::classified_point2d> convert_dataframe (const T &df)
 {
     bool has_predictions;
-    bool has_sea_surface;
-    return convert_dataframe (df, has_predictions, has_sea_surface);
+    bool has_surface_elevations;
+    bool has_bathy_elevations;
+    return convert_dataframe (df, has_predictions, has_surface_elevations, has_bathy_elevations);
+}
+
+template<typename T>
+std::vector<ATL24_coastnet::classified_point2d> convert_dataframe (const T &df, bool &has_predictions)
+{
+    bool has_surface_elevations;
+    bool has_bathy_elevations;
+    return convert_dataframe (df, has_predictions, has_surface_elevations, has_bathy_elevations);
 }
 
 } // namespace ATL24_coastnet
