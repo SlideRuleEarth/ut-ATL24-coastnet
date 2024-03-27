@@ -94,16 +94,19 @@ int main (int argc, char **argv)
 
         // Convert it to the correct format
         bool has_predictions = false;
-        bool has_sea_surface = false;
-        auto p = convert_dataframe (df, has_predictions, has_sea_surface);
+        bool has_surface_elevations = false;
+        bool has_bathy_elevations = false;
+        auto p = convert_dataframe (df, has_predictions, has_surface_elevations, has_bathy_elevations);
 
         if (args.verbose)
         {
             clog << p.size () << " points read" << endl;
             if (has_predictions)
                 clog << "Dataframe contains predictions" << endl;
-            if (has_sea_surface)
+            if (has_surface_elevations)
                 clog << "Dataframe contains sea surface estimates" << endl;
+            if (has_bathy_elevations)
+                clog << "Dataframe contains bathy estimates" << endl;
             clog << "Sorting points" << endl;
         }
 
@@ -201,14 +204,6 @@ int main (int argc, char **argv)
         assert (p.size () == q.size ());
         for (size_t i = 0; i < p.size (); ++i)
             p[i].prediction = q[i];
-
-        // Get surface estimates
-        const auto s = get_surface_estimates (p);
-
-        // Assign surface estimates
-        assert (p.size () == s.size ());
-        for (size_t i = 0; i < p.size (); ++i)
-            p[i].sea_surface = s[i];
 
         // Write classified output to stdout
         write_classified_point2d (cout, p);
