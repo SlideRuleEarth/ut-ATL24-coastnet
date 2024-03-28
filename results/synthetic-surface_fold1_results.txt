@@ -1,0 +1,784 @@
+cls	acc	F1	bal_acc	cal_F1	tp	tn	fp	fn	support	total
+0	0.987	0.992	0.968	0.943	19413	2395	142	152	19565	22102
+41	0.987	0.942	0.968	0.964	2395	19413	152	142	2537	22102
+weighted_accuracy = 0.987
+weighted_F1 = 0.987
+weighted_bal_acc = 0.968
+weighted_cal_F1 = 0.945
+cls	acc	F1	bal_acc	cal_F1	tp	tn	fp	fn	support	total
+0	0.989	0.991	0.990	0.986	20573	11939	97	259	20832	32868
+41	0.989	0.985	0.990	0.984	11939	20573	259	97	12036	32868
+weighted_accuracy = 0.989
+weighted_F1 = 0.989
+weighted_bal_acc = 0.990
+weighted_cal_F1 = 0.985
+cls	acc	F1	bal_acc	cal_F1	tp	tn	fp	fn	support	total
+0	0.992	0.996	0.987	0.978	21429	1514	30	146	21575	23119
+41	0.992	0.945	0.987	0.983	1514	21429	146	30	1544	23119
+weighted_accuracy = 0.992
+weighted_F1 = 0.993
+weighted_bal_acc = 0.987
+weighted_cal_F1 = 0.978
+cls	acc	F1	bal_acc	cal_F1	tp	tn	fp	fn	support	total
+0	0.996	0.996	0.996	0.996	16015	14286	0	134	16149	30435
+41	0.996	0.995	0.996	0.992	14286	16015	134	0	14286	30435
+weighted_accuracy = 0.996
+weighted_F1 = 0.996
+weighted_bal_acc = 0.996
+weighted_cal_F1 = 0.994
+cls	acc	F1	bal_acc	cal_F1	tp	tn	fp	fn	support	total
+0	0.990	0.995	0.800	0.715	21261	239	157	71	21332	21728
+41	0.990	0.677	0.800	0.750	239	21261	71	157	396	21728
+weighted_accuracy = 0.990
+weighted_F1 = 0.989
+weighted_bal_acc = 0.800
+weighted_cal_F1 = 0.715
+cls	acc	F1	bal_acc	cal_F1	tp	tn	fp	fn	support	total
+0	0.985	0.988	0.984	0.975	22108	14009	285	249	22357	36651
+41	0.985	0.981	0.984	0.979	14009	22108	249	285	14294	36651
+weighted_accuracy = 0.985
+weighted_F1 = 0.985
+weighted_bal_acc = 0.984
+weighted_cal_F1 = 0.976
+cls	acc	F1	bal_acc	cal_F1	tp	tn	fp	fn	support	total
+0	0.994	0.995	0.995	0.995	25739	14290	0	241	25980	40270
+41	0.994	0.992	0.995	0.991	14290	25739	241	0	14290	40270
+weighted_accuracy = 0.994
+weighted_F1 = 0.994
+weighted_bal_acc = 0.995
+weighted_cal_F1 = 0.994
+cls	acc	F1	bal_acc	cal_F1	tp	tn	fp	fn	support	total
+0	0.989	0.994	0.953	0.915	82656	6180	612	385	83041	89833
+41	0.989	0.925	0.953	0.948	6180	82656	385	612	6792	89833
+weighted_accuracy = 0.989
+weighted_F1 = 0.989
+weighted_bal_acc = 0.953
+weighted_cal_F1 = 0.918
+cls	acc	F1	bal_acc	cal_F1	tp	tn	fp	fn	support	total
+0	0.983	0.984	0.983	0.974	16333	14026	268	263	16596	30890
+41	0.983	0.981	0.983	0.975	14026	16333	263	268	14294	30890
+weighted_accuracy = 0.983
+weighted_F1 = 0.983
+weighted_bal_acc = 0.983
+weighted_cal_F1 = 0.974
+cls	acc	F1	bal_acc	cal_F1	tp	tn	fp	fn	support	total
+0	0.935	0.936	0.935	0.899	9833	9342	852	488	10321	20515
+41	0.935	0.933	0.935	0.911	9342	9833	488	852	10194	20515
+weighted_accuracy = 0.935
+weighted_F1 = 0.935
+weighted_bal_acc = 0.935
+weighted_cal_F1 = 0.905
+cls	acc	F1	bal_acc	cal_F1	tp	tn	fp	fn	support	total
+0	0.973	0.969	0.970	0.967	10457	14122	59	613	11070	25251
+41	0.973	0.977	0.970	0.945	14122	10457	613	59	14181	25251
+weighted_accuracy = 0.973
+weighted_F1 = 0.973
+weighted_bal_acc = 0.970
+weighted_cal_F1 = 0.955
+cls	acc	F1	bal_acc	cal_F1	tp	tn	fp	fn	support	total
+0	0.983	0.984	0.984	0.984	16885	14284	3	551	17436	31723
+41	0.983	0.981	0.984	0.969	14284	16885	551	3	14287	31723
+weighted_accuracy = 0.983
+weighted_F1 = 0.983
+weighted_bal_acc = 0.984
+weighted_cal_F1 = 0.977
+cls	acc	F1	bal_acc	cal_F1	tp	tn	fp	fn	support	total
+0	0.991	0.992	0.992	0.992	18109	14274	2	286	18395	32671
+41	0.991	0.990	0.992	0.985	14274	18109	286	2	14276	32671
+weighted_accuracy = 0.991
+weighted_F1 = 0.991
+weighted_bal_acc = 0.992
+weighted_cal_F1 = 0.989
+cls	acc	F1	bal_acc	cal_F1	tp	tn	fp	fn	support	total
+0	0.987	0.993	0.759	0.675	8181	80	73	40	8221	8374
+41	0.987	0.586	0.759	0.682	80	8181	40	73	153	8374
+weighted_accuracy = 0.987
+weighted_F1 = 0.986
+weighted_bal_acc = 0.759
+weighted_cal_F1 = 0.675
+cls	acc	F1	bal_acc	cal_F1	tp	tn	fp	fn	support	total
+0	0.992	0.984	0.989	0.987	4937	14218	75	81	5018	19311
+41	0.992	0.995	0.989	0.981	14218	4937	81	75	14293	19311
+weighted_accuracy = 0.992
+weighted_F1 = 0.992
+weighted_bal_acc = 0.989
+weighted_cal_F1 = 0.983
+cls	acc	F1	bal_acc	cal_F1	tp	tn	fp	fn	support	total
+0	0.993	0.991	0.992	0.991	9947	14281	8	164	10111	24400
+41	0.993	0.994	0.992	0.984	14281	9947	164	8	14289	24400
+weighted_accuracy = 0.993
+weighted_F1 = 0.993
+weighted_bal_acc = 0.992
+weighted_cal_F1 = 0.987
+cls	acc	F1	bal_acc	cal_F1	tp	tn	fp	fn	support	total
+0	0.953	0.970	0.941	0.906	36753	9655	849	1418	38171	48675
+41	0.953	0.895	0.941	0.922	9655	36753	1418	849	10504	48675
+weighted_accuracy = 0.953
+weighted_F1 = 0.954
+weighted_bal_acc = 0.941
+weighted_cal_F1 = 0.910
+cls	acc	F1	bal_acc	cal_F1	tp	tn	fp	fn	support	total
+0	0.969	0.976	0.976	0.974	27901	14247	38	1325	29226	43511
+41	0.969	0.954	0.976	0.955	14247	27901	1325	38	14285	43511
+weighted_accuracy = 0.969
+weighted_F1 = 0.969
+weighted_bal_acc = 0.976
+weighted_cal_F1 = 0.968
+cls	acc	F1	bal_acc	cal_F1	tp	tn	fp	fn	support	total
+0	0.975	0.985	0.957	0.928	19136	2889	207	368	19504	22600
+41	0.975	0.909	0.957	0.947	2889	19136	368	207	3096	22600
+weighted_accuracy = 0.975
+weighted_F1 = 0.975
+weighted_bal_acc = 0.957
+weighted_cal_F1 = 0.930
+cls	acc	F1	bal_acc	cal_F1	tp	tn	fp	fn	support	total
+0	0.988	0.987	0.987	0.987	13157	14283	6	334	13491	27780
+41	0.988	0.988	0.987	0.976	14283	13157	334	6	14289	27780
+weighted_accuracy = 0.988
+weighted_F1 = 0.988
+weighted_bal_acc = 0.987
+weighted_cal_F1 = 0.981
+cls	acc	F1	bal_acc	cal_F1	tp	tn	fp	fn	support	total
+0	0.977	0.987	0.936	0.889	52324	7321	995	394	52718	61034
+41	0.977	0.913	0.936	0.929	7321	52324	394	995	8316	61034
+weighted_accuracy = 0.977
+weighted_F1 = 0.977
+weighted_bal_acc = 0.936
+weighted_cal_F1 = 0.895
+cls	acc	F1	bal_acc	cal_F1	tp	tn	fp	fn	support	total
+0	0.976	0.986	0.965	0.940	62032	12736	726	1074	63106	76568
+41	0.976	0.934	0.965	0.956	12736	62032	1074	726	13462	76568
+weighted_accuracy = 0.976
+weighted_F1 = 0.977
+weighted_bal_acc = 0.965
+weighted_cal_F1 = 0.943
+cls	acc	F1	bal_acc	cal_F1	tp	tn	fp	fn	support	total
+0	0.983	0.990	0.972	0.951	56949	9661	454	682	57631	67746
+41	0.983	0.944	0.972	0.965	9661	56949	682	454	10115	67746
+weighted_accuracy = 0.983
+weighted_F1 = 0.983
+weighted_bal_acc = 0.972
+weighted_cal_F1 = 0.953
+cls	acc	F1	bal_acc	cal_F1	tp	tn	fp	fn	support	total
+0	0.987	0.986	0.986	0.986	13187	14279	8	362	13549	27836
+41	0.987	0.987	0.986	0.974	14279	13187	362	8	14287	27836
+weighted_accuracy = 0.987
+weighted_F1 = 0.987
+weighted_bal_acc = 0.986
+weighted_cal_F1 = 0.980
+cls	acc	F1	bal_acc	cal_F1	tp	tn	fp	fn	support	total
+0	0.859	0.913	0.816	0.741	15367	2399	780	2132	17499	20678
+41	0.859	0.622	0.816	0.755	2399	15367	2132	780	3179	20678
+weighted_accuracy = 0.859
+weighted_F1 = 0.869
+weighted_bal_acc = 0.816
+weighted_cal_F1 = 0.744
+cls	acc	F1	bal_acc	cal_F1	tp	tn	fp	fn	support	total
+0	0.995	0.994	0.994	0.994	8579	14288	0	110	8689	22977
+41	0.995	0.996	0.994	0.987	14288	8579	110	0	14288	22977
+weighted_accuracy = 0.995
+weighted_F1 = 0.995
+weighted_bal_acc = 0.994
+weighted_cal_F1 = 0.990
+cls	acc	F1	bal_acc	cal_F1	tp	tn	fp	fn	support	total
+0	0.988	0.988	0.989	0.988	16465	14287	2	382	16847	31136
+41	0.988	0.987	0.989	0.978	14287	16465	382	2	14289	31136
+weighted_accuracy = 0.988
+weighted_F1 = 0.988
+weighted_bal_acc = 0.989
+weighted_cal_F1 = 0.984
+cls	acc	F1	bal_acc	cal_F1	tp	tn	fp	fn	support	total
+0	0.996	0.997	0.997	0.997	28478	14285	1	191	28669	42955
+41	0.996	0.993	0.997	0.993	14285	28478	191	1	14286	42955
+weighted_accuracy = 0.996
+weighted_F1 = 0.996
+weighted_bal_acc = 0.997
+weighted_cal_F1 = 0.996
+cls	acc	F1	bal_acc	cal_F1	tp	tn	fp	fn	support	total
+0	0.996	0.996	0.996	0.996	13120	14289	0	118	13238	27527
+41	0.996	0.996	0.996	0.991	14289	13120	118	0	14289	27527
+weighted_accuracy = 0.996
+weighted_F1 = 0.996
+weighted_bal_acc = 0.996
+weighted_cal_F1 = 0.993
+cls	acc	F1	bal_acc	cal_F1	tp	tn	fp	fn	support	total
+0	0.994	0.995	0.995	0.995	20007	14290	0	220	20227	34517
+41	0.994	0.992	0.995	0.989	14290	20007	220	0	14290	34517
+weighted_accuracy = 0.994
+weighted_F1 = 0.994
+weighted_bal_acc = 0.995
+weighted_cal_F1 = 0.992
+cls	acc	F1	bal_acc	cal_F1	tp	tn	fp	fn	support	total
+0	0.993	0.995	0.994	0.994	29409	14268	23	280	29689	43980
+41	0.993	0.989	0.994	0.990	14268	29409	280	23	14291	43980
+weighted_accuracy = 0.993
+weighted_F1 = 0.993
+weighted_bal_acc = 0.994
+weighted_cal_F1 = 0.992
+cls	acc	F1	bal_acc	cal_F1	tp	tn	fp	fn	support	total
+0	0.995	0.995	0.995	0.995	18326	14282	0	169	18495	32777
+41	0.995	0.994	0.995	0.991	14282	18326	169	0	14282	32777
+weighted_accuracy = 0.995
+weighted_F1 = 0.995
+weighted_bal_acc = 0.995
+weighted_cal_F1 = 0.993
+cls	acc	F1	bal_acc	cal_F1	tp	tn	fp	fn	support	total
+0	0.992	0.995	0.994	0.993	35661	14268	20	366	36027	50315
+41	0.992	0.987	0.994	0.989	14268	35661	366	20	14288	50315
+weighted_accuracy = 0.992
+weighted_F1 = 0.992
+weighted_bal_acc = 0.994
+weighted_cal_F1 = 0.992
+cls	acc	F1	bal_acc	cal_F1	tp	tn	fp	fn	support	total
+0	0.986	0.992	0.929	0.877	30024	2083	331	140	30164	32578
+41	0.986	0.898	0.929	0.922	2083	30024	140	331	2414	32578
+weighted_accuracy = 0.986
+weighted_F1 = 0.985
+weighted_bal_acc = 0.929
+weighted_cal_F1 = 0.880
+cls	acc	F1	bal_acc	cal_F1	tp	tn	fp	fn	support	total
+0	0.985	0.987	0.986	0.980	21097	14147	147	401	21498	35792
+41	0.985	0.981	0.986	0.977	14147	21097	401	147	14294	35792
+weighted_accuracy = 0.985
+weighted_F1 = 0.985
+weighted_bal_acc = 0.986
+weighted_cal_F1 = 0.979
+cls	acc	F1	bal_acc	cal_F1	tp	tn	fp	fn	support	total
+0	0.991	0.995	0.990	0.984	35656	5431	62	329	35985	41478
+41	0.991	0.965	0.990	0.985	5431	35656	329	62	5493	41478
+weighted_accuracy = 0.991
+weighted_F1 = 0.991
+weighted_bal_acc = 0.990
+weighted_cal_F1 = 0.984
+cls	acc	F1	bal_acc	cal_F1	tp	tn	fp	fn	support	total
+0	0.597	0.513	0.628	0.466	6784	12339	1718	11167	17951	32008
+41	0.597	0.657	0.628	0.562	12339	6784	11167	1718	14057	32008
+weighted_accuracy = 0.597
+weighted_F1 = 0.576
+weighted_bal_acc = 0.628
+weighted_cal_F1 = 0.508
+cls	acc	F1	bal_acc	cal_F1	tp	tn	fp	fn	support	total
+0	0.997	0.996	0.997	0.996	6456	14275	13	39	6495	20783
+41	0.997	0.998	0.997	0.994	14275	6456	39	13	14288	20783
+weighted_accuracy = 0.997
+weighted_F1 = 0.997
+weighted_bal_acc = 0.997
+weighted_cal_F1 = 0.994
+cls	acc	F1	bal_acc	cal_F1	tp	tn	fp	fn	support	total
+0	0.978	0.986	0.964	0.939	13440	2988	183	188	13628	16799
+41	0.978	0.942	0.964	0.957	2988	13440	188	183	3171	16799
+weighted_accuracy = 0.978
+weighted_F1 = 0.978
+weighted_bal_acc = 0.964
+weighted_cal_F1 = 0.942
+cls	acc	F1	bal_acc	cal_F1	tp	tn	fp	fn	support	total
+0	0.988	0.994	0.861	0.784	14606	236	88	86	14692	15016
+41	0.988	0.731	0.861	0.837	236	14606	86	88	324	15016
+weighted_accuracy = 0.988
+weighted_F1 = 0.988
+weighted_bal_acc = 0.861
+weighted_cal_F1 = 0.785
+cls	acc	F1	bal_acc	cal_F1	tp	tn	fp	fn	support	total
+0	0.995	0.992	0.993	0.992	7527	14287	2	113	7640	21929
+41	0.995	0.996	0.993	0.985	14287	7527	113	2	14289	21929
+weighted_accuracy = 0.995
+weighted_F1 = 0.995
+weighted_bal_acc = 0.993
+weighted_cal_F1 = 0.988
+cls	acc	F1	bal_acc	cal_F1	tp	tn	fp	fn	support	total
+0	0.982	0.984	0.984	0.983	17512	14289	1	586	18098	32388
+41	0.982	0.980	0.984	0.969	14289	17512	586	1	14290	32388
+weighted_accuracy = 0.982
+weighted_F1 = 0.982
+weighted_bal_acc = 0.984
+weighted_cal_F1 = 0.977
+cls	acc	F1	bal_acc	cal_F1	tp	tn	fp	fn	support	total
+0	0.928	0.952	0.916	0.873	24175	6962	819	1600	25775	33556
+41	0.928	0.852	0.916	0.886	6962	24175	1600	819	7781	33556
+weighted_accuracy = 0.928
+weighted_F1 = 0.929
+weighted_bal_acc = 0.916
+weighted_cal_F1 = 0.876
+cls	acc	F1	bal_acc	cal_F1	tp	tn	fp	fn	support	total
+0	0.992	0.995	0.985	0.972	55020	12572	350	174	55194	68116
+41	0.992	0.980	0.985	0.983	12572	55020	174	350	12922	68116
+weighted_accuracy = 0.992
+weighted_F1 = 0.992
+weighted_bal_acc = 0.985
+weighted_cal_F1 = 0.974
+cls	acc	F1	bal_acc	cal_F1	tp	tn	fp	fn	support	total
+0	0.981	0.979	0.981	0.970	12227	13978	316	198	12425	26719
+41	0.981	0.982	0.981	0.973	13978	12227	198	316	14294	26719
+weighted_accuracy = 0.981
+weighted_F1 = 0.981
+weighted_bal_acc = 0.981
+weighted_cal_F1 = 0.972
+cls	acc	F1	bal_acc	cal_F1	tp	tn	fp	fn	support	total
+0	0.995	0.997	0.995	0.993	45072	12924	52	243	45315	58291
+41	0.995	0.989	0.995	0.993	12924	45072	243	52	12976	58291
+weighted_accuracy = 0.995
+weighted_F1 = 0.995
+weighted_bal_acc = 0.995
+weighted_cal_F1 = 0.993
+cls	acc	F1	bal_acc	cal_F1	tp	tn	fp	fn	support	total
+0	0.982	0.991	0.841	0.759	23968	446	199	248	24216	24861
+41	0.982	0.666	0.841	0.808	446	23968	248	199	645	24861
+weighted_accuracy = 0.982
+weighted_F1 = 0.982
+weighted_bal_acc = 0.841
+weighted_cal_F1 = 0.761
+cls	acc	F1	bal_acc	cal_F1	tp	tn	fp	fn	support	total
+0	0.983	0.978	0.979	0.978	9053	14281	4	395	9448	23733
+41	0.983	0.986	0.979	0.960	14281	9053	395	4	14285	23733
+weighted_accuracy = 0.983
+weighted_F1 = 0.983
+weighted_bal_acc = 0.979
+weighted_cal_F1 = 0.967
+cls	acc	F1	bal_acc	cal_F1	tp	tn	fp	fn	support	total
+0	0.969	0.973	0.968	0.952	19201	13779	513	535	19736	34028
+41	0.969	0.963	0.968	0.955	13779	19201	535	513	14292	34028
+weighted_accuracy = 0.969
+weighted_F1 = 0.969
+weighted_bal_acc = 0.968
+weighted_cal_F1 = 0.953
+cls	acc	F1	bal_acc	cal_F1	tp	tn	fp	fn	support	total
+0	0.996	0.992	0.993	0.992	4894	14280	9	71	4965	19254
+41	0.996	0.997	0.993	0.986	14280	4894	71	9	14289	19254
+weighted_accuracy = 0.996
+weighted_F1 = 0.996
+weighted_bal_acc = 0.993
+weighted_cal_F1 = 0.987
+cls	acc	F1	bal_acc	cal_F1	tp	tn	fp	fn	support	total
+0	0.996	0.994	0.994	0.994	8818	14283	0	101	8919	23202
+41	0.996	0.996	0.994	0.989	14283	8818	101	0	14283	23202
+weighted_accuracy = 0.996
+weighted_F1 = 0.996
+weighted_bal_acc = 0.994
+weighted_cal_F1 = 0.991
+cls	acc	F1	bal_acc	cal_F1	tp	tn	fp	fn	support	total
+0	0.992	0.996	0.982	0.968	27882	1077	32	209	28091	29200
+41	0.992	0.899	0.982	0.978	1077	27882	209	32	1109	29200
+weighted_accuracy = 0.992
+weighted_F1 = 0.992
+weighted_bal_acc = 0.982
+weighted_cal_F1 = 0.969
+cls	acc	F1	bal_acc	cal_F1	tp	tn	fp	fn	support	total
+0	0.976	0.971	0.972	0.970	9985	14264	21	582	10567	24852
+41	0.976	0.979	0.972	0.947	14264	9985	582	21	14285	24852
+weighted_accuracy = 0.976
+weighted_F1 = 0.976
+weighted_bal_acc = 0.972
+weighted_cal_F1 = 0.957
+cls	acc	F1	bal_acc	cal_F1	tp	tn	fp	fn	support	total
+0	0.995	0.995	0.995	0.995	16278	14283	5	158	16436	30724
+41	0.995	0.994	0.995	0.990	14283	16278	158	5	14288	30724
+weighted_accuracy = 0.995
+weighted_F1 = 0.995
+weighted_bal_acc = 0.995
+weighted_cal_F1 = 0.993
+cls	acc	F1	bal_acc	cal_F1	tp	tn	fp	fn	support	total
+0	0.992	0.996	0.982	0.968	27882	1077	32	209	28091	29200
+41	0.992	0.899	0.982	0.978	1077	27882	209	32	1109	29200
+weighted_accuracy = 0.992
+weighted_F1 = 0.992
+weighted_bal_acc = 0.982
+weighted_cal_F1 = 0.969
+cls	acc	F1	bal_acc	cal_F1	tp	tn	fp	fn	support	total
+0	0.989	0.994	0.651	0.588	29533	77	174	155	29688	29939
+41	0.989	0.319	0.651	0.466	77	29533	155	174	251	29939
+weighted_accuracy = 0.989
+weighted_F1 = 0.989
+weighted_bal_acc = 0.651
+weighted_cal_F1 = 0.587
+cls	acc	F1	bal_acc	cal_F1	tp	tn	fp	fn	support	total
+0	0.993	0.994	0.994	0.994	19458	14288	0	234	19692	33980
+41	0.993	0.992	0.994	0.988	14288	19458	234	0	14288	33980
+weighted_accuracy = 0.993
+weighted_F1 = 0.993
+weighted_bal_acc = 0.994
+weighted_cal_F1 = 0.992
+cls	acc	F1	bal_acc	cal_F1	tp	tn	fp	fn	support	total
+0	0.993	0.995	0.995	0.994	38788	14271	20	368	39156	53447
+41	0.993	0.987	0.995	0.990	14271	38788	368	20	14291	53447
+weighted_accuracy = 0.993
+weighted_F1 = 0.993
+weighted_bal_acc = 0.995
+weighted_cal_F1 = 0.993
+cls	acc	F1	bal_acc	cal_F1	tp	tn	fp	fn	support	total
+0	0.975	0.985	0.958	0.928	29038	4985	360	501	29539	34884
+41	0.975	0.921	0.958	0.949	4985	29038	501	360	5345	34884
+weighted_accuracy = 0.975
+weighted_F1 = 0.975
+weighted_bal_acc = 0.958
+weighted_cal_F1 = 0.931
+cls	acc	F1	bal_acc	cal_F1	tp	tn	fp	fn	support	total
+0	0.990	0.991	0.991	0.990	17712	14284	2	335	18047	32333
+41	0.990	0.988	0.991	0.982	14284	17712	335	2	14286	32333
+weighted_accuracy = 0.990
+weighted_F1 = 0.990
+weighted_bal_acc = 0.991
+weighted_cal_F1 = 0.987
+cls	acc	F1	bal_acc	cal_F1	tp	tn	fp	fn	support	total
+0	0.995	0.988	0.996	0.994	3438	14220	73	7	3445	17738
+41	0.995	0.997	0.996	0.995	14220	3438	7	73	14293	17738
+weighted_accuracy = 0.995
+weighted_F1 = 0.996
+weighted_bal_acc = 0.996
+weighted_cal_F1 = 0.995
+cls	acc	F1	bal_acc	cal_F1	tp	tn	fp	fn	support	total
+0	0.988	0.993	0.974	0.954	43730	4671	210	392	44122	49003
+41	0.988	0.939	0.974	0.969	4671	43730	392	210	4881	49003
+weighted_accuracy = 0.988
+weighted_F1 = 0.988
+weighted_bal_acc = 0.974
+weighted_cal_F1 = 0.956
+cls	acc	F1	bal_acc	cal_F1	tp	tn	fp	fn	support	total
+0	0.996	0.996	0.996	0.996	17872	14285	1	136	18008	32294
+41	0.996	0.995	0.996	0.992	14285	17872	136	1	14286	32294
+weighted_accuracy = 0.996
+weighted_F1 = 0.996
+weighted_bal_acc = 0.996
+weighted_cal_F1 = 0.995
+cls	acc	F1	bal_acc	cal_F1	tp	tn	fp	fn	support	total
+0	0.989	0.989	0.989	0.985	14513	14165	128	189	14702	28995
+41	0.989	0.989	0.989	0.983	14165	14513	189	128	14293	28995
+weighted_accuracy = 0.989
+weighted_F1 = 0.989
+weighted_bal_acc = 0.989
+weighted_cal_F1 = 0.984
+cls	acc	F1	bal_acc	cal_F1	tp	tn	fp	fn	support	total
+0	0.988	0.991	0.991	0.991	27701	14288	1	518	28219	42508
+41	0.988	0.982	0.991	0.982	14288	27701	518	1	14289	42508
+weighted_accuracy = 0.988
+weighted_F1 = 0.988
+weighted_bal_acc = 0.991
+weighted_cal_F1 = 0.988
+cls	acc	F1	bal_acc	cal_F1	tp	tn	fp	fn	support	total
+0	0.994	0.993	0.993	0.993	12752	14283	3	166	12918	27204
+41	0.994	0.994	0.993	0.987	14283	12752	166	3	14286	27204
+weighted_accuracy = 0.994
+weighted_F1 = 0.994
+weighted_bal_acc = 0.993
+weighted_cal_F1 = 0.990
+cls	acc	F1	bal_acc	cal_F1	tp	tn	fp	fn	support	total
+0	0.994	0.997	0.960	0.927	43613	1832	154	134	43747	45733
+41	0.994	0.927	0.960	0.957	1832	43613	134	154	1986	45733
+weighted_accuracy = 0.994
+weighted_F1 = 0.994
+weighted_bal_acc = 0.960
+weighted_cal_F1 = 0.928
+cls	acc	F1	bal_acc	cal_F1	tp	tn	fp	fn	support	total
+0	0.961	0.980	0.821	0.739	59379	1313	641	1822	61201	63155
+41	0.961	0.516	0.821	0.776	1313	59379	1822	641	1954	63155
+weighted_accuracy = 0.961
+weighted_F1 = 0.965
+weighted_bal_acc = 0.821
+weighted_cal_F1 = 0.740
+cls	acc	F1	bal_acc	cal_F1	tp	tn	fp	fn	support	total
+0	0.979	0.983	0.982	0.981	23998	14242	42	797	24795	39079
+41	0.979	0.971	0.982	0.967	14242	23998	797	42	14284	39079
+weighted_accuracy = 0.979
+weighted_F1 = 0.979
+weighted_bal_acc = 0.982
+weighted_cal_F1 = 0.976
+cls	acc	F1	bal_acc	cal_F1	tp	tn	fp	fn	support	total
+0	0.987	0.991	0.984	0.974	37314	13501	300	377	37691	51492
+41	0.987	0.976	0.984	0.979	13501	37314	377	300	13801	51492
+weighted_accuracy = 0.987
+weighted_F1 = 0.987
+weighted_bal_acc = 0.984
+weighted_cal_F1 = 0.975
+cls	acc	F1	bal_acc	cal_F1	tp	tn	fp	fn	support	total
+0	0.990	0.992	0.990	0.986	21035	14168	125	220	21255	35548
+41	0.990	0.988	0.990	0.985	14168	21035	220	125	14293	35548
+weighted_accuracy = 0.990
+weighted_F1 = 0.990
+weighted_bal_acc = 0.990
+weighted_cal_F1 = 0.986
+cls	acc	F1	bal_acc	cal_F1	tp	tn	fp	fn	support	total
+0	0.992	0.994	0.994	0.994	27890	14288	1	323	28213	42502
+41	0.992	0.989	0.994	0.989	14288	27890	323	1	14289	42502
+weighted_accuracy = 0.992
+weighted_F1 = 0.992
+weighted_bal_acc = 0.994
+weighted_cal_F1 = 0.992
+cls	acc	F1	bal_acc	cal_F1	tp	tn	fp	fn	support	total
+0	0.995	0.998	0.960	0.926	80818	1392	117	261	81079	82588
+41	0.995	0.880	0.960	0.956	1392	80818	261	117	1509	82588
+weighted_accuracy = 0.995
+weighted_F1 = 0.996
+weighted_bal_acc = 0.960
+weighted_cal_F1 = 0.927
+cls	acc	F1	bal_acc	cal_F1	tp	tn	fp	fn	support	total
+0	0.994	0.995	0.995	0.995	23043	14289	0	233	23276	37565
+41	0.994	0.992	0.995	0.990	14289	23043	233	0	14289	37565
+weighted_accuracy = 0.994
+weighted_F1 = 0.994
+weighted_bal_acc = 0.995
+weighted_cal_F1 = 0.993
+cls	acc	F1	bal_acc	cal_F1	tp	tn	fp	fn	support	total
+0	0.994	0.996	0.996	0.996	36806	14286	0	303	37109	51395
+41	0.994	0.990	0.996	0.992	14286	36806	303	0	14286	51395
+weighted_accuracy = 0.994
+weighted_F1 = 0.994
+weighted_bal_acc = 0.996
+weighted_cal_F1 = 0.995
+cls	acc	F1	bal_acc	cal_F1	tp	tn	fp	fn	support	total
+0	0.999	0.999	0.817	0.733	108594	141	81	40	108634	108856
+41	0.999	0.700	0.817	0.777	141	108594	40	81	222	108856
+weighted_accuracy = 0.999
+weighted_F1 = 0.999
+weighted_bal_acc = 0.817
+weighted_cal_F1 = 0.733
+cls	acc	F1	bal_acc	cal_F1	tp	tn	fp	fn	support	total
+0	0.994	0.996	0.996	0.996	27083	14289	0	235	27318	41607
+41	0.994	0.992	0.996	0.991	14289	27083	235	0	14289	41607
+weighted_accuracy = 0.994
+weighted_F1 = 0.994
+weighted_bal_acc = 0.996
+weighted_cal_F1 = 0.994
+cls	acc	F1	bal_acc	cal_F1	tp	tn	fp	fn	support	total
+0	0.994	0.996	0.993	0.988	67058	13921	128	394	67452	81501
+41	0.994	0.982	0.993	0.990	13921	67058	394	128	14049	81501
+weighted_accuracy = 0.994
+weighted_F1 = 0.994
+weighted_bal_acc = 0.993
+weighted_cal_F1 = 0.988
+cls	acc	F1	bal_acc	cal_F1	tp	tn	fp	fn	support	total
+0	0.993	0.994	0.994	0.994	16905	14286	0	209	17114	31400
+41	0.993	0.993	0.994	0.988	14286	16905	209	0	14286	31400
+weighted_accuracy = 0.993
+weighted_F1 = 0.993
+weighted_bal_acc = 0.994
+weighted_cal_F1 = 0.991
+cls	acc	F1	bal_acc	cal_F1	tp	tn	fp	fn	support	total
+0	0.998	0.999	-nan	-nan	29456	0	0	68	29524	29524
+41	0.998	-nan	-nan	-nan	0	29456	68	0	0	29524
+weighted_accuracy = 0.998
+weighted_F1 = 0.999
+weighted_bal_acc = 0.000
+weighted_cal_F1 = 0.000
+cls	acc	F1	bal_acc	cal_F1	tp	tn	fp	fn	support	total
+0	0.992	0.993	0.993	0.993	15985	14288	1	239	16224	30513
+41	0.992	0.992	0.993	0.985	14288	15985	239	1	14289	30513
+weighted_accuracy = 0.992
+weighted_F1 = 0.992
+weighted_bal_acc = 0.993
+weighted_cal_F1 = 0.989
+cls	acc	F1	bal_acc	cal_F1	tp	tn	fp	fn	support	total
+0	0.986	0.983	0.984	0.982	9934	14211	76	264	10198	24485
+41	0.986	0.988	0.984	0.972	14211	9934	264	76	14287	24485
+weighted_accuracy = 0.986
+weighted_F1 = 0.986
+weighted_bal_acc = 0.984
+weighted_cal_F1 = 0.976
+cls	acc	F1	bal_acc	cal_F1	tp	tn	fp	fn	support	total
+0	0.979	0.973	0.976	0.970	8458	14133	161	317	8775	23069
+41	0.979	0.983	0.976	0.959	14133	8458	317	161	14294	23069
+weighted_accuracy = 0.979
+weighted_F1 = 0.979
+weighted_bal_acc = 0.976
+weighted_cal_F1 = 0.964
+cls	acc	F1	bal_acc	cal_F1	tp	tn	fp	fn	support	total
+0	0.990	0.990	0.990	0.990	15753	14289	0	315	16068	30357
+41	0.990	0.989	0.990	0.981	14289	15753	315	0	14289	30357
+weighted_accuracy = 0.990
+weighted_F1 = 0.990
+weighted_bal_acc = 0.990
+weighted_cal_F1 = 0.986
+cls	acc	F1	bal_acc	cal_F1	tp	tn	fp	fn	support	total
+0	0.985	0.986	0.986	0.986	17941	14289	0	502	18443	32732
+41	0.985	0.983	0.986	0.974	14289	17941	502	0	14289	32732
+weighted_accuracy = 0.985
+weighted_F1 = 0.985
+weighted_bal_acc = 0.986
+weighted_cal_F1 = 0.981
+cls	acc	F1	bal_acc	cal_F1	tp	tn	fp	fn	support	total
+0	0.975	0.971	0.975	0.961	10651	13873	421	217	10868	25162
+41	0.975	0.978	0.975	0.965	13873	10651	217	421	14294	25162
+weighted_accuracy = 0.975
+weighted_F1 = 0.975
+weighted_bal_acc = 0.975
+weighted_cal_F1 = 0.964
+cls	acc	F1	bal_acc	cal_F1	tp	tn	fp	fn	support	total
+0	0.985	0.990	0.987	0.984	35379	11938	84	652	36031	48053
+41	0.985	0.970	0.987	0.979	11938	35379	652	84	12022	48053
+weighted_accuracy = 0.985
+weighted_F1 = 0.985
+weighted_bal_acc = 0.987
+weighted_cal_F1 = 0.983
+cls	acc	F1	bal_acc	cal_F1	tp	tn	fp	fn	support	total
+0	0.953	0.976	0.622	0.566	307946	1542	3973	11332	319278	324793
+41	0.953	0.168	0.622	0.414	1542	307946	11332	3973	5515	324793
+weighted_accuracy = 0.953
+weighted_F1 = 0.962
+weighted_bal_acc = 0.622
+weighted_cal_F1 = 0.564
+cls	acc	F1	bal_acc	cal_F1	tp	tn	fp	fn	support	total
+0	0.996	0.998	0.498	0.499	378017	0	14	1361	379378	379392
+41	0.996	-nan	0.498	0.000	0	378017	1361	14	14	379392
+weighted_accuracy = 0.996
+weighted_F1 = 0.998
+weighted_bal_acc = 0.498
+weighted_cal_F1 = 0.499
+cls	acc	F1	bal_acc	cal_F1	tp	tn	fp	fn	support	total
+0	0.999	0.999	0.999	0.999	158220	14290	0	168	158388	172678
+41	0.999	0.994	0.999	0.999	14290	158220	168	0	14290	172678
+weighted_accuracy = 0.999
+weighted_F1 = 0.999
+weighted_bal_acc = 0.999
+weighted_cal_F1 = 0.999
+cls	acc	F1	bal_acc	cal_F1	tp	tn	fp	fn	support	total
+0	0.995	0.997	0.994	0.991	206264	14206	85	1121	207385	221676
+41	0.995	0.959	0.994	0.992	14206	206264	1121	85	14291	221676
+weighted_accuracy = 0.995
+weighted_F1 = 0.995
+weighted_bal_acc = 0.994
+weighted_cal_F1 = 0.991
+cls	acc	F1	bal_acc	cal_F1	tp	tn	fp	fn	support	total
+0	0.920	0.954	0.895	0.843	40633	4998	794	3169	43802	49594
+41	0.920	0.716	0.895	0.860	4998	40633	3169	794	5792	49594
+weighted_accuracy = 0.920
+weighted_F1 = 0.926
+weighted_bal_acc = 0.895
+weighted_cal_F1 = 0.845
+cls	acc	F1	bal_acc	cal_F1	tp	tn	fp	fn	support	total
+0	0.991	0.993	0.993	0.993	26706	14285	1	355	27061	41347
+41	0.991	0.988	0.993	0.987	14285	26706	355	1	14286	41347
+weighted_accuracy = 0.991
+weighted_F1 = 0.991
+weighted_bal_acc = 0.993
+weighted_cal_F1 = 0.991
+cls	acc	F1	bal_acc	cal_F1	tp	tn	fp	fn	support	total
+0	0.986	0.991	0.986	0.980	34925	9389	115	535	35460	44964
+41	0.986	0.967	0.986	0.979	9389	34925	535	115	9504	44964
+weighted_accuracy = 0.986
+weighted_F1 = 0.986
+weighted_bal_acc = 0.986
+weighted_cal_F1 = 0.980
+cls	acc	F1	bal_acc	cal_F1	tp	tn	fp	fn	support	total
+0	0.992	0.996	0.831	0.748	40422	425	214	102	40524	41163
+41	0.992	0.729	0.831	0.796	425	40422	102	214	639	41163
+weighted_accuracy = 0.992
+weighted_F1 = 0.992
+weighted_bal_acc = 0.831
+weighted_cal_F1 = 0.749
+cls	acc	F1	bal_acc	cal_F1	tp	tn	fp	fn	support	total
+0	0.932	0.960	0.858	0.784	17446	2423	798	643	18089	21310
+41	0.932	0.771	0.858	0.825	2423	17446	643	798	3221	21310
+weighted_accuracy = 0.932
+weighted_F1 = 0.932
+weighted_bal_acc = 0.858
+weighted_cal_F1 = 0.790
+cls	acc	F1	bal_acc	cal_F1	tp	tn	fp	fn	support	total
+0	0.995	0.995	0.995	0.995	14094	14290	0	134	14228	28518
+41	0.995	0.995	0.995	0.991	14290	14094	134	0	14290	28518
+weighted_accuracy = 0.995
+weighted_F1 = 0.995
+weighted_bal_acc = 0.995
+weighted_cal_F1 = 0.993
+cls	acc	F1	bal_acc	cal_F1	tp	tn	fp	fn	support	total
+0	0.986	0.985	0.985	0.979	11051	11882	159	178	11229	23270
+41	0.986	0.986	0.985	0.978	11882	11051	178	159	12041	23270
+weighted_accuracy = 0.986
+weighted_F1 = 0.986
+weighted_bal_acc = 0.985
+weighted_cal_F1 = 0.978
+cls	acc	F1	bal_acc	cal_F1	tp	tn	fp	fn	support	total
+0	0.970	0.983	0.930	0.883	35320	3916	536	691	36011	40463
+41	0.970	0.865	0.930	0.917	3916	35320	691	536	4452	40463
+weighted_accuracy = 0.970
+weighted_F1 = 0.970
+weighted_bal_acc = 0.930
+weighted_cal_F1 = 0.887
+cls	acc	F1	bal_acc	cal_F1	tp	tn	fp	fn	support	total
+0	0.954	0.973	0.898	0.835	54216	8488	1906	1093	55309	65703
+41	0.954	0.850	0.898	0.880	8488	54216	1093	1906	10394	65703
+weighted_accuracy = 0.954
+weighted_F1 = 0.954
+weighted_bal_acc = 0.898
+weighted_cal_F1 = 0.842
+cls	acc	F1	bal_acc	cal_F1	tp	tn	fp	fn	support	total
+0	0.992	0.993	0.993	0.993	19679	14289	0	260	19939	34228
+41	0.992	0.991	0.993	0.987	14289	19679	260	0	14289	34228
+weighted_accuracy = 0.992
+weighted_F1 = 0.992
+weighted_bal_acc = 0.993
+weighted_cal_F1 = 0.991
+cls	acc	F1	bal_acc	cal_F1	tp	tn	fp	fn	support	total
+0	0.992	0.994	0.994	0.993	25146	14275	16	298	25444	39735
+41	0.992	0.989	0.994	0.988	14275	25146	298	16	14291	39735
+weighted_accuracy = 0.992
+weighted_F1 = 0.992
+weighted_bal_acc = 0.994
+weighted_cal_F1 = 0.991
+cls	acc	F1	bal_acc	cal_F1	tp	tn	fp	fn	support	total
+0	0.997	0.998	0.988	0.977	102943	6579	153	184	103127	109859
+41	0.997	0.975	0.988	0.987	6579	102943	184	153	6732	109859
+weighted_accuracy = 0.997
+weighted_F1 = 0.997
+weighted_bal_acc = 0.988
+weighted_cal_F1 = 0.977
+cls	acc	F1	bal_acc	cal_F1	tp	tn	fp	fn	support	total
+0	0.980	0.990	0.746	0.663	97051	1386	1396	652	97703	100485
+41	0.980	0.575	0.746	0.659	1386	97051	652	1396	2782	100485
+weighted_accuracy = 0.980
+weighted_F1 = 0.978
+weighted_bal_acc = 0.746
+weighted_cal_F1 = 0.663
+cls	acc	F1	bal_acc	cal_F1	tp	tn	fp	fn	support	total
+0	0.995	0.996	0.996	0.995	21117	12321	17	153	21270	33608
+41	0.995	0.993	0.996	0.992	12321	21117	153	17	12338	33608
+weighted_accuracy = 0.995
+weighted_F1 = 0.995
+weighted_bal_acc = 0.996
+weighted_cal_F1 = 0.994
+cls	acc	F1	bal_acc	cal_F1	tp	tn	fp	fn	support	total
+0	0.985	0.987	0.987	0.987	17775	14282	4	473	18248	32534
+41	0.985	0.984	0.987	0.975	14282	17775	473	4	14286	32534
+weighted_accuracy = 0.985
+weighted_F1 = 0.985
+weighted_bal_acc = 0.987
+weighted_cal_F1 = 0.981
+cls	acc	F1	bal_acc	cal_F1	tp	tn	fp	fn	support	total
+0	0.996	0.993	0.993	0.993	6904	14288	1	91	6995	21284
+41	0.996	0.997	0.993	0.987	14288	6904	91	1	14289	21284
+weighted_accuracy = 0.996
+weighted_F1 = 0.996
+weighted_bal_acc = 0.993
+weighted_cal_F1 = 0.989
+cls	acc	F1	bal_acc	cal_F1	tp	tn	fp	fn	support	total
+0	0.995	0.996	0.996	0.996	23863	14285	1	179	24042	38328
+41	0.995	0.994	0.996	0.993	14285	23863	179	1	14286	38328
+weighted_accuracy = 0.995
+weighted_F1 = 0.995
+weighted_bal_acc = 0.996
+weighted_cal_F1 = 0.995
+cls	acc	F1	bal_acc	cal_F1	tp	tn	fp	fn	support	total
+0	0.996	0.997	0.997	0.997	21133	14285	0	135	21268	35553
+41	0.996	0.995	0.997	0.994	14285	21133	135	0	14285	35553
+weighted_accuracy = 0.996
+weighted_F1 = 0.996
+weighted_bal_acc = 0.997
+weighted_cal_F1 = 0.996
+cls	acc	F1	bal_acc	cal_F1	tp	tn	fp	fn	support	total
+0	0.981	0.991	0.709	0.632	97606	429	564	1289	98895	99888
+41	0.981	0.316	0.709	0.593	429	97606	1289	564	993	99888
+weighted_accuracy = 0.981
+weighted_F1 = 0.984
+weighted_bal_acc = 0.709
+weighted_cal_F1 = 0.632
+cls	acc	F1	bal_acc	cal_F1	tp	tn	fp	fn	support	total
+0	0.989	0.990	0.990	0.990	15148	14284	1	317	15465	29750
+41	0.989	0.989	0.990	0.980	14284	15148	317	1	14285	29750
+weighted_accuracy = 0.989
+weighted_F1 = 0.989
+weighted_bal_acc = 0.990
+weighted_cal_F1 = 0.985
+cls	acc	F1	bal_acc	cal_F1	tp	tn	fp	fn	support	total
+0	0.997	0.998	0.712	0.634	10844	25	34	2	10846	10905
+41	0.997	0.581	0.712	0.595	25	10844	2	34	59	10905
+weighted_accuracy = 0.997
+weighted_F1 = 0.996
+weighted_bal_acc = 0.712
+weighted_cal_F1 = 0.634

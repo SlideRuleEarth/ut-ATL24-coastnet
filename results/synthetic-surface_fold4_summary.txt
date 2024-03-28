@@ -1,0 +1,6 @@
+Average Acc = 0.984
+Average F1 = 0.924
+Average BA = 0.973
+Average cal_F1 = 0.955
+Average Weighted F1 = 0.985
+Average Weighted cal_F1 = 0.946
