@@ -78,9 +78,6 @@ T relative_depth_check (T p, const double water_column_width)
     // We need to know the along-track distance to surface photons
     const auto nearby_surface_indexes = get_nearest_along_track_prediction (p, sea_surface_class);
 
-    // We also need surface elevation estimates at each point
-    const auto s = get_surface_estimates (p);
-
     for (size_t i = 0; i < p.size (); ++i)
     {
         // Ignore non-bathy
@@ -99,7 +96,7 @@ T relative_depth_check (T p, const double water_column_width)
             continue;
 
         // If the bathy below the surface?
-        if (p[i].z < s[j])
+        if (p[i].z < p[j].surface_elevation)
             continue; // Yes, keep going
 
         // No, reassign
@@ -121,9 +118,6 @@ T surface_range_check (T p, const double range)
     if (total_surface == 0)
         return p;
 
-    // We need surface elevation estimates at each point
-    const auto s = get_surface_estimates (p);
-
     // Surface photons must be near the surface estimate
     for (size_t i = 0; i < p.size (); ++i)
     {
@@ -132,7 +126,7 @@ T surface_range_check (T p, const double range)
             continue;
 
         // Is it close enough?
-        const double d = std::fabs (p[i].z - s[i]);
+        const double d = std::fabs (p[i].z - p[i].surface_elevation);
 
         // Must be within +-range
         if (d > range)
@@ -154,9 +148,6 @@ T bathy_range_check (T p, const double range)
     if (total_bathy == 0)
         return p;
 
-    // We need bathy elevation estimates at each point
-    const auto s = get_bathy_estimates (p);
-
     // Bathy photons must be near the bathy estimate
     for (size_t i = 0; i < p.size (); ++i)
     {
@@ -165,7 +156,7 @@ T bathy_range_check (T p, const double range)
             continue;
 
         // Is it close enough?
-        const double d = std::fabs (p[i].z - s[i]);
+        const double d = std::fabs (p[i].z - p[i].bathy_elevation);
 
         // Must be within +-range
         if (d > range)
