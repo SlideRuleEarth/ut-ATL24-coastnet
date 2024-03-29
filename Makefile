@@ -149,6 +149,22 @@ cross_val_bathy: build
 	@build=release ./scripts/cross_validate_bathy.sh "$(INPUT_GLOB)" $(ID)
 
 ##############################################################################
+# Combine bathy and surface predictions into a single file
+##############################################################################
+
+.PHONY: combine # Combine surface and bathy predictions into one
+combine: build
+	@build=debug ./scripts/combine.sh $(ID)
+	@./scripts/compute_scores.sh "./predictions/$(ID)/*_classified_combined.csv"
+
+.PHONY: score_combined # Generate scores on combined files
+score_combined:
+	@echo "Combined Surface Scores"
+	@./scripts/summarize_scores.sh "./predictions/$(ID)/*_classified_combined_results.txt" 41
+	@echo "Combined Bathy Scores"
+	@./scripts/summarize_scores.sh "./predictions/$(ID)/*_classified_combined_results.txt" 40
+
+##############################################################################
 # Blunder detection
 ##############################################################################
 
@@ -156,6 +172,7 @@ cross_val_bathy: build
 check_surface: build
 	@build=debug ./scripts/check.sh \
 		"./predictions/$(ID)/*_classified_surface.csv" \
+		"./predictions/$(ID)/*_classified_bathy.csv" \
 		./predictions/$(ID)
 	@./scripts/compute_scores.sh "./predictions/$(ID)/*_classified_surface_checked.csv" 41
 
@@ -187,7 +204,6 @@ classify_surface_mixed:
 		./models/coastnet-surface-synthetic.pt \
 		./predictions/mixed
 	@./scripts/compute_scores.sh "./predictions/mixed/*_classified_surface.csv" 41
-	@./scripts/summarize_scores.sh "./predictions/mixed/*_classified_surface_results.txt" 41
 
 .PHONY: classify_bathy_mixed # Run bathy classifier using synthetic model
 classify_bathy_mixed:
@@ -197,7 +213,17 @@ classify_bathy_mixed:
 		./models/coastnet-bathy-synthetic.pt \
 		./predictions/mixed
 	@./scripts/compute_scores.sh "./predictions/mixed/*_classified_bathy.csv" 40
-	@./scripts/summarize_scores.sh "./predictions/mixed/*_classified_bathy_results.txt" 40
+
+.PHONY: score_mixed # Generate scores on mixed files
+score_mixed:
+	@./scripts/summarize_scores.sh \
+		"./predictions/mixed/*_classified_surface_results.txt" 41 \
+		> mixed-surface_summary.txt
+	@./scripts/summarize_scores.sh \
+		"./predictions/mixed/*_classified_bathy_results.txt" 40 \
+		> mixed-bathy_summary.txt
+	@cat mixed-surface_summary.txt
+	@cat mixed-bathy_summary.txt
 
 ##############################################################################
 #
@@ -245,6 +271,14 @@ view_checked_bathy:
 		"streamlit run ../ATL24_rasters/apps/view_predictions.py -- --verbose {}" \
 		::: ${CHECKED_BATHY_PREDICTION_FNS}
 
+MIXED_BATHY_PREDICTION_FNS=$(shell find ./predictions/mixed/*_classified_bathy.csv | shuf | tail)
+
+.PHONY: view_mixed_bathy # View mixed bathy prediction labels
+view_mixed_bathy:
+	@parallel --lb --jobs=100 \
+		"streamlit run ../ATL24_rasters/apps/view_predictions.py -- --verbose {}" \
+		::: ${MIXED_BATHY_PREDICTION_FNS}
+
 SELECTIONS=\
 		ATL03_20210704023000_01601201_005_01_gt3r \
 		ATL03_20230213042035_08341807_006_01_gt1l
@@ -282,6 +316,15 @@ manual_cross_val:
 synthetic_cross_val:
 	@$(MAKE) ID=synthetic --no-print-directory cross_val_surface
 	@$(MAKE) ID=synthetic --no-print-directory cross_val_bathy
+
+.PHONY: classify_full_run # Classify all datasets
+classify_full_run:
+	@$(MAKE) --no-print-directory classify_surface
+	@$(MAKE) --no-print-directory classify_bathy
+	@$(MAKE) ID=synthetic --no-print-directory classify_surface
+	@$(MAKE) ID=synthetic --no-print-directory classify_bathy
+	@$(MAKE) --no-print-directory classify_surface_mixed
+	@$(MAKE) --no-print-directory classify_bathy_mixed
 
 ##############################################################################
 #
