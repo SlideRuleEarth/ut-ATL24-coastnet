@@ -67,10 +67,6 @@ args get_args (int argc, char **argv, const std::string &usage)
     if (optind != argc)
         throw std::runtime_error ("Too many arguments on command line");
 
-    // Check args
-    if (args.cls == -1)
-        throw std::runtime_error ("No class was specified");
-
     return args;
 }
 

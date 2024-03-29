@@ -39,7 +39,7 @@ int main (int argc, char **argv)
 
         // Convert it to the correct format
         bool has_predictions = false;
-        auto p = convert_dataframe (df, has_predictions);
+        const auto p = convert_dataframe (df, has_predictions);
 
         if (args.verbose)
         {
@@ -49,33 +49,47 @@ int main (int argc, char **argv)
             clog << "Sorting points" << endl;
         }
 
+        // Do this for one or more classes
+        set<long> classes;
+
+        if (args.cls != -1)
+        {
+            // Do it for the specified class
+            classes.insert (args.cls);
+        }
+        else
+        {
+            // Do it for all classes in the dataset
+            for (size_t i = 0; i < p.size (); ++i)
+                classes.insert (p[i].cls);
+        }
+
+        if (args.verbose)
+        {
+            clog << "Computing scores for:";
+            for (auto c : classes)
+                clog << " " << c;
+            clog << endl;
+        }
+
         // Keep track of performance
         unordered_map<long,confusion_matrix> cm;
 
-        // Also allocate cm's even if the point cloud does not contain these classes
+        // Allocate cm
         cm[0] = confusion_matrix ();
-        cm[args.cls] = confusion_matrix ();
 
-        // Get results
-        //
-        // For each point
-        for (size_t i = 0; i < p.size (); ++i)
+        // For each classification
+        for (auto cls : classes)
         {
-            // Get actual value
-            //
-            // Force it to be either 0 or the class we are predicting
-            const long actual = static_cast<int> (p[i].cls) != args.cls ? 0 : args.cls;
+            // Allocate cm
+            cm[cls] = confusion_matrix ();
 
-            // Get predicted value
-            const long pred = static_cast<int> (p[i].prediction) != args.cls ? 0 : args.cls;
-
-            // Check logic
-            assert (pred == 0 || pred == args.cls);
-
-            for (auto j : cm)
+            // For each point
+            for (size_t i = 0; i < p.size (); ++i)
             {
-                // Get the key
-                const auto cls = j.first;
+                // Get values
+                const long actual = static_cast<long> (p[i].cls);
+                const long pred = static_cast<int> (p[i].prediction);
 
                 // Update the matrix
                 const bool is_present = (actual == cls);
