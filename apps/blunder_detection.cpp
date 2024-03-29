@@ -65,10 +65,34 @@ int main (int argc, char **argv)
         if (args.verbose)
             clog << "Re-classifying points" << endl;
 
-        const auto q = blunder_detection (p, args);
+        // Copy the photons
+        auto q (p);
 
-        // Check logic
-        assert (p.size () == q.size ());
+        const size_t iterations = 3;
+
+        for (size_t i = 0; i < iterations; ++i)
+        {
+            if (args.verbose)
+                clog << "Blunder detection pass " << i << endl;
+
+            q = blunder_detection (p, args);
+
+            // Check logic
+            assert (p.size () == q.size ());
+
+            // Rerun surface and bathy estimates
+            const auto s = get_surface_estimates (q, args.surface_sigma);
+            const auto b = get_bathy_estimates (q, args.bathy_sigma);
+
+            assert (s.size () == q.size ());
+            assert (b.size () == q.size ());
+
+            for (size_t j = 0; j < q.size (); ++j)
+            {
+                q[j].surface_elevation = s[j];
+                q[j].bathy_elevation = b[j];
+            }
+        }
 
         if (args.verbose)
         {
