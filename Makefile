@@ -168,27 +168,19 @@ score_combined:
 # Blunder detection
 ##############################################################################
 
-.PHONY: check_surface # Run blunder detection
-check_surface: build
+.PHONY: check_combined # Run blunder detection
+check_combined: build
 	@build=debug ./scripts/check.sh \
-		"./predictions/$(ID)/*_classified_surface.csv" \
-		"./predictions/$(ID)/*_classified_bathy.csv" \
+		"./predictions/$(ID)/*_classified_combined.csv" \
 		./predictions/$(ID)
-	@./scripts/compute_scores.sh "./predictions/$(ID)/*_classified_surface_checked.csv" 41
-
-.PHONY: check_bathy # Run blunder detection
-check_bathy: build
-	@build=debug ./scripts/check.sh \
-		"./predictions/$(ID)/*_classified_bathy.csv" \
-		./predictions/$(ID)
-	@./scripts/compute_scores.sh "./predictions/$(ID)/*_classified_bathy_checked.csv" 40
+	@./scripts/compute_scores.sh "./predictions/$(ID)/*_classified_combined_checked.csv"
 
 .PHONY: score_checked # Generate scores on checked files
 score_checked:
 	@echo "Checked Surface Scores"
-	@./scripts/summarize_scores.sh "./predictions/$(ID)/*_classified_surface_checked_results.txt" 41
+	@./scripts/summarize_scores.sh "./predictions/$(ID)/*_classified_combined_checked_results.txt" 41
 	@echo "Checked Bathy Scores"
-	@./scripts/summarize_scores.sh "./predictions/$(ID)/*_classified_bathy_checked_results.txt" 40
+	@./scripts/summarize_scores.sh "./predictions/$(ID)/*_classified_combined_checked_results.txt" 40
 
 ##############################################################################
 #
@@ -255,21 +247,21 @@ view_bathy:
 		"streamlit run ../ATL24_rasters/apps/view_predictions.py -- --verbose {}" \
 		::: ${BATHY_PREDICTION_FNS}
 
-CHECKED_SURFACE_PREDICTION_FNS=$(shell find ./predictions/$(ID)/*_classified_surface_checked.csv | shuf | tail)
+COMBINED_PREDICTION_FNS=$(shell find ./predictions/$(ID)/*_classified_combined.csv | shuf | tail)
 
-.PHONY: view_checked_surface # View checked water surface prediction labels
-view_checked_surface:
+.PHONY: view_combined # View combined prediction labels
+view_combined:
 	@parallel --lb --jobs=100 \
 		"streamlit run ../ATL24_rasters/apps/view_predictions.py -- --verbose {}" \
-		::: ${CHECKED_SURFACE_PREDICTION_FNS}
+		::: ${COMBINED_PREDICTION_FNS}
 
-CHECKED_BATHY_PREDICTION_FNS=$(shell find ./predictions/$(ID)/*_classified_bathy_checked.csv | shuf | tail)
+CHECKED_PREDICTION_FNS=$(shell find ./predictions/$(ID)/*_classified_combined_checked.csv | shuf | tail)
 
-.PHONY: view_checked_bathy # View checked bathy prediction labels
-view_checked_bathy:
+.PHONY: view_checked # View checked prediction labels
+view_checked:
 	@parallel --lb --jobs=100 \
 		"streamlit run ../ATL24_rasters/apps/view_predictions.py -- --verbose {}" \
-		::: ${CHECKED_BATHY_PREDICTION_FNS}
+		::: ${CHECKED_PREDICTION_FNS}
 
 MIXED_BATHY_PREDICTION_FNS=$(shell find ./predictions/mixed/*_classified_bathy.csv | shuf | tail)
 
@@ -280,8 +272,16 @@ view_mixed_bathy:
 		::: ${MIXED_BATHY_PREDICTION_FNS}
 
 SELECTIONS=\
+		ATL03_20200212214153_07360601_005_01_gt2r \
 		ATL03_20210704023000_01601201_005_01_gt3r \
-		ATL03_20230213042035_08341807_006_01_gt1l
+		ATL03_20230213042035_08341807_006_01_gt1l \
+		ATL03_20200606090624_10970705_005_01_gt3l
+
+.PHONY: view_selected # View selected prediction labels
+view_selected:
+	@parallel --lb --jobs=100 \
+		"streamlit run ../ATL24_rasters/apps/view_predictions.py -- --verbose ./predictions/$(ID)/{}_classified_combined_checked.csv" \
+		::: ${SELECTIONS}
 
 ##############################################################################
 #
