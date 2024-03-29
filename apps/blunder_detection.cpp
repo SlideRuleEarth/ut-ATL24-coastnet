@@ -13,11 +13,6 @@ int main (int argc, char **argv)
 
     try
     {
-        // Check if assertions are enabled
-        bool is_debug = false;
-        assert (is_debug = true);
-        clog << "Debug is " << (is_debug ? "ON" : "OFF") << endl;
-
         // Parse the args
         auto args = cmd::get_args (argc, argv, usage);
 
