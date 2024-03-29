@@ -438,13 +438,13 @@ std::vector<double> get_elevation_estimates (const T &p, const double sigma, con
 }
 
 template<typename T>
-std::vector<double> get_surface_estimates (const T &p, const double sigma = 4.0)
+std::vector<double> get_surface_estimates (const T &p, const double sigma)
 {
     return get_elevation_estimates (p, sigma, sea_surface_class);
 }
 
 template<typename T>
-std::vector<double> get_bathy_estimates (const T &p, const double sigma = 4.0)
+std::vector<double> get_bathy_estimates (const T &p, const double sigma)
 {
     return get_elevation_estimates (p, sigma, bathy_class);
 }
