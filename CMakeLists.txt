@@ -68,3 +68,8 @@ add_executable(blunder_detection ./apps/blunder_detection.cpp)
 target_link_libraries(blunder_detection ${TORCH_LIBRARIES} gmp)
 target_include_directories(blunder_detection PUBLIC)
 target_precompile_headers(blunder_detection PUBLIC ATL24_coastnet/precompiled.h)
+
+add_executable(combine_predictions ./apps/combine_predictions.cpp)
+target_link_libraries(combine_predictions ${TORCH_LIBRARIES} gmp)
+target_include_directories(combine_predictions PUBLIC)
+target_precompile_headers(combine_predictions PUBLIC ATL24_coastnet/precompiled.h)
