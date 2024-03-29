@@ -24,6 +24,8 @@ struct args
     double water_column_width = NAN;
     double surface_range = NAN;
     double bathy_range = NAN;
+    double surface_sigma = 100.0;
+    double bathy_sigma = 60.0;
 };
 
 std::ostream &operator<< (std::ostream &os, const args &args)
@@ -37,6 +39,8 @@ std::ostream &operator<< (std::ostream &os, const args &args)
     os << "water_column_width: " << args.water_column_width << std::endl;
     os << "surface_range: " << args.surface_range << std::endl;
     os << "bathy_range: " << args.bathy_range << std::endl;
+    os << "surface_sigma: " << args.surface_sigma << std::endl;
+    os << "bathy_sigma: " << args.bathy_sigma << std::endl;
     return os;
 }
 
@@ -57,10 +61,12 @@ args get_args (int argc, char **argv, const std::string &usage)
             {"water-column-width", required_argument, 0,  'w' },
             {"surface-range", required_argument, 0,  's' },
             {"bathy-range", required_argument, 0,  'a' },
+            {"surface-sigma", required_argument, 0,  'i' },
+            {"bathy-sigma", required_argument, 0,  't' },
             {0,      0,           0,  0 }
         };
 
-        int c = getopt_long(argc, argv, "hvn:x:b:w:s:a:", long_options, &option_index);
+        int c = getopt_long(argc, argv, "hvn:x:b:w:s:a:i:t:", long_options, &option_index);
         if (c == -1)
             break;
 
@@ -83,6 +89,8 @@ args get_args (int argc, char **argv, const std::string &usage)
             case 'w': args.water_column_width = atof(optarg); break;
             case 's': args.surface_range = atof(optarg); break;
             case 'a': args.bathy_range = atof(optarg); break;
+            case 'i': args.surface_sigma = atof(optarg); break;
+            case 't': args.bathy_sigma = atof(optarg); break;
         }
     }
 

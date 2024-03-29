@@ -18,6 +18,8 @@ struct args
 {
     bool help = false;
     bool verbose = false;
+    double surface_sigma = 40.0;
+    double bathy_sigma = 40.0;
     std::string fn1;
     std::string fn2;
 };
@@ -27,6 +29,8 @@ std::ostream &operator<< (std::ostream &os, const args &args)
     os << std::boolalpha;
     os << "help: " << args.help << std::endl;
     os << "verbose: " << args.verbose << std::endl;
+    os << "surface_sigma: " << args.surface_sigma << std::endl;
+    os << "bathy_sigma: " << args.bathy_sigma << std::endl;
     return os;
 }
 
@@ -41,10 +45,12 @@ args get_args (int argc, char **argv, const std::string &usage)
         static struct option long_options[] = {
             {"help", no_argument, 0,  'h' },
             {"verbose", no_argument, 0,  'v' },
+            {"surface-sigma", required_argument, 0,  's' },
+            {"bathy-sigma", required_argument, 0,  'b' },
             {0,      0,           0,  0 }
         };
 
-        int c = getopt_long(argc, argv, "hv", long_options, &option_index);
+        int c = getopt_long(argc, argv, "hvs:b:", long_options, &option_index);
         if (c == -1)
             break;
 
@@ -61,6 +67,8 @@ args get_args (int argc, char **argv, const std::string &usage)
                 return args;
             }
             case 'v': args.verbose = true; break;
+            case 's': args.surface_sigma = atof(optarg); break;
+            case 'b': args.bathy_sigma = atof(optarg); break;
         }
     }
 

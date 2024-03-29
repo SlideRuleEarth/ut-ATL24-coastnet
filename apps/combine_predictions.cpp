@@ -80,8 +80,8 @@ int main (int argc, char **argv)
         // Merge them into one
         auto q = combine (p1, p2);
 
-        const auto s = get_surface_estimates (q);
-        const auto b = get_bathy_estimates (q);
+        const auto s = get_surface_estimates (q, args.surface_sigma);
+        const auto b = get_bathy_estimates (q, args.bathy_sigma);
 
         assert (s.size () == q.size ());
         assert (b.size () == q.size ());
