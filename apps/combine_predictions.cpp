@@ -20,7 +20,7 @@ T combine (const T &p1, const T &p2)
     {
         // Sanity check
         if (p1[i].h5_index != p2[i].h5_index)
-            throw runtime_error ("The h2 indexes do not match in these two datasets");
+            throw runtime_error ("The h5 indexes do not match in these two datasets");
 
         // Override only if the first one is not set
         if (q[i].prediction == 0)
