@@ -22,7 +22,7 @@ def create_fold_summary_table(verbose, title, input_fn, output_fn):
     df.update(df[['BA']].map('{:,.3f}'.format))
     print(df)
 
-    fig, ax = plt.subplots(figsize=[5, 1.5])
+    fig, ax = plt.subplots(figsize=[6, 2])
     fig.patch.set_visible(False)
     ax.axis('off')
     ax.axis('tight')
@@ -37,7 +37,7 @@ def create_fold_summary_table(verbose, title, input_fn, output_fn):
                                 r'$Balanced\ Accuracy$'],
                      loc='center',
                      cellLoc='center')
-    # table.auto_set_font_size(False)
+    table.auto_set_font_size(False)
     table.set_fontsize(9)
     table.auto_set_column_width(col=list(range(len(df.columns))))
 

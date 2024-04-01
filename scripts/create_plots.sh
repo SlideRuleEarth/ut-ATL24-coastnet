@@ -20,20 +20,16 @@ function cleanup {
     "results/manual-surface_fold?_summary.txt" \
     > ${tmpdir}/df.csv
 python ./scripts/plot_fold_summaries.py \
-    --title="surface cross-validation" \
     ${tmpdir}/df.csv surface_fold_summary.png
 python ./scripts/create_fold_summary_table.py \
-    --title="surface cross-validation" \
     ${tmpdir}/df.csv surface_fold_summary_table.png
 
 ./scripts/create_xval_results_dataframe.sh \
     "results/manual-bathy_fold?_summary.txt" \
     > ${tmpdir}/df.csv
 python ./scripts/plot_fold_summaries.py \
-    --title="bathymetry cross-validation" \
     ${tmpdir}/df.csv bathy_fold_summary.png
 python ./scripts/create_fold_summary_table.py \
-    --title="bathymetry cross-validation" \
     ${tmpdir}/df.csv bathy_fold_summary_table.png
 
 eog *_fold_summary.png *_fold_summary_table.png

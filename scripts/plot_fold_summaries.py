@@ -23,7 +23,6 @@ def plot_fold_summaries(verbose, title, input_fn, output_fn):
                     "BA"],
                  kind="bar",
                  rot=0,
-                 figsize=[10, 6],
                  stacked=False)
     ax.set_ylim([0.0, 1.0])
     ax.set_ylabel('score')
