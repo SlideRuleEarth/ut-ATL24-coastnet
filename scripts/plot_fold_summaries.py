@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 
 import argparse
+import numpy as np
 import pandas as pd
+import matplotlib as mpl
 import matplotlib.pyplot as plt
 
 
@@ -10,7 +12,9 @@ def plot_fold_summaries(verbose, title, input_fn, output_fn):
     Create a bar chart of fold summaries
     """
 
+    mpl.rcParams['figure.dpi'] = 300
     plt.style.use('fivethirtyeight')
+
     df = pd.read_csv(input_fn)
     print(df)
     fig = plt.figure()
@@ -35,8 +39,10 @@ def plot_fold_summaries(verbose, title, input_fn, output_fn):
                       r'$Balanced\ Accuracy$'],
               loc='upper left')
 
+    fig.set_facecolor('white')
+    plt.yticks(np.arange(0.0, 1.1, 0.1))
     plt.title(title)
-    plt.savefig(output_fn, bbox_inches='tight')
+    plt.savefig(output_fn, bbox_inches='tight', transparent=True)
 
 
 if __name__ == "__main__":

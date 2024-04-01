@@ -2,6 +2,7 @@
 
 import argparse
 import pandas as pd
+import matplotlib as mpl
 import matplotlib.pyplot as plt
 
 
@@ -10,6 +11,7 @@ def create_fold_summary_table(verbose, title, input_fn, output_fn):
     Create a table of fold summaries
     """
 
+    mpl.rcParams['figure.dpi'] = 300
     plt.style.use('fivethirtyeight')
 
     df = pd.read_csv(input_fn).astype('object')
