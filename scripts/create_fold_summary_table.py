@@ -13,7 +13,6 @@ def create_fold_summary_table(verbose, title, input_fn, output_fn):
     plt.style.use('fivethirtyeight')
 
     df = pd.read_csv(input_fn).astype('object')
-    df.update(df[['Fold']].map('{:,.0f}'.format))
     df.update(df[['Acc']].map('{:,.3f}'.format))
     df.update(df[['F1']].map('{:,.3f}'.format))
     df.update(df[['F1_r0']].map('{:,.3f}'.format))
