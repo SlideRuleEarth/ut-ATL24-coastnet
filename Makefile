@@ -335,6 +335,7 @@ classify_full_run:
 .PHONY: plots # Generate plots for publications
 plots:
 	./scripts/create_plots.sh
+	./scripts/create_mixed_plots.sh
 
 ##############################################################################
 #
