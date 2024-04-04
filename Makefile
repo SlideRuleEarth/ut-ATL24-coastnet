@@ -283,6 +283,27 @@ view_selected:
 		"streamlit run ../ATL24_rasters/apps/view_predictions.py -- --verbose ./predictions/$(ID)/{}_classified_combined_checked.csv" \
 		::: ${SELECTIONS}
 
+SYNTHETIC_FNS=$(shell find ./input/synthetic/*_synthetic.csv | shuf | tail)
+
+.PHONY: view_synthetic # View synthetic prediction labels
+view_synthetic:
+	@parallel --lb --jobs=100 \
+		"streamlit run ../ATL24_rasters/apps/view_classifications.py -- --verbose {}" \
+		::: ${SYNTHETIC_FNS}
+
+SYNTHETIC_SELECTIONS=\
+		sweden_18E023_68750_6025_25.TRUTH_original_linear_0006 \
+		UFO_385330N070130W_HALOE_merge_decimate20ppm_WashingtonDC.QA04_original_linear_0009 \
+		port_royal.TRUTH2_original_linear_0007 \
+		PuertoRico_20151004_19QGA58003000.TRUTH_original_linear_0004 \
+		dem_1m_a1_mosul_tile7-rgb-crop.GF.VM.QA10_AC_original_linear_0001
+
+.PHONY: view_synthetic_selections # View synthetic prediction labels
+view_synthetic_selections:
+	@parallel --lb --jobs=100 \
+		"streamlit run ../ATL24_rasters/apps/view_classifications.py -- --verbose ./input/synthetic/{}_synthetic.csv" \
+		::: ${SYNTHETIC_SELECTIONS}
+
 ##############################################################################
 #
 # Full runs
