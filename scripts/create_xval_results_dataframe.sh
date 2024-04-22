@@ -16,10 +16,10 @@ done
 
 x1=$(grep "Average Acc" $1 | cut -f 2 -d '=' | datamash mean 1)
 x2=$(grep "Average F1" $1 | cut -f 2 -d '=' | datamash mean 1)
-x3=$(grep "Average cal_F1" $1 | cut -f 2 -d '=' | datamash mean 1)
-x4=$(grep "Average Weighted F1" $1 | cut -f 2 -d '=' | datamash mean 1)
-x5=$(grep "Average Weighted cal_F1" $1 | cut -f 2 -d '=' | datamash mean 1)
-x6=$(grep "Average BA" $1 | cut -f 2 -d '=' | datamash mean 1)
+x3=$(grep "Average BA" $1 | cut -f 2 -d '=' | datamash mean 1)
+x4=$(grep "Average cal_F1" $1 | cut -f 2 -d '=' | datamash mean 1)
+x5=$(grep "Average Weighted F1" $1 | cut -f 2 -d '=' | datamash mean 1)
+x6=$(grep "Average Weighted cal_F1" $1 | cut -f 2 -d '=' | datamash mean 1)
 
 printf "avg,%0.3f,%0.3f,%0.3f,%0.3f,%0.3f,%0.3f\n"\
     ${x1} ${x2} ${x3} ${x4} ${x5} ${x6}
