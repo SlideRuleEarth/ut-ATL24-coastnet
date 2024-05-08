@@ -1,3 +1,4 @@
+#include "ATL24_coastnet/raster.h"
 #include "ATL24_coastnet/pgm.h"
 #include "ATL24_coastnet/verify.h"
 #include <iostream>
@@ -5,7 +6,7 @@
 #include <sstream>
 
 using namespace std;
-using namespace viper::raster;
+using namespace ATL24_coastnet::raster;
 using namespace ATL24_coastnet::pgm;
 
 void test_bad_headers ()

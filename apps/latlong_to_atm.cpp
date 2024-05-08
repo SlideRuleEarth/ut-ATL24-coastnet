@@ -1,6 +1,6 @@
 #include "ATL24_coastnet/utils.h"
-#include "viper/geotiff.h"
-#include "viper/raster.h"
+#include "ATL24_coastnet/geotiff.h"
+#include "ATL24_coastnet/raster.h"
 #include <iomanip>
 #include <iostream>
 #include <random>
@@ -9,8 +9,8 @@
 #include <unordered_set>
 
 using namespace std;
-using namespace viper::geotiff;
-using namespace viper::raster;
+using namespace ATL24_coastnet::geotiff;
+using namespace ATL24_coastnet::raster;
 using namespace ATL24_coastnet;
 
 template<typename T>
@@ -131,7 +131,7 @@ class egm2008
     egm2008 ()
     {
         clog << "Reading " << filename << endl;
-        const auto g = ::read<raster<float>> (filename);
+        const auto g = ::read<ATL24_coastnet::raster::raster<float>> (filename);
 
         if (g.bands.empty ())
             throw runtime_error ("No raster bands were read");
@@ -212,7 +212,7 @@ class egm2008
     static constexpr double resolution = 1.0 / 60.0; // degrees
     static constexpr int top_left_x = -180;
     static constexpr int top_left_y = 90;
-    raster<float> r;
+    ATL24_coastnet::raster::raster<float> r;
 };
 
 vector<classified_point3d> read_lat_lon (istream &is)

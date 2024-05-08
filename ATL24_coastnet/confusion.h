@@ -1,6 +1,6 @@
 #pragma once
 
-#include "viper/raster.h"
+#include "raster.h"
 #include <cassert>
 #include <iomanip>
 #include <iostream>

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "ATL24_coastnet/coastnet.h"
-#include "viper/raster.h"
+#include "raster.h"
 #include <algorithm>
 #include <cassert>
 #include <iomanip>
@@ -257,7 +257,7 @@ std::ostream &operator<< (std::ostream &os, const augmentation_params &ap)
 }
 
 template<typename T>
-viper::raster::raster<unsigned char> create_raster (const T &p,
+ATL24_coastnet::raster::raster<unsigned char> create_raster (const T &p,
     const size_t index,
     const size_t rows,
     const size_t cols,
@@ -275,7 +275,7 @@ viper::raster::raster<unsigned char> create_raster (const T &p,
     assert (index < p.size ());
 
     // Create an empty raster
-    viper::raster::raster<unsigned char> r (rows, cols);
+    ATL24_coastnet::raster::raster<unsigned char> r (rows, cols);
 
     // The point at 'index' will be centered in the patch
     //

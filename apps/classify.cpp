@@ -2,7 +2,7 @@
 #include "ATL24_coastnet/confusion.h"
 #include "ATL24_coastnet/utils.h"
 #include "ATL24_utils/dataframe.h"
-#include "viper/raster.h"
+#include "ATL24_coastnet/raster.h"
 #include "resnet.h"
 #include "classify_cmd.h"
 

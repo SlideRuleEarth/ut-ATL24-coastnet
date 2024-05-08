@@ -1,7 +1,7 @@
 #include "ATL24_coastnet/precompiled.h"
 #include "ATL24_coastnet/custom_dataset.h"
 #include "ATL24_coastnet/utils.h"
-#include "viper/raster.h"
+#include "ATL24_coastnet/raster.h"
 #include "resnet.h"
 #include "train_cmd.h"
 #include <opencv2/opencv.hpp>

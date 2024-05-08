@@ -1,6 +1,6 @@
 #pragma once
 
-#include "viper/raster.h"
+#include "raster.h"
 #include <algorithm>
 #include <cassert>
 #include <iostream>
@@ -35,7 +35,7 @@ std::ostream &operator<< (std::ostream &os, const sample_parameters &sp)
     return os;
 }
 
-using image=viper::raster::raster<unsigned char>;
+using image=ATL24_coastnet::raster::raster<unsigned char>;
 
 template<typename SP,typename T>
 std::vector<image> get_samples (const SP &sp,

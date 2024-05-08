@@ -2,6 +2,7 @@
 
 #include "ATL24_coastnet/coastnet.h"
 #include "ATL24_coastnet/pgm.h"
+#include "ATL24_coastnet/raster.h"
 #include "ATL24_coastnet/utils.h"
 #include "ATL24_utils/dataframe.h"
 #include <map>
@@ -21,7 +22,7 @@ class classified_point_dataset : public torch::data::datasets::Dataset<classifie
     using Example = torch::data::Example<>;
     std::vector<std::vector<ATL24_coastnet::classified_point2d>> datasets;
     std::vector<sample_index> sample_indexes;
-    std::vector<viper::raster::raster<unsigned char>> rasters;
+    std::vector<raster::raster<unsigned char>> rasters;
     size_t patch_rows;
     size_t patch_cols;
     double aspect_ratio;
@@ -117,7 +118,7 @@ class classified_point_dataset : public torch::data::datasets::Dataset<classifie
         for (size_t i = 0; i < random_seeds.size (); ++i)
             random_seeds[i] = rng ();
 
-        using namespace viper::raster;
+        using namespace ATL24_coastnet::raster;
 
 #pragma omp parallel for
         for (size_t i = 0; i < rasters.size (); ++i)
@@ -176,7 +177,7 @@ class coastnet_dataset : public torch::data::datasets::Dataset<coastnet_dataset<
     using Example = torch::data::Example<>;
     std::vector<std::vector<ATL24_coastnet::classified_point2d>> datasets;
     std::vector<sample_index> sample_indexes;
-    std::vector<viper::raster::raster<unsigned char>> rasters;
+    std::vector<ATL24_coastnet::raster::raster<unsigned char>> rasters;
     size_t patch_rows;
     size_t patch_cols;
     double aspect_ratio;
@@ -296,7 +297,7 @@ class coastnet_dataset : public torch::data::datasets::Dataset<coastnet_dataset<
         for (size_t i = 0; i < random_seeds.size (); ++i)
             random_seeds[i] = rng ();
 
-        using namespace viper::raster;
+        using namespace ATL24_coastnet::raster;
 
 #pragma omp parallel for
         for (size_t i = 0; i < rasters.size (); ++i)

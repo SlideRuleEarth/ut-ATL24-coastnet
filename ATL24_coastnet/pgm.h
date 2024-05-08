@@ -1,6 +1,6 @@
 #pragma once
 
-#include "viper/raster.h"
+#include "raster.h"
 #include <cassert>
 #include <iostream>
 #include <stdexcept>
@@ -89,7 +89,7 @@ header read_header (std::istream &is)
 
 void write (std::ostream &os,
     const header &h,
-    const viper::raster::raster<unsigned char> &r,
+    const raster::raster<unsigned char> &r,
     const std::string &comment = std::string ())
 {
     if (r.rows () != h.h)
@@ -104,12 +104,12 @@ void write (std::ostream &os,
     os.write (reinterpret_cast<const char *> (&r[0]), h.h * h.w);
 }
 
-header read (std::istream &is, viper::raster::raster<unsigned char> &r)
+header read (std::istream &is, raster::raster<unsigned char> &r)
 {
     const auto h = read_header (is);
 
     // Allocate space for pixels
-    r = viper::raster::raster<unsigned char> (h.h, h.w);
+    r = raster::raster<unsigned char> (h.h, h.w);
 
     // Read the pixels
     is.read (reinterpret_cast<char *> (&r[0]), r.size ());

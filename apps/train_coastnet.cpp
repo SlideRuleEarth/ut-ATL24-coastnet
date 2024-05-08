@@ -1,7 +1,7 @@
 #include "ATL24_coastnet/precompiled.h"
 #include "ATL24_coastnet/custom_dataset.h"
 #include "ATL24_coastnet/utils.h"
-#include "viper/raster.h"
+#include "ATL24_coastnet/raster.h"
 #include "coastnet_network.h"
 #include "train_coastnet_cmd.h"
 
