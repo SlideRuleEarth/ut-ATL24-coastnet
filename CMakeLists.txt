@@ -18,7 +18,7 @@ message(STATUS "Torch version ${Torch_VERSION}")
 
 set(CMAKE_CXX_FLAGS "-Wall -Werror ${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
 
-include_directories(${PROJECT_SOURCE_DIR} ../viper/ ../ATL24_utils)
+include_directories(${PROJECT_SOURCE_DIR})
 
 ############################################################
 # Unit tests

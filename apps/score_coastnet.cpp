@@ -2,7 +2,7 @@
 #include "ATL24_coastnet/precompiled.h"
 #include "ATL24_coastnet/confusion.h"
 #include "ATL24_coastnet/utils.h"
-#include "ATL24_utils/dataframe.h"
+#include "ATL24_coastnet/dataframe.h"
 #include "score_coastnet_cmd.h"
 
 const std::string usage {"score_coastnet < filename.csv"};
@@ -30,7 +30,7 @@ int main (int argc, char **argv)
         }
 
         // Read the points
-        const auto df = ATL24_utils::dataframe::read (cin);
+        const auto df = ATL24_coastnet::dataframe::read (cin);
 
         // Convert it to the correct format
         bool has_predictions = false;

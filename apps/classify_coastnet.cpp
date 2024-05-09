@@ -2,7 +2,7 @@
 #include "ATL24_coastnet/precompiled.h"
 #include "ATL24_coastnet/confusion.h"
 #include "ATL24_coastnet/utils.h"
-#include "ATL24_utils/dataframe.h"
+#include "ATL24_coastnet/dataframe.h"
 #include "ATL24_coastnet/raster.h"
 #include "coastnet_network.h"
 #include "classify_coastnet_cmd.h"
@@ -85,7 +85,7 @@ int main (int argc, char **argv)
         torch::NoGradGuard no_grad;
 
         // Read the points
-        const auto df = ATL24_utils::dataframe::read (cin);
+        const auto df = ATL24_coastnet::dataframe::read (cin);
 
         // Convert it to the correct format
         bool has_predictions = false;

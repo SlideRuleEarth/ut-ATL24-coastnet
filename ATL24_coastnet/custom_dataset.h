@@ -4,7 +4,7 @@
 #include "ATL24_coastnet/pgm.h"
 #include "ATL24_coastnet/raster.h"
 #include "ATL24_coastnet/utils.h"
-#include "ATL24_utils/dataframe.h"
+#include "ATL24_coastnet/dataframe.h"
 #include <map>
 
 namespace ATL24_coastnet
@@ -61,7 +61,7 @@ class classified_point_dataset : public torch::data::datasets::Dataset<classifie
                 clog << "Reading " << fn << endl;
 
             // Read the points
-            const auto df = ATL24_utils::dataframe::read (fn);
+            const auto df = ATL24_coastnet::dataframe::read (fn);
 
             // Convert it to the correct format
             datasets[i] = convert_dataframe (df);
@@ -221,7 +221,7 @@ class coastnet_dataset : public torch::data::datasets::Dataset<coastnet_dataset<
             }
 
             // Read the points
-            const auto df = ATL24_utils::dataframe::read (fn);
+            const auto df = ATL24_coastnet::dataframe::read (fn);
 
             // Convert it to the correct format
             datasets[i] = convert_dataframe (df);

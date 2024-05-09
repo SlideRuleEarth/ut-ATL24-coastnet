@@ -1,6 +1,6 @@
 #include "ATL24_coastnet/precompiled.h"
 #include "ATL24_coastnet/utils.h"
-#include "ATL24_utils/dataframe.h"
+#include "ATL24_coastnet/dataframe.h"
 #include "combine_predictions_cmd.h"
 
 const std::string usage {"combine_predictions [options] input1.csv input2.csv > output.csv"};
@@ -48,7 +48,7 @@ int main (int argc, char **argv)
         if (!ifs1)
             throw runtime_error (args.fn1 + ": Could not open file for reading");
 
-        const auto df1 = ATL24_utils::dataframe::read (ifs1);
+        const auto df1 = ATL24_coastnet::dataframe::read (ifs1);
 
         if (args.verbose)
             clog << "Reading " << args.fn2 << endl;
@@ -57,7 +57,7 @@ int main (int argc, char **argv)
         if (!ifs2)
             throw runtime_error (args.fn2 + ": Could not open file for reading");
 
-        const auto df2 = ATL24_utils::dataframe::read (ifs2);
+        const auto df2 = ATL24_coastnet::dataframe::read (ifs2);
 
         // Convert it to the correct format
         bool has_predictions = false;

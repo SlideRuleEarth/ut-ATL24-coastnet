@@ -1,7 +1,7 @@
 #include "ATL24_coastnet/blunder_detection.h"
 #include "ATL24_coastnet/precompiled.h"
 #include "ATL24_coastnet/utils.h"
-#include "ATL24_utils/dataframe.h"
+#include "ATL24_coastnet/dataframe.h"
 #include "blunder_detection_cmd.h"
 
 const std::string usage {"blunder_detection [options] < input.csv > output.csv"};
@@ -42,7 +42,7 @@ int main (int argc, char **argv)
         }
 
         // Read the points
-        const auto df = ATL24_utils::dataframe::read (cin);
+        const auto df = ATL24_coastnet::dataframe::read (cin);
 
         // Convert it to the correct format
         bool has_predictions = false;
