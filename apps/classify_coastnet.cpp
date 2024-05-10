@@ -72,7 +72,7 @@ int main (int argc, char **argv)
             : "CUDA is NOT available.") << endl;
 
         // Create the hardware device
-        torch::Device device (torch::kCUDA);
+        torch::Device device (cuda_available ? torch::kCUDA : torch::kCPU);
 
         // Prepare for inference
         network->train (false);
