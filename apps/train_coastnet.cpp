@@ -161,11 +161,19 @@ int main (int argc, char **argv)
 
             scheduler.step();
 
-            clog << "Saving model..." << endl;
+            clog << "Saving GPU model..." << endl;
 
             // Save the model
             torch::save (network, args.network_filename);
         }
+
+        // Move the model to CPU so that it can be used on non-GPU systems
+        network->to (torch::kCPU);
+
+        clog << "Saving CPU model..." << endl;
+
+        // Save the model
+        torch::save (network, args.network_filename);
 
         return 0;
     }
