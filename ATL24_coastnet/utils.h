@@ -377,6 +377,7 @@ ATL24_coastnet::raster::raster<unsigned char> create_raster (const T &p,
 template<typename T>
 std::vector<ATL24_coastnet::classified_point2d> convert_dataframe (
     const T &df,
+    bool &has_manual_label,
     bool &has_predictions,
     bool &has_surface_elevations,
     bool &has_bathy_elevations)
@@ -411,13 +412,14 @@ std::vector<ATL24_coastnet::classified_point2d> convert_dataframe (
         throw runtime_error ("Can't find 'along_track_dist' in dataframe");
     if (z_it == df.headers.end ())
         throw runtime_error ("Can't find 'geoid_corrected_h' in dataframe");
-    if (cls_it == df.headers.end ())
-        throw runtime_error ("Can't find 'manual_label' in dataframe");
 
     size_t ph_index = pi_it - df.headers.begin();
     size_t x_index = x_it - df.headers.begin();
     size_t z_index = z_it - df.headers.begin();
-    size_t cls_index = cls_it - df.headers.begin();
+    has_manual_label = cls_it != df.headers.end ();
+    size_t cls_index = has_manual_label ?
+        cls_it - df.headers.begin() :
+        df.headers.size ();
     has_predictions = prediction_it != df.headers.end ();
     size_t prediction_index = has_predictions ?
         prediction_it - df.headers.begin() :
@@ -435,7 +437,8 @@ std::vector<ATL24_coastnet::classified_point2d> convert_dataframe (
     assert (ph_index < df.headers.size ());
     assert (x_index < df.headers.size ());
     assert (z_index < df.headers.size ());
-    assert (cls_index < df.headers.size ());
+    if (has_manual_label)
+        assert (cls_index < df.headers.size ());
     if (has_predictions)
         assert (prediction_index < df.headers.size ());
     if (has_surface_elevations)
@@ -446,7 +449,8 @@ std::vector<ATL24_coastnet::classified_point2d> convert_dataframe (
     assert (ph_index < df.columns.size ());
     assert (x_index < df.columns.size ());
     assert (z_index < df.columns.size ());
-    assert (cls_index < df.columns.size ());
+    if (has_manual_label)
+        assert (cls_index < df.columns.size ());
     if (has_predictions)
         assert (prediction_index < df.columns.size ());
     if (has_surface_elevations)
@@ -463,7 +467,8 @@ std::vector<ATL24_coastnet::classified_point2d> convert_dataframe (
         assert (j < df.columns[ph_index].size ());
         assert (j < df.columns[x_index].size ());
         assert (j < df.columns[z_index].size ());
-        assert (j < df.columns[cls_index].size ());
+        if (has_manual_label)
+            assert (j < df.columns[cls_index].size ());
         if (has_predictions)
             assert (j < df.columns[prediction_index].size ());
         if (has_surface_elevations)
@@ -475,7 +480,8 @@ std::vector<ATL24_coastnet::classified_point2d> convert_dataframe (
         dataset[j].h5_index = df.columns[ph_index][j];
         dataset[j].x = df.columns[x_index][j];
         dataset[j].z = df.columns[z_index][j];
-        dataset[j].cls = df.columns[cls_index][j];
+        if (has_manual_label)
+            dataset[j].cls = df.columns[cls_index][j];
         if (has_predictions)
             dataset[j].prediction = df.columns[prediction_index][j];
         if (has_surface_elevations)
@@ -490,18 +496,31 @@ std::vector<ATL24_coastnet::classified_point2d> convert_dataframe (
 template<typename T>
 std::vector<ATL24_coastnet::classified_point2d> convert_dataframe (const T &df)
 {
+    bool has_manual_label;
     bool has_predictions;
     bool has_surface_elevations;
     bool has_bathy_elevations;
-    return convert_dataframe (df, has_predictions, has_surface_elevations, has_bathy_elevations);
+
+    return convert_dataframe (df,
+        has_manual_label,
+        has_predictions,
+        has_surface_elevations,
+        has_bathy_elevations);
 }
 
 template<typename T>
-std::vector<ATL24_coastnet::classified_point2d> convert_dataframe (const T &df, bool &has_predictions)
+std::vector<ATL24_coastnet::classified_point2d> convert_dataframe (const T &df,
+    bool &has_manual_label,
+    bool &has_predictions)
 {
     bool has_surface_elevations;
     bool has_bathy_elevations;
-    return convert_dataframe (df, has_predictions, has_surface_elevations, has_bathy_elevations);
+
+    return convert_dataframe (df,
+        has_manual_label,
+        has_predictions,
+        has_surface_elevations,
+        has_bathy_elevations);
 }
 
 } // namespace ATL24_coastnet
