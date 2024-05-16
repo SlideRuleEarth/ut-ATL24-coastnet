@@ -88,14 +88,17 @@ int main (int argc, char **argv)
         const auto df = ATL24_coastnet::dataframe::read (cin);
 
         // Convert it to the correct format
+        bool has_manual_label = false;
         bool has_predictions = false;
         bool has_surface_elevations = false;
         bool has_bathy_elevations = false;
-        auto p = convert_dataframe (df, has_predictions, has_surface_elevations, has_bathy_elevations);
+        auto p = convert_dataframe (df, has_manual_label, has_predictions, has_surface_elevations, has_bathy_elevations);
 
         if (args.verbose)
         {
             clog << p.size () << " points read" << endl;
+            if (has_manual_label)
+                clog << "Dataframe contains manual labels" << endl;
             if (has_predictions)
                 clog << "Dataframe contains predictions" << endl;
             if (has_surface_elevations)

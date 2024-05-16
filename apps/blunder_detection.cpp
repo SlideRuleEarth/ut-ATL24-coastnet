@@ -45,8 +45,9 @@ int main (int argc, char **argv)
         const auto df = ATL24_coastnet::dataframe::read (cin);
 
         // Convert it to the correct format
+        bool has_manual_label = false;
         bool has_predictions = false;
-        auto p = convert_dataframe (df, has_predictions);
+        auto p = convert_dataframe (df, has_manual_label, has_predictions);
 
         if (args.verbose)
             clog << p.size () << " points read" << endl;

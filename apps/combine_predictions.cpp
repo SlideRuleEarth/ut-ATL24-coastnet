@@ -60,8 +60,9 @@ int main (int argc, char **argv)
         const auto df2 = ATL24_coastnet::dataframe::read (ifs2);
 
         // Convert it to the correct format
+        bool has_manual_label = false;
         bool has_predictions = false;
-        auto p1 = convert_dataframe (df1, has_predictions);
+        auto p1 = convert_dataframe (df1, has_manual_label, has_predictions);
 
         if (args.verbose)
             clog << p1.size () << " points read" << endl;
@@ -69,7 +70,7 @@ int main (int argc, char **argv)
         if (has_predictions == false)
             throw runtime_error ("Expected the dataframe to have predictions, but none were found");
 
-        auto p2 = convert_dataframe (df2, has_predictions);
+        auto p2 = convert_dataframe (df2, has_manual_label, has_predictions);
 
         if (args.verbose)
             clog << p2.size () << " points read" << endl;
