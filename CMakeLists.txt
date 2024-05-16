@@ -36,9 +36,6 @@ add_test(test_blunder_detection)
 # Applications
 ############################################################
 
-add_executable(latlong_to_atm ./apps/latlong_to_atm.cpp)
-target_link_libraries(latlong_to_atm gmp gdal)
-
 add_executable(train ./apps/train.cpp)
 target_link_libraries(train ${TORCH_LIBRARIES} gmp ${OpenCV_LIBS})
 target_include_directories(train PUBLIC ${OpenCV_INCLUDE_DIRS})
