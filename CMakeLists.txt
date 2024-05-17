@@ -25,7 +25,7 @@ include_directories(${PROJECT_SOURCE_DIR})
 ############################################################
 macro(add_test name)
     add_executable(${name} ./tests/${name}.cpp)
-    target_link_libraries(${name} ${TORCH_LIBRARIES} gmp)
+    target_link_libraries(${name} ${TORCH_LIBRARIES})
 endmacro()
 
 add_test(test_pgm)
@@ -37,36 +37,36 @@ add_test(test_blunder_detection)
 ############################################################
 
 add_executable(train ./apps/train.cpp)
-target_link_libraries(train ${TORCH_LIBRARIES} gmp ${OpenCV_LIBS})
+target_link_libraries(train ${TORCH_LIBRARIES} ${OpenCV_LIBS})
 target_include_directories(train PUBLIC ${OpenCV_INCLUDE_DIRS})
 target_precompile_headers(train PUBLIC ATL24_coastnet/precompiled.h)
 
 add_executable(classify ./apps/classify.cpp)
-target_link_libraries(classify ${TORCH_LIBRARIES} gmp)
+target_link_libraries(classify ${TORCH_LIBRARIES})
 target_include_directories(classify PUBLIC)
 target_precompile_headers(classify PUBLIC ATL24_coastnet/precompiled.h)
 
 add_executable(train_coastnet ./apps/train_coastnet.cpp)
-target_link_libraries(train_coastnet ${TORCH_LIBRARIES} gmp)
+target_link_libraries(train_coastnet ${TORCH_LIBRARIES})
 target_include_directories(train_coastnet PUBLIC)
 target_precompile_headers(train_coastnet PUBLIC ATL24_coastnet/precompiled.h)
 
 add_executable(classify_coastnet ./apps/classify_coastnet.cpp)
-target_link_libraries(classify_coastnet ${TORCH_LIBRARIES} gmp)
+target_link_libraries(classify_coastnet ${TORCH_LIBRARIES})
 target_include_directories(classify_coastnet PUBLIC)
 target_precompile_headers(classify_coastnet PUBLIC ATL24_coastnet/precompiled.h)
 
 add_executable(score_coastnet ./apps/score_coastnet.cpp)
-target_link_libraries(score_coastnet ${TORCH_LIBRARIES} gmp)
+target_link_libraries(score_coastnet ${TORCH_LIBRARIES})
 target_include_directories(score_coastnet PUBLIC)
 target_precompile_headers(score_coastnet PUBLIC ATL24_coastnet/precompiled.h)
 
 add_executable(blunder_detection ./apps/blunder_detection.cpp)
-target_link_libraries(blunder_detection ${TORCH_LIBRARIES} gmp)
+target_link_libraries(blunder_detection ${TORCH_LIBRARIES})
 target_include_directories(blunder_detection PUBLIC)
 target_precompile_headers(blunder_detection PUBLIC ATL24_coastnet/precompiled.h)
 
 add_executable(combine_predictions ./apps/combine_predictions.cpp)
-target_link_libraries(combine_predictions ${TORCH_LIBRARIES} gmp)
+target_link_libraries(combine_predictions ${TORCH_LIBRARIES})
 target_include_directories(combine_predictions PUBLIC)
 target_precompile_headers(combine_predictions PUBLIC ATL24_coastnet/precompiled.h)
