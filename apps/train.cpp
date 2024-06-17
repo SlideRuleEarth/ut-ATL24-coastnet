@@ -2,7 +2,7 @@
 #include "ATL24_coastnet/custom_dataset.h"
 #include "ATL24_coastnet/utils.h"
 #include "ATL24_coastnet/raster.h"
-#include "resnet.h"
+#include "network.h"
 #include "train_cmd.h"
 #include <opencv2/opencv.hpp>
 
@@ -124,7 +124,6 @@ int main (int argc, char **argv)
             cout << fn << endl;
 
         // Params
-        sampling_params sp;
         hyper_params hp;
         augmentation_params ap;
         const bool enable_augmentation = true;
@@ -132,7 +131,7 @@ int main (int argc, char **argv)
         if (args.verbose)
         {
             clog << "sampling parameters:" << endl;
-            clog << sp << endl;
+            print_sampling_params (clog);
             clog << "hyper parameters:" << endl;
             clog << hp << endl;
             clog << "augmentation parameters:" << endl;
@@ -141,12 +140,12 @@ int main (int argc, char **argv)
         }
 
         // Create Datasets
-        const size_t training_samples_per_class = 20'000;
-        const size_t test_samples_per_class = 200;
+        const size_t training_samples_per_class = 200'000;
+        const size_t test_samples_per_class = 20'000;
         auto train_dataset = classified_point_dataset (train_filenames,
-            sp.patch_rows,
-            sp.patch_cols,
-            sp.aspect_ratio,
+            sampling_params::patch_rows,
+            sampling_params::patch_cols,
+            sampling_params::aspect_ratio,
             ap,
             enable_augmentation,
             training_samples_per_class,
@@ -154,9 +153,9 @@ int main (int argc, char **argv)
             rng)
             .map(torch::data::transforms::Stack<>());
         auto test_dataset = classified_point_dataset (test_filenames,
-            sp.patch_rows,
-            sp.patch_cols,
-            sp.aspect_ratio,
+            sampling_params::patch_rows,
+            sampling_params::patch_cols,
+            sampling_params::aspect_ratio,
             ap,
             false, // enable augmentation
             test_samples_per_class,
@@ -188,17 +187,15 @@ int main (int argc, char **argv)
         torch::Device device (cuda_available ? torch::kCUDA : torch::kCPU);
 
         // Create the network
-        std::array<int64_t, 3> layers{2, 2, 2};
-        ResNet<ResidualBlock> network (layers, args.num_classes);
+        Network network (args.num_classes);
 
         // Print the network
-        //clog << network << endl;
+        clog << network << endl;
 
         clog << "Training network" << endl;
         network->to (device);
         network->train (true);
 
-        //torch::optim::Adam optimizer (network->parameters (), torch::optim::AdamOptions (hp.initial_learning_rate));
         torch::optim::SGD optimizer (network->parameters (), torch::optim::SGDOptions (hp.initial_learning_rate));
         torch::optim::StepLR scheduler (optimizer, 10, 0.1);
 
@@ -216,12 +213,19 @@ int main (int argc, char **argv)
 
             for (auto &batch : *train_loader)
             {
-                auto data = batch.data.unsqueeze(0).permute({1, 0, 2, 3}).to(device);
+                // The last batch may have less than hp.batch_size samples
+                const auto samples = batch.data.sizes()[0];
+
+                at::autocast::set_enabled(true);
+                auto data = batch.data.view({samples, -1}).to(device);
                 auto target = batch.target.squeeze().to(device);
                 auto output = network->forward(data);
+                at::autocast::clear_cache();
+                at::autocast::set_enabled(false);
                 auto prediction = output.argmax(1);
                 auto loss = torch::nn::functional::cross_entropy(output, target);
-                show_samples ("input", data, sp.patch_rows, sp.patch_cols);
+
+                show_samples ("input", data, sampling_params::patch_rows, sampling_params::patch_cols);
 
                 // Update number of correctly classified samples
                 total_correct += prediction.eq(target).sum().item<int64_t>();
@@ -284,12 +288,15 @@ int main (int argc, char **argv)
 
         for (auto &batch : *test_loader)
         {
-            auto data = batch.data.unsqueeze(0).permute({1, 0, 2, 3});
+            // The last batch may have less than hp.batch_size samples
+            const auto samples = batch.data.sizes()[0];
+
+            auto data = batch.data.view({samples, -1});
             auto target = batch.target.squeeze();
             auto output = network->forward(data);
             auto prediction = output.argmax(1);
             auto loss = torch::nn::functional::cross_entropy(output, target);
-            show_samples ("testing", data, sp.patch_rows, sp.patch_cols);
+            show_samples ("testing", data, sampling_params::patch_rows, sampling_params::patch_cols);
             cv::waitKey (1);
 
             // Update number of correctly classified samples

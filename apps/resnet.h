@@ -13,12 +13,12 @@ struct sampling_params
     double aspect_ratio = 1.0;
 };
 
-std::ostream &operator<< (std::ostream &os, const sampling_params &hp)
+std::ostream &operator<< (std::ostream &os, const sampling_params &sp)
 {
-    os << "patch_rows: " << hp.patch_rows << std::endl;
-    os << "patch_cols: " << hp.patch_cols << std::endl;
-    os << "input_size: " << hp.input_size << std::endl;
-    os << "aspect_ratio: " << hp.aspect_ratio << std::endl;
+    os << "patch_rows: " << sp.patch_rows << std::endl;
+    os << "patch_cols: " << sp.patch_cols << std::endl;
+    os << "input_size: " << sp.input_size << std::endl;
+    os << "aspect_ratio: " << sp.aspect_ratio << std::endl;
     return os;
 }
 

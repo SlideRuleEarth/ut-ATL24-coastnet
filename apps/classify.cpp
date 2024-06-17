@@ -3,7 +3,7 @@
 #include "ATL24_coastnet/utils.h"
 #include "ATL24_coastnet/dataframe.h"
 #include "ATL24_coastnet/raster.h"
-#include "resnet.h"
+#include "network.h"
 #include "classify_cmd.h"
 
 const std::string usage {"ls *.csv | resnet [options]"};
@@ -29,20 +29,19 @@ int main (int argc, char **argv)
         }
 
         // Params
-        sampling_params sp;
         hyper_params hp;
 
         if (args.verbose)
         {
             clog << "sampling parameters:" << endl;
-            clog << sp << endl;
+            print_sampling_params (clog);
+            clog << endl;
             clog << "hyper parameters:" << endl;
             clog << hp << endl;
         }
 
         // Create the network
-        std::array<int64_t, 3> layers{2, 2, 2};
-        ResNet<ResidualBlock> network (layers, args.num_classes);
+        Network network (args.num_classes);
 
         // Check the network
         if (args.verbose)
@@ -58,14 +57,10 @@ int main (int argc, char **argv)
         // Load the network
         torch::load (network, args.network_filename);
 
-        // Check if we have GPU support
-        const auto cuda_available = torch::cuda::is_available();
-        clog << (cuda_available
-            ? "CUDA is available."
-            : "CUDA is NOT available.") << endl;
-
+        // Always use CPU during inference
+        //
         // Create the hardware device
-        torch::Device device (torch::kCUDA);
+        torch::Device device (torch::kCPU);
 
         // Prepare for inference
         network->train (false);
@@ -127,15 +122,12 @@ int main (int argc, char **argv)
                 // No, compute the prediction
                 //
                 // Create the raster at this point
-                auto r = create_raster (p, i, sp.patch_rows, sp.patch_cols, sp.aspect_ratio);
+                auto r = create_raster (p, i, sampling_params::patch_rows, sampling_params::patch_cols, sampling_params::aspect_ratio);
 
                 // Create image Tensor from raster
                 auto t = torch::from_blob (&r[0],
-                    { static_cast<int> (sp.patch_rows), static_cast<int> (sp.patch_cols) },
-                    torch::kUInt8).to(torch::kFloat);
-
-                // [32 32] -> [1 1 32 32]
-                t = t.unsqueeze(0).unsqueeze(0).to(device);
+                    { 1, static_cast<int> (sampling_params::input_size) },
+                    torch::kUInt8).to(torch::kFloat).to(device);
 
                 // Decode
                 auto prediction = network->forward (t).argmax(1);
