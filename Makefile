@@ -49,6 +49,7 @@ preprocess:
 	@mkdir -p ./input/manual
 	@mkdir -p ./input/synthetic
 	@./scripts/preprocess.sh  "./data/local/3DGL/*.csv" ./input/manual
+	@./scripts/preprocess.sh  "./data/local/OSU/*.csv" ./input/manual
 	@./scripts/preprocess.sh  "./data/local/synthetic/*.csv" ./input/synthetic
 
 ##############################################################################
@@ -67,8 +68,8 @@ MC_INPUT=./input/manual/*.csv
 
 .PHONY: train_mc # Train a multi-class model
 train_mc: build
-	@parallel --lb --jobs=15 \
-		"find $(MC_INPUT) | build/debug/train \
+	@parallel --lb --jobs=5 --halt now,fail=1 \
+		"find $(MC_INPUT) | build/release/train \
 			--verbose \
 			--num-classes=7 \
 			--test-dataset={} \
@@ -80,7 +81,7 @@ train_mc: build
 
 .PHONY: classify_mc # Run multi-class classifier
 classify_mc: build
-	@./scripts/classify.sh | parallel --verbose --lb --jobs=15
+	@./scripts/classify.sh | parallel --verbose --lb --jobs=4 --halt now,fail=1
 
 ##############################################################################
 #
