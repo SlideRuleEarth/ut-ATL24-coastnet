@@ -5,4 +5,5 @@
 #include <set>
 #include <unordered_map>
 #include <vector>
+#include <ATen/autocast_mode.h>
 #include <torch/torch.h>
