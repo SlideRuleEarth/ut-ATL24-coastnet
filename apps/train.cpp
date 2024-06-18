@@ -51,8 +51,8 @@ int main (int argc, char **argv)
         // Check if we have GPU support
         const auto cuda_available = torch::cuda::is_available();
         clog << (cuda_available
-            ? "CUDA available. Training on GPU."
-            : "CUDA not available. Training on CPU.") << '\n';
+            ? "CUDA is available."
+            : "CUDA is not available.") << '\n';
 
         // Parse the args
         const auto args = cmd::get_args (argc, argv, usage);
@@ -281,9 +281,11 @@ int main (int argc, char **argv)
             torch::save (network, args.network_filename);
         }
 
+        clog << "Done training" << endl;
+
         // Test the network
         network->train (false);
-        network->to (torch::kCPU);
+        network->to (device);
 
         // Disabling gradient calculation is useful for inference,
         // when you are sure that you will not call Tensor::backward.
@@ -294,10 +296,12 @@ int main (int argc, char **argv)
         size_t batch_index = 0;
         size_t total_correct = 0;
 
+        clog << "Testing" << endl;
+
         for (auto &batch : *test_loader)
         {
             auto data = batch.data.unsqueeze(0).permute({1, 0, 2, 3}).to(device);
-            auto target = batch.target.squeeze();
+            auto target = batch.target.squeeze().to(device);
             auto output = network->forward(data);
             auto prediction = output.argmax(1);
             auto loss = torch::nn::functional::cross_entropy(output, target);
