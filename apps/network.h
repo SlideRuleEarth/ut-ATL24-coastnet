@@ -76,4 +76,42 @@ class NetworkImpl : public torch::nn::Module
 
 TORCH_MODULE(Network);
 
+class CNNImpl : public torch::nn::Module
+{
+    public:
+    explicit CNNImpl(int64_t num_classes)
+        : dense_layer(7 * 7 * 32, num_classes)
+    {
+        register_module("conv_block1", conv_block1);
+        register_module("conv_block2", conv_block2);
+        register_module("dense_layer", dense_layer);
+    }
+
+    torch::Tensor forward(torch::Tensor x)
+    {
+        x = conv_block1->forward(x);
+        x = conv_block2->forward(x);
+        x = x.view({-1, 7 * 7 * 32});
+        x = dense_layer->forward(x);
+        return x;
+    }
+
+    private:
+    torch::nn::Sequential conv_block1
+    {
+        torch::nn::Conv2d(torch::nn::Conv2dOptions(1, 16, 5).stride(1).padding(2)),
+        torch::nn::BatchNorm2d(16), torch::nn::ReLU(),
+        torch::nn::MaxPool2d(torch::nn::MaxPool2dOptions(2).stride(2))
+    };
+    torch::nn::Sequential conv_block2
+    {
+        torch::nn::Conv2d(torch::nn::Conv2dOptions(16, 32, 5).stride(1).padding(2)),
+        torch::nn::BatchNorm2d(32), torch::nn::ReLU(),
+        torch::nn::MaxPool2d(torch::nn::MaxPool2dOptions(2).stride(2))
+    };
+    torch::nn::Linear dense_layer;
+};
+
+TORCH_MODULE(CNN);
+
 } // namespace ATL24_coastnet
