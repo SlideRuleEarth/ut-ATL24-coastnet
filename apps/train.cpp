@@ -92,16 +92,25 @@ int main (int argc, char **argv)
         vector<string> train_filenames;
         vector<string> test_filenames;
 
-        for (size_t i = 0; i < fns.size (); ++i)
+        // If train/test split is 0.0, train on everything and test on everything
+        if (args.train_test_split == 0.0)
         {
-            const size_t total_datasets = std::ceil (1.0 / args.train_test_split);
-            // To which dataset does 'i' belong?
-            size_t d = i * total_datasets / fns.size ();
-            assert (d < total_datasets);
-            if (d == args.test_dataset)
-                test_filenames.push_back (fns[i]);
-            else
-                train_filenames.push_back (fns[i]);
+            train_filenames = fns;
+            test_filenames = fns;
+        }
+        else
+        {
+            for (size_t i = 0; i < fns.size (); ++i)
+            {
+                const size_t total_datasets = std::ceil (1.0 / args.train_test_split);
+                // To which dataset does 'i' belong?
+                size_t d = i * total_datasets / fns.size ();
+                assert (d < total_datasets);
+                if (d == args.test_dataset)
+                    test_filenames.push_back (fns[i]);
+                else
+                    train_filenames.push_back (fns[i]);
+            }
         }
 
         if (args.verbose)
@@ -183,11 +192,13 @@ int main (int argc, char **argv)
             std::move(test_dataset),
             hp.batch_size);
 
+        // Always use CUDA during training
+        //
         // Create the hardware device
-        torch::Device device (cuda_available ? torch::kCUDA : torch::kCPU);
+        torch::Device device (torch::kCUDA);
 
         // Create the network
-        Network network (args.num_classes);
+        CNN network (args.num_classes);
 
         // Print the network
         clog << network << endl;
