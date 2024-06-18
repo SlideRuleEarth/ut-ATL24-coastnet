@@ -41,7 +41,7 @@ int main (int argc, char **argv)
         }
 
         // Create the network
-        Network network (args.num_classes);
+        CNN network (args.num_classes);
 
         // Check the network
         if (args.verbose)
@@ -184,6 +184,7 @@ int main (int argc, char **argv)
             << "\t" << "acc"
             << "\t" << "F1"
             << "\t" << "bal_acc"
+            << "\t" << "cal_F1"
             << "\t" << "tp"
             << "\t" << "tn"
             << "\t" << "fp"
@@ -194,6 +195,7 @@ int main (int argc, char **argv)
         double weighted_f1 = 0.0;
         double weighted_accuracy = 0.0;
         double weighted_bal_acc = 0.0;
+        double weighted_cal_f1 = 0.0;
 
         // Copy map so that it's ordered
         std::map<long,confusion_matrix> m (cm.begin (), cm.end ());
@@ -204,6 +206,7 @@ int main (int argc, char **argv)
                 << "\t" << cm[key].accuracy ()
                 << "\t" << cm[key].F1 ()
                 << "\t" << cm[key].balanced_accuracy ()
+                << "\t" << cm[key].calibrated_F_beta ()
                 << "\t" << cm[key].true_positives ()
                 << "\t" << cm[key].true_negatives ()
                 << "\t" << cm[key].false_positives ()
@@ -217,10 +220,13 @@ int main (int argc, char **argv)
                 weighted_accuracy += cm[key].accuracy () * cm[key].support () / cm[key].total ();
             if (!isnan (cm[key].balanced_accuracy ()))
                 weighted_bal_acc += cm[key].balanced_accuracy () * cm[key].support () / cm[key].total ();
+            if (!isnan (cm[key].calibrated_F_beta ()))
+                weighted_cal_f1 += cm[key].calibrated_F_beta () * cm[key].support () / cm[key].total ();
         }
-        ss << "weighted_F1 = " << weighted_f1 << endl;
         ss << "weighted_accuracy = " << weighted_accuracy << endl;
+        ss << "weighted_F1 = " << weighted_f1 << endl;
         ss << "weighted_bal_acc = " << weighted_bal_acc << endl;
+        ss << "weighted_cal_F1 = " << weighted_cal_f1 << endl;
         ss << "cache usage = " << 100.0 * cache_hits / cache_lookups << "%" << endl;
 
         // Show results
