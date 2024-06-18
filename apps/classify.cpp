@@ -126,7 +126,7 @@ int main (int argc, char **argv)
 
                 // Create image Tensor from raster
                 auto t = torch::from_blob (&r[0],
-                    { 1, static_cast<int> (sampling_params::input_size) },
+                    { 1, 1, static_cast<int> (sampling_params::patch_rows), static_cast<int> (sampling_params::patch_cols) },
                     torch::kUInt8).to(torch::kFloat).to(device);
 
                 // Decode
