@@ -20,7 +20,7 @@ struct args
     bool verbose = false;
     size_t random_seed = 123;
     std::string network_filename = std::string ("./coastnet_network.pt");
-    double train_test_split = 0.2;
+    double train_test_split = 0.0;
     size_t epochs = 20;
     size_t test_dataset = 0;
     size_t num_classes = 5;
@@ -94,7 +94,9 @@ args get_args (int argc, char **argv, const std::string &usage)
     if (args.train_test_split > 0.5)
         throw std::runtime_error ("train-test-split must be <= 0.5");
 
-    const size_t total_datasets = std::ceil (1.0 / args.train_test_split);
+    const size_t total_datasets = ((args.train_test_split == 0.0)
+        ? 1
+        : std::ceil (1.0 / args.train_test_split));
 
     if (args.test_dataset >= total_datasets)
     {
