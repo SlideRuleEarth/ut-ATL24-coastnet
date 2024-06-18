@@ -224,11 +224,8 @@ int main (int argc, char **argv)
 
             for (auto &batch : *train_loader)
             {
-                // The last batch may have less than hp.batch_size samples
-                const auto samples = batch.data.sizes()[0];
-
                 at::autocast::set_enabled(true);
-                auto data = batch.data.view({samples, -1}).to(device);
+                auto data = batch.data.unsqueeze(0).permute({1, 0, 2, 3}).to(device);
                 auto target = batch.target.squeeze().to(device);
                 auto output = network->forward(data);
                 at::autocast::clear_cache();
@@ -299,10 +296,7 @@ int main (int argc, char **argv)
 
         for (auto &batch : *test_loader)
         {
-            // The last batch may have less than hp.batch_size samples
-            const auto samples = batch.data.sizes()[0];
-
-            auto data = batch.data.view({samples, -1});
+            auto data = batch.data.unsqueeze(0).permute({1, 0, 2, 3}).to(device);
             auto target = batch.target.squeeze();
             auto output = network->forward(data);
             auto prediction = output.argmax(1);

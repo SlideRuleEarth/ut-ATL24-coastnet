@@ -80,7 +80,7 @@ class CNNImpl : public torch::nn::Module
 {
     public:
     explicit CNNImpl(int64_t num_classes)
-        : dense_layer(7 * 7 * 32, num_classes)
+        : dense_layer(32 * 15, num_classes)
     {
         register_module("conv_block1", conv_block1);
         register_module("conv_block2", conv_block2);
@@ -91,7 +91,7 @@ class CNNImpl : public torch::nn::Module
     {
         x = conv_block1->forward(x);
         x = conv_block2->forward(x);
-        x = x.view({-1, 7 * 7 * 32});
+        x = x.view({-1, 32 * 15});
         x = dense_layer->forward(x);
         return x;
     }
