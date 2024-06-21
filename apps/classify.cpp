@@ -40,8 +40,9 @@ int main (int argc, char **argv)
             clog << hp << endl;
         }
 
+        /*
         // Create the network
-        CNN network (args.num_classes);
+        Network network (args.num_classes);
 
         // Check the network
         if (args.verbose)
@@ -126,7 +127,7 @@ int main (int argc, char **argv)
 
                 // Create image Tensor from raster
                 auto t = torch::from_blob (&r[0],
-                    { 1, 1, static_cast<int> (sampling_params::patch_rows), static_cast<int> (sampling_params::patch_cols) },
+                    { 1, static_cast<int> (sampling_params::input_size) },
                     torch::kUInt8).to(torch::kFloat).to(device);
 
                 // Decode
@@ -249,6 +250,7 @@ int main (int argc, char **argv)
 
         // Write classified output to stdout
         write_classified_point2d (cout, q);
+        */
 
         return 0;
     }

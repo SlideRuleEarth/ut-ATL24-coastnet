@@ -3,43 +3,10 @@
 #include "ATL24_coastnet/utils.h"
 #include "ATL24_coastnet/raster.h"
 #include "network.h"
+#include "xgboost.h"
 #include "train_cmd.h"
-#include <opencv2/opencv.hpp>
 
 const std::string usage {"ls *.csv | resnet [options]"};
-
-cv::Mat to_mat (torch::Tensor t)
-{
-    using namespace std;
-
-    const int w = t.sizes()[0];
-    const int h = t.sizes()[1];
-    cv::Mat m (cv::Size {h, w}, CV_8UC1, t.data_ptr<unsigned char>());
-    cv::normalize (m, m, 0, 255, cv::NORM_MINMAX);
-    return m;
-}
-
-void show_samples (
-    const std::string &title,
-    const torch::Tensor &samples,
-    const int patch_rows,
-    const int patch_cols,
-    int total = 10)
-{
-    using namespace std;
-
-    // Make sure there are enough samples
-    total = std::min (total, int (samples.sizes()[0]));
-
-    // Convert to uint8 Mat
-    auto t = torch::zeros({total, patch_rows, patch_cols}, torch::kByte);
-    for (int i = 0; i < total; ++i)
-        t[i] = samples[i].reshape ({patch_rows, patch_cols}).toType (torch::kByte);
-
-    t = t.permute ({1, 0, 2}).reshape ({patch_rows, total * patch_cols});
-
-    cv::imshow(title, to_mat (t));
-}
 
 int main (int argc, char **argv)
 {
@@ -48,12 +15,6 @@ int main (int argc, char **argv)
 
     try
     {
-        // Check if we have GPU support
-        const auto cuda_available = torch::cuda::is_available();
-        clog << (cuda_available
-            ? "CUDA is available."
-            : "CUDA is not available.") << '\n';
-
         // Parse the args
         const auto args = cmd::get_args (argc, argv, usage);
 
@@ -67,9 +28,6 @@ int main (int argc, char **argv)
             clog << "cmd_line_parameters:" << endl;
             clog << args << endl;
         }
-
-        // Set the seed in torch
-        torch::manual_seed (args.random_seed);
 
         // Read input filenames
         vector<string> fns;
@@ -151,7 +109,7 @@ int main (int argc, char **argv)
         // Create Datasets
         const size_t training_samples_per_class = 200'000;
         const size_t test_samples_per_class = 20'000;
-        auto train_dataset = classified_point_dataset (train_filenames,
+        auto train_dataset = coastnet_dataset (train_filenames,
             sampling_params::patch_rows,
             sampling_params::patch_cols,
             sampling_params::aspect_ratio,
@@ -159,9 +117,8 @@ int main (int argc, char **argv)
             enable_augmentation,
             training_samples_per_class,
             args.verbose,
-            rng)
-            .map(torch::data::transforms::Stack<>());
-        auto test_dataset = classified_point_dataset (test_filenames,
+            rng);
+        auto test_dataset = coastnet_dataset (test_filenames,
             sampling_params::patch_rows,
             sampling_params::patch_cols,
             sampling_params::aspect_ratio,
@@ -169,8 +126,7 @@ int main (int argc, char **argv)
             false, // enable augmentation
             test_samples_per_class,
             false, // args.verbose,
-            rng)
-            .map(torch::data::transforms::Stack<>());
+            rng);
 
         if (args.verbose)
         {
@@ -198,7 +154,7 @@ int main (int argc, char **argv)
         torch::Device device (torch::kCUDA);
 
         // Create the network
-        CNN network (args.num_classes);
+        Network network (args.num_classes);
 
         // Print the network
         clog << network << endl;
@@ -224,8 +180,10 @@ int main (int argc, char **argv)
 
             for (auto &batch : *train_loader)
             {
+                const auto samples = batch.data.sizes()[0];
+
                 at::autocast::set_enabled(true);
-                auto data = batch.data.unsqueeze(0).permute({1, 0, 2, 3}).to(device);
+                auto data = batch.data.view({samples, -1}).to(device);
                 auto target = batch.target.squeeze().to(device);
                 auto output = network->forward(data);
                 at::autocast::clear_cache();
@@ -300,7 +258,8 @@ int main (int argc, char **argv)
 
         for (auto &batch : *test_loader)
         {
-            auto data = batch.data.unsqueeze(0).permute({1, 0, 2, 3}).to(device);
+            const auto samples = batch.data.sizes()[0];
+            auto data = batch.data.view({samples, -1}).to(device);
             auto target = batch.target.squeeze().to(device);
             auto output = network->forward(data);
             auto prediction = output.argmax(1);

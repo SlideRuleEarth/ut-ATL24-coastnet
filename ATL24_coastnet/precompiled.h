@@ -1,9 +1,9 @@
 #include <cassert>
 #include <fstream>
 #include <iostream>
+#include <map>
 #include <random>
 #include <set>
 #include <unordered_map>
 #include <vector>
-#include <ATen/autocast_mode.h>
-#include <torch/torch.h>
+#include <xgboost/c_api.h>
