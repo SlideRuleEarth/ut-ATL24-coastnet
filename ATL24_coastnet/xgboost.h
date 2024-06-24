@@ -190,7 +190,7 @@ class xgbooster
         if (!initialized)
         {
             if (verbose)
-                clog << "Creating booster" << filename << endl;
+                clog << "Creating booster" << endl;
 
             call_xgboost (XGBoosterCreate, nullptr, 0, &booster);
             initialized = true;
