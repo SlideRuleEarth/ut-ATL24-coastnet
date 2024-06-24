@@ -3,7 +3,7 @@
 #include "ATL24_coastnet/utils.h"
 #include "ATL24_coastnet/dataframe.h"
 #include "ATL24_coastnet/raster.h"
-#include "network.h"
+#include "sampling.h"
 #include "classify_cmd.h"
 
 const std::string usage {"ls *.csv | resnet [options]"};

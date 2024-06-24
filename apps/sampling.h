@@ -1,6 +1,7 @@
 #pragma once
 
 #include "ATL24_coastnet/precompiled.h"
+#include "ATL24_coastnet/utils.h"
 
 namespace ATL24_coastnet
 {

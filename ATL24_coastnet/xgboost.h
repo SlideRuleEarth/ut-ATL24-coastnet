@@ -20,26 +20,6 @@ namespace constants
     constexpr float missing_data = std::numeric_limits<float>::max ();
 } // namespace constants
 
-uint32_t remap_label (const uint32_t label)
-{
-    switch (label)
-    {
-        default: return 0;
-        case 40: return 1;
-        case 41: return 2;
-    }
-}
-
-uint32_t unremap_label (const uint32_t label)
-{
-    switch (label)
-    {
-        default: return 0;
-        case 1: return 40;
-        case 2: return 41;
-    }
-}
-
 template<typename F,typename... Args>
 void call_xgboost (F f, Args... args)
 {
@@ -163,7 +143,7 @@ class xgbooster
 
         // Set model parameters
         call_xgboost (XGBoosterSetParam, booster, "objective", "multi:softmax");
-        call_xgboost (XGBoosterSetParam, booster, "num_class", "3");
+        call_xgboost (XGBoosterSetParam, booster, "num_class", "7");
 
         // These values were determined by the hyper-pararmeter search
         call_xgboost (XGBoosterSetParam, booster, "max_depth", to_string (constants::max_depth).c_str ());
@@ -260,7 +240,7 @@ class xgbooster
         vector<uint32_t> predictions (rows);
 
         for (size_t i = 0; i < rows; ++i)
-            predictions[i] = unremap_label (results[i]);
+            predictions[i] = results[i];
 
         return predictions;
     }

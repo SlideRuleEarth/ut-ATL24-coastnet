@@ -2,7 +2,7 @@
 #include "ATL24_coastnet/custom_dataset.h"
 #include "ATL24_coastnet/utils.h"
 #include "ATL24_coastnet/raster.h"
-#include "network.h"
+#include "sampling.h"
 #include "xgboost.h"
 #include "train_cmd.h"
 
@@ -98,7 +98,7 @@ int main (int argc, char **argv)
             print_sampling_params (clog);
             clog << "augmentation parameters:" << endl;
             clog << ap << endl;
-            clog << "Creating dataset" << endl;
+            clog << "Creating datasets" << endl;
         }
 
         // Create Datasets
@@ -139,6 +139,52 @@ int main (int argc, char **argv)
         features train_features (train_dataset);
         features test_features (test_dataset);
 
+        // Dump class counts of training set
+        {
+        unordered_map<size_t,size_t> counts;
+        for (size_t i = 0; i < train_dataset.size (); ++i)
+            ++counts[train_dataset.get_label (i)];
+
+        clog << "Train labels:" << endl;
+        for (auto i : counts)
+            clog << i.first << "\t" << i.second << endl;
+        }
+
+        // Dump class counts of test set
+        {
+        unordered_map<size_t,size_t> counts;
+        for (size_t i = 0; i < test_dataset.size (); ++i)
+            ++counts[test_dataset.get_label (i)];
+
+        clog << "Test labels:" << endl;
+        for (auto i : counts)
+            clog << i.first << "\t" << i.second << endl;
+        }
+
+        // Dump class counts of training set
+        {
+        const auto labels = train_features.get_labels ();
+        unordered_map<size_t,size_t> counts;
+        for (size_t i = 0; i < labels.size (); ++i)
+            ++counts[labels[i]];
+
+        clog << "Train labels:" << endl;
+        for (auto i : counts)
+            clog << i.first << "\t" << i.second << endl;
+        }
+
+        // Dump class counts of test set
+        {
+        const auto labels = test_features.get_labels ();
+        unordered_map<size_t,size_t> counts;
+        for (size_t i = 0; i < labels.size (); ++i)
+            ++counts[labels[i]];
+
+        clog << "Test labels:" << endl;
+        for (auto i : counts)
+            clog << i.first << "\t" << i.second << endl;
+        }
+
         clog << "Training model" << endl;
 
         // Create the booster
@@ -166,12 +212,24 @@ int main (int argc, char **argv)
         const auto labels = test_features.get_labels ();
         assert (labels.size () == predictions.size ());
         for (size_t i = 0; i < labels.size (); ++i)
-            total_correct += (xgboost::unremap_label (labels[i]) == predictions[i]);
+            total_correct += (labels[i] == predictions[i]);
+
+        unordered_map<size_t,size_t> prediction_counts;
+        for (size_t i = 0; i < predictions.size (); ++i)
+            ++prediction_counts[predictions[i]];
+
+        clog << "Predictions:" << endl;
+        for (auto i : prediction_counts)
+            clog << i.first << "\t" << i.second << endl;
 
         const double accuracy = total_correct / predictions.size ();
 
         if (args.verbose)
-            clog << "Training accuracy = " << accuracy << endl;
+        {
+            clog << "Total predictions = " << predictions.size () << endl;
+            clog << "Total correct = " << total_correct << endl;
+            clog << "Training accuracy = " << 100.0 * accuracy << "%" << endl;
+        }
 
         return 0;
     }
