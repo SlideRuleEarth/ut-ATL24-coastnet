@@ -63,34 +63,34 @@ INPUT=./input/manual/*.csv
 
 .PHONY: train # Train a model
 train: build
-	find $(INPUT) | build/release/train \
+	find $(INPUT) | build/debug/train \
 		--verbose \
 		--num-classes=7 \
 		--test-dataset=0 \
 		--train-test-split=0.0 \
 		--random-seed=123 \
-		--epochs=40 \
-		--network-filename=coastnet_network.pt
+		--epochs=100 \
+		--model-filename=coastnet_model.json
 
 .PHONY: classify # Run classifier
 classify: build
 	@mkdir -p predictions
 	@find $(INPUT) | parallel --verbose --lb --jobs=4 --halt now,fail=1 \
-		"build/release/classify --verbose --num-classes=7 --network-filename=coastnet_network.pt --results-filename=predictions/{/.}_results.txt < {} > predictions/{/.}_classified.csv"
+		"build/release/classify --verbose --num-classes=7 --model-filename=coastnet_model.json --results-filename=predictions/{/.}_results.txt < {} > predictions/{/.}_classified.csv"
 	@./scripts/summarize_scores.sh "./predictions/*_results.txt" 41
 	@./scripts/summarize_scores.sh "./predictions/*_results.txt" 40
 
 .PHONY: xval # Cross-validate
 xval: build
 	@parallel --lb --jobs=5 --halt now,fail=1 \
-		"find $(INPUT) | build/release/train \
+		"find $(INPUT) | build/debug/train \
 			--verbose \
 			--num-classes=7 \
 			--train-test-split=0.2 \
 			--test-dataset={} \
 			--random-seed=123 \
 			--epochs=40 \
-			--network-filename=coastnet_network-{}.pt \
+			--model-filename=coastnet_model-{}.json \
 			> coastnet_test_files-{}.txt" \
 			::: $$(seq 0 4)
 	@./scripts/classify.sh | parallel --verbose --lb --jobs=4 --halt now,fail=1

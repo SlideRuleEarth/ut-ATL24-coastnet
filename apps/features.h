@@ -22,6 +22,15 @@ void print_sampling_params (std::ostream &os)
     os << "aspect_ratio: " << sampling_params::aspect_ratio << std::endl;
 }
 
+size_t features_per_sample ()
+{
+    // total features =
+    //        photon elevation
+    //      + raster size
+    return    1
+            + sampling_params::patch_rows * sampling_params::patch_cols;
+}
+
 template<typename T>
 class features
 {
@@ -34,31 +43,20 @@ class features
     {
         return dataset.size ();
     }
-    size_t features_per_sample () const
-    {
-        assert (dataset.size () != 0);
-        // total features =
-        //        photon elevation
-        //      + raster size
-        return    1
-                + dataset.get_raster (0).size ();
-    }
     std::vector<float> get_features () const
     {
         using namespace std;
 
         // Get all the features for this dataset
-        vector<float> f;
-
-        // Allocate space for features
         const size_t rows = dataset.size ();
         const size_t cols = features_per_sample ();
-        f.reserve (rows * cols);
+        vector<float> f (rows * cols);
 
         // Stuff values into features vector
         for (size_t i = 0; i < rows; ++i)
         {
             // First feature is the photon's elevation
+            assert (i * cols < f.size ());
             f[i * cols] = dataset.get_elevation (i);
 
             // The other features are the raster values

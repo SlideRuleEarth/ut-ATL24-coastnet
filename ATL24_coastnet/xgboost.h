@@ -208,9 +208,6 @@ class xgbooster
     {
         using namespace std;
 
-        if (verbose)
-            clog << "Getting predictions" << endl;
-
         // Check invariants
         assert (!features.empty ());
         assert (features.size () == rows * cols);

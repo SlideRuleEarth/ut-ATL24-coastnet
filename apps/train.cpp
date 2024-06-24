@@ -2,7 +2,7 @@
 #include "ATL24_coastnet/custom_dataset.h"
 #include "ATL24_coastnet/utils.h"
 #include "ATL24_coastnet/raster.h"
-#include "sampling.h"
+#include "features.h"
 #include "xgboost.h"
 #include "train_cmd.h"
 
@@ -102,8 +102,8 @@ int main (int argc, char **argv)
         }
 
         // Create Datasets
-        const size_t training_samples_per_class = 200'000;
-        const size_t test_samples_per_class = 20'000;
+        const size_t training_samples_per_class = 2'000'000;
+        const size_t test_samples_per_class = 200'000;
         auto train_dataset = coastnet_dataset (train_filenames,
             sampling_params::patch_rows,
             sampling_params::patch_cols,
@@ -185,13 +185,11 @@ int main (int argc, char **argv)
             clog << i.first << "\t" << i.second << endl;
         }
 
-        clog << "Training model" << endl;
-
         // Create the booster
         xgboost::xgbooster xgb (args.verbose);
 
         const size_t train_rows = train_features.size ();
-        const size_t train_cols = train_features.features_per_sample ();
+        const size_t train_cols = features_per_sample ();
 
         xgb.train (train_features.get_features (),
             train_features.get_labels (),
@@ -199,10 +197,13 @@ int main (int argc, char **argv)
             train_cols,
             args.epochs);
 
+        clog << "Saving model" << endl;
+        xgb.save_model (args.model_filename);
+
         clog << "Testing model" << endl;
 
         const size_t test_rows = test_features.size ();
-        const size_t test_cols = test_features.features_per_sample ();
+        const size_t test_cols = features_per_sample ();
         const auto predictions = xgb.predict (test_features.get_features (),
             test_rows,
             test_cols);

@@ -3,7 +3,8 @@
 #include "ATL24_coastnet/utils.h"
 #include "ATL24_coastnet/dataframe.h"
 #include "ATL24_coastnet/raster.h"
-#include "sampling.h"
+#include "features.h"
+#include "xgboost.h"
 #include "classify_cmd.h"
 
 const std::string usage {"ls *.csv | resnet [options]"};
@@ -35,38 +36,9 @@ int main (int argc, char **argv)
             clog << endl;
         }
 
-        /*
-        // Create the network
-        Network network (args.num_classes);
-
-        // Check the network
-        if (args.verbose)
-            clog << "Reading " << args.network_filename << endl;
-
-        {
-            ifstream ifs (args.network_filename);
-
-            if (!ifs)
-                throw runtime_error ("Error loading network from disk");
-        }
-
-        // Load the network
-        torch::load (network, args.network_filename);
-
-        // Always use CPU during inference
-        //
-        // Create the hardware device
-        torch::Device device (torch::kCPU);
-
-        // Prepare for inference
-        network->train (false);
-        network->to (device);
-
-        // Disabling gradient calculation is useful for inference,
-        // when you are sure that you will not call Tensor::backward.
-        // It will reduce memory consumption and speed up computations
-        // that would otherwise have requires_grad() == true.
-        torch::NoGradGuard no_grad;
+        // Create the booster
+        xgboost::xgbooster xgb (args.verbose);
+        xgb.load_model (args.model_filename);
 
         // Read the points
         const auto df = ATL24_coastnet::dataframe::read (cin);
@@ -119,17 +91,24 @@ int main (int argc, char **argv)
                 //
                 // Create the raster at this point
                 auto r = create_raster (p, i, sampling_params::patch_rows, sampling_params::patch_cols, sampling_params::aspect_ratio);
+                vector<float> f (features_per_sample ());
 
-                // Create image Tensor from raster
-                auto t = torch::from_blob (&r[0],
-                    { 1, static_cast<int> (sampling_params::input_size) },
-                    torch::kUInt8).to(torch::kFloat).to(device);
+                // The first feature is the elevation
+                f[0] = p[i].z;
 
-                // Decode
-                auto prediction = network->forward (t).argmax(1);
+                // The rest of the features are the raster values
+                for (size_t j = 0; j < r.size (); ++j)
+                {
+                    const size_t index = 1 + j;
+                    assert (index < f.size ());
+                    f[index] = r[j];
+                }
+                const auto predictions = xgb.predict (f, 1, features_per_sample ());
 
-                // Convert prediction from tensor to int
-                pred = reverse_label_map.at (prediction[0].item<long> ());
+                assert (predictions.size () == 1);
+
+                // Remap prediction
+                pred = reverse_label_map.at (predictions[0]);
 
                 // Update the cache
                 cache.update (p, i, pred);
@@ -245,7 +224,6 @@ int main (int argc, char **argv)
 
         // Write classified output to stdout
         write_classified_point2d (cout, q);
-        */
 
         return 0;
     }
