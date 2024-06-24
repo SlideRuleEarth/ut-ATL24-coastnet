@@ -28,16 +28,11 @@ int main (int argc, char **argv)
             clog << args;
         }
 
-        // Params
-        hyper_params hp;
-
         if (args.verbose)
         {
             clog << "sampling parameters:" << endl;
             print_sampling_params (clog);
             clog << endl;
-            clog << "hyper parameters:" << endl;
-            clog << hp << endl;
         }
 
         /*

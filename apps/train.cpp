@@ -29,13 +29,11 @@ int main (int argc, char **argv)
             clog << args << endl;
         }
 
-        // Read input filenames
         vector<string> fns;
 
         if (args.verbose)
             clog << "Reading filenames from stdin" << endl;
 
-        // Read filenames from stdin
         for (string line; getline(std::cin, line); )
             fns.push_back (line);
 
@@ -91,7 +89,6 @@ int main (int argc, char **argv)
             cout << fn << endl;
 
         // Params
-        hyper_params hp;
         augmentation_params ap;
         const bool enable_augmentation = true;
 
@@ -99,8 +96,6 @@ int main (int argc, char **argv)
         {
             clog << "sampling parameters:" << endl;
             print_sampling_params (clog);
-            clog << "hyper parameters:" << endl;
-            clog << hp << endl;
             clog << "augmentation parameters:" << endl;
             clog << ap << endl;
             clog << "Creating dataset" << endl;
@@ -130,157 +125,53 @@ int main (int argc, char **argv)
 
         if (args.verbose)
         {
-            clog << train_dataset.size ().value () << " total train samples" << endl;
-            clog << test_dataset.size ().value () << " total test samples" << endl;
+            clog << train_dataset.size () << " total train samples" << endl;
+            clog << test_dataset.size () << " total test samples" << endl;
         }
 
-        const auto total_train_samples = train_dataset.size().value();
-        const auto total_test_samples = test_dataset.size().value();
+        const auto total_train_samples = train_dataset.size();
+        const auto total_test_samples = test_dataset.size();
 
-        clog << "total_train_samples " << total_train_samples << endl;
-        clog << "total_test_samples " << total_test_samples << endl;
+        clog << "Total train samples " << total_train_samples << endl;
+        clog << "Total test samples " << total_test_samples << endl;
 
-        // Create Data Loaders
-        auto train_loader = torch::data::make_data_loader<torch::data::samplers::SequentialSampler> (
-            std::move(train_dataset),
-            hp.batch_size);
-        auto test_loader = torch::data::make_data_loader<torch::data::samplers::SequentialSampler> (
-            std::move(test_dataset),
-            hp.batch_size);
+        // Create the raw data that gets passed to xgbooster
+        features train_features (train_dataset);
+        features test_features (test_dataset);
 
-        // Always use CUDA during training
-        //
-        // Create the hardware device
-        torch::Device device (torch::kCUDA);
+        clog << "Training model" << endl;
 
-        // Create the network
-        Network network (args.num_classes);
+        // Create the booster
+        xgboost::xgbooster xgb (args.verbose);
 
-        // Print the network
-        clog << network << endl;
+        const size_t train_rows = train_features.size ();
+        const size_t train_cols = train_features.features_per_sample ();
 
-        clog << "Training network" << endl;
-        network->to (device);
-        network->train (true);
+        xgb.train (train_features.get_features (),
+            train_features.get_labels (),
+            train_rows,
+            train_cols,
+            args.epochs);
 
-        torch::optim::SGD optimizer (network->parameters (), torch::optim::SGDOptions (hp.initial_learning_rate));
-        torch::optim::StepLR scheduler (optimizer, 10, 0.1);
+        clog << "Testing model" << endl;
 
-        for (size_t epoch = 0; epoch < args.epochs; ++epoch)
-        {
-            size_t batch_index = 0;
+        const size_t test_rows = test_features.size ();
+        const size_t test_cols = test_features.features_per_sample ();
+        const auto predictions = xgb.predict (test_features.get_features (),
+            test_rows,
+            test_cols);
 
-            if (args.verbose)
-            {
-                for (const auto &p : optimizer.param_groups ())
-                    clog << "Optimizer learning rate = "<< p.options ().get_lr () << endl;
-            }
+        double total_correct = 0;
 
-            size_t total_correct = 0;
+        const auto labels = test_features.get_labels ();
+        assert (labels.size () == predictions.size ());
+        for (size_t i = 0; i < labels.size (); ++i)
+            total_correct += (xgboost::unremap_label (labels[i]) == predictions[i]);
 
-            for (auto &batch : *train_loader)
-            {
-                const auto samples = batch.data.sizes()[0];
+        const double accuracy = total_correct / predictions.size ();
 
-                at::autocast::set_enabled(true);
-                auto data = batch.data.view({samples, -1}).to(device);
-                auto target = batch.target.squeeze().to(device);
-                auto output = network->forward(data);
-                at::autocast::clear_cache();
-                at::autocast::set_enabled(false);
-                auto prediction = output.argmax(1);
-                auto loss = torch::nn::functional::cross_entropy(output, target);
-
-                show_samples ("input", data, sampling_params::patch_rows, sampling_params::patch_cols);
-
-                // Update number of correctly classified samples
-                total_correct += prediction.eq(target).sum().item<int64_t>();
-
-                static int timeout = 1;
-                const auto ch = cv::waitKey (timeout);
-
-                switch (ch)
-                {
-                    default:
-                    break;
-                    case 27: // quit
-                    return 0;
-                    break;
-                    case 32: // pause/unpause
-                    timeout = !timeout;
-                    break;
-                }
-
-                if (batch_index == 0)
-                {
-                    clog << "epoch: " << epoch;
-                    clog << " loss " << loss.item<float>();
-                    clog << endl;
-                }
-
-                // Zero gradients
-                optimizer.zero_grad();
-                // Compute gradients
-                loss.backward ();
-                // Update parameters
-                optimizer.step ();
-
-                ++batch_index;
-            }
-
-            auto accuracy = static_cast<double>(total_correct) / total_train_samples;
-            clog << "total_correct " << total_correct << endl;
-            clog << "total_train_samples " << total_train_samples << endl;
-            clog << "accuracy " << accuracy << endl;
-
-            scheduler.step();
-
-            // Save the model
-            torch::save (network, args.network_filename);
-        }
-
-        clog << "Done training" << endl;
-
-        // Test the network
-        network->train (false);
-        network->to (device);
-
-        // Disabling gradient calculation is useful for inference,
-        // when you are sure that you will not call Tensor::backward.
-        // It will reduce memory consumption and speed up computations
-        // that would otherwise have requires_grad() == true.
-        torch::NoGradGuard no_grad;
-
-        size_t batch_index = 0;
-        size_t total_correct = 0;
-
-        clog << "Testing" << endl;
-
-        for (auto &batch : *test_loader)
-        {
-            const auto samples = batch.data.sizes()[0];
-            auto data = batch.data.view({samples, -1}).to(device);
-            auto target = batch.target.squeeze().to(device);
-            auto output = network->forward(data);
-            auto prediction = output.argmax(1);
-            auto loss = torch::nn::functional::cross_entropy(output, target);
-            show_samples ("testing", data, sampling_params::patch_rows, sampling_params::patch_cols);
-            cv::waitKey (1);
-
-            // Update number of correctly classified samples
-            total_correct += prediction.eq(target).sum().item<int64_t>();
-
-            clog << "batch index: " << batch_index;
-            clog << " loss " << loss.item<float>();
-            clog << endl;
-
-            ++batch_index;
-        }
-
-        auto accuracy = static_cast<double>(total_correct) / total_test_samples;
-        clog << "total_correct " << total_correct << endl;
-        clog << "total_test_samples " << total_test_samples << endl;
-        clog << "accuracy " << accuracy << endl;
+        if (args.verbose)
+            clog << "Training accuracy = " << accuracy << endl;
 
         return 0;
     }

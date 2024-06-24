@@ -21,17 +21,70 @@ void print_sampling_params (std::ostream &os)
     os << "aspect_ratio: " << sampling_params::aspect_ratio << std::endl;
 }
 
-struct hyper_params
+template<typename T>
+class features
 {
-    int64_t batch_size = 64;
-    double initial_learning_rate = 0.01;
-};
+    public:
+    explicit features (const T &dataset)
+        : dataset (dataset)
+    {
+    }
+    size_t size () const
+    {
+        return dataset.size ();
+    }
+    size_t features_per_sample () const
+    {
+        assert (dataset.size () != 0);
+        // total features =
+        //        photon elevation
+        //      + raster size
+        return    1
+                + dataset.get_raster (0).size ();
+    }
+    std::vector<float> get_features () const
+    {
+        using namespace std;
 
-std::ostream &operator<< (std::ostream &os, const hyper_params &hp)
-{
-    os << "batch_size: " << hp.batch_size << std::endl;
-    os << "initial_learning_rate: " << hp.initial_learning_rate << std::endl;
-    return os;
-}
+        // Get all the features for this dataset
+        vector<float> f;
+
+        // Allocate space for features
+        const size_t rows = dataset.size ();
+        const size_t cols = features_per_sample ();
+        f.reserve (rows * cols);
+
+        // Stuff values into features vector
+        for (size_t i = 0; i < rows; ++i)
+        {
+            // First feature is the photon's elevation
+            f[i * cols] = dataset.get_elevation (i);
+
+            // The other features are the raster values
+            const auto r = dataset.get_raster (i);
+
+            for (size_t j = 0; j < r.size (); ++j)
+            {
+                const size_t index = i * cols + 1 + j;
+                assert (index < f.size ());
+                f[index] = r[j];
+            }
+        }
+
+        return f;
+    }
+    std::vector<unsigned> get_labels () const
+    {
+        std::vector<unsigned> l (dataset.size ());
+
+        for (size_t i = 0; i < l.size (); ++i)
+            l[i] = dataset.get_label (i);
+
+        return l;
+    }
+
+    private:
+    const T &dataset;
+};
 
 } // namespace ATL24_coastnet
