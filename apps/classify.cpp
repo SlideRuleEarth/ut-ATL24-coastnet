@@ -63,62 +63,60 @@ int main (int argc, char **argv)
         // Copy the points
         auto q (p);
 
-        // Setup the prediction cache
-        prediction_cache cache;
-
-        // Keep track of cache usage
-        size_t cache_lookups = 0;
-        size_t cache_hits = 0;
+        // Predict in batches
+        const size_t batch_size = 1000;
 
         // For each point
-        for (size_t i = 0; i < p.size (); ++i)
+        for (size_t i = 0; i < p.size (); i += batch_size)
         {
-            // Set sentinel
-            long pred = -1;
+            // Get number of samples to predict
+            const size_t rows = (i + batch_size < p.size ())
+                ? batch_size
+                : p.size () - i;
 
-            ++cache_lookups;
+            // Create the features
+            const size_t cols = features_per_sample ();
+            vector<float> f (rows * cols);
 
-            // Do we already have a prediction near this point?
-            if (cache.check (p, i))
+            // Get the rasters for each point
+            for (size_t j = 0; j < rows; ++j)
             {
-                // Yes, use the previous prediction
-                pred = cache.get_prediction (p, i);
-                ++cache_hits;
-            }
-            else
-            {
-                // No, compute the prediction
-                //
+                // Get point sample index
+                const size_t index = i + j;
+                assert (index < p.size ());
+
                 // Create the raster at this point
-                auto r = create_raster (p, i, sampling_params::patch_rows, sampling_params::patch_cols, sampling_params::aspect_ratio);
-                vector<float> f (features_per_sample ());
+                auto r = create_raster (p, index, sampling_params::patch_rows, sampling_params::patch_cols, sampling_params::aspect_ratio);
 
                 // The first feature is the elevation
-                f[0] = p[i].z;
+                f[j * cols] = p[index].z;
 
                 // The rest of the features are the raster values
-                for (size_t j = 0; j < r.size (); ++j)
+                for (size_t k = 0; k < r.size (); ++k)
                 {
-                    const size_t index = 1 + j;
-                    assert (index < f.size ());
-                    f[index] = r[j];
+                    const size_t n = j * cols + 1 + k;
+                    assert (n < f.size ());
+                    f[n] = r[k];
                 }
-                const auto predictions = xgb.predict (f, 1, features_per_sample ());
-
-                assert (predictions.size () == 1);
-
-                // Remap prediction
-                pred = reverse_label_map.at (predictions[0]);
-
-                // Update the cache
-                cache.update (p, i, pred);
             }
 
-            // Check sentinel
-            assert (pred != -1);
+            // Process the batch
+            const auto predictions = xgb.predict (f, rows, cols);
+            assert (predictions.size () == rows);
 
-            // Save predicted value
-            q[i].cls = pred;
+            // Get the prediction for each batch point
+            for (size_t j = 0; j < rows; ++j)
+            {
+                // Remap prediction
+                const unsigned pred = reverse_label_map.at (predictions[j]);
+
+                // Get point sample index
+                const size_t index = i + j;
+                assert (index < q.size ());
+
+                // Save predicted value
+                q[index].cls = pred;
+            }
         }
 
         // Keep track of performance
@@ -202,7 +200,6 @@ int main (int argc, char **argv)
         ss << "weighted_F1 = " << weighted_f1 << endl;
         ss << "weighted_bal_acc = " << weighted_bal_acc << endl;
         ss << "weighted_cal_F1 = " << weighted_cal_f1 << endl;
-        ss << "cache usage = " << 100.0 * cache_hits / cache_lookups << "%" << endl;
 
         // Show results
         if (args.verbose)
