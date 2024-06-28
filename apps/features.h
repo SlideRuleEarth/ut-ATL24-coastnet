@@ -9,9 +9,9 @@ namespace ATL24_coastnet
 namespace sampling_params
 {
     const size_t patch_rows = 63;
-    const size_t patch_cols = 7;
+    const size_t patch_cols = 15;
     const int64_t input_size = patch_rows * patch_cols;
-    const double aspect_ratio = 8.0;
+    const double aspect_ratio = 4.0;
 }
 
 void print_sampling_params (std::ostream &os)
