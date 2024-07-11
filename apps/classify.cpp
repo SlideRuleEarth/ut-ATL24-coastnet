@@ -81,7 +81,13 @@ int main (int argc, char **argv)
         const auto df = ATL24_coastnet::dataframe::read (cin);
 
         // Convert it to the correct format
-        auto p = convert_dataframe (df);
+        bool has_manual_label;
+        bool has_predictions;
+        auto p = convert_dataframe (df, has_manual_label, has_predictions);
+
+        // Check args
+        if (args.use_predictions && has_predictions == false)
+            throw runtime_error ("'use-predictions' was specified, but the input file does not contain predictions");
 
         if (args.verbose)
         {
@@ -104,6 +110,7 @@ int main (int argc, char **argv)
         prediction_cache cache;
 
         // Keep track of cache usage
+        size_t used_predictions = 0;
         size_t cache_lookups = 0;
         size_t cache_hits = 0;
 
@@ -112,6 +119,15 @@ int main (int argc, char **argv)
         {
             // Set sentinel
             long pred = -1;
+
+            // Are we using the input predictions?
+            if (args.use_predictions && p[i].prediction != 0)
+            {
+                // Use the prediction and skip it
+                q[i].cls = p[i].prediction;
+                ++used_predictions;
+                continue;
+            }
 
             ++cache_lookups;
 
@@ -230,6 +246,7 @@ int main (int argc, char **argv)
         ss << "weighted_accuracy = " << weighted_accuracy << endl;
         ss << "weighted_bal_acc = " << weighted_bal_acc << endl;
         ss << "cache usage = " << 100.0 * cache_hits / cache_lookups << "%" << endl;
+        ss << "used predictions = " << 100.0 * used_predictions / p.size () << "%" << endl;
 
         // Show results
         if (args.verbose)
