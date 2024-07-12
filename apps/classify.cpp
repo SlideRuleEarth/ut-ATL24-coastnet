@@ -44,7 +44,13 @@ int main (int argc, char **argv)
         const auto df = ATL24_coastnet::dataframe::read (cin);
 
         // Convert it to the correct format
-        auto p = convert_dataframe (df);
+        bool has_manual_label;
+        bool has_predictions;
+        auto p = convert_dataframe (df, has_manual_label, has_predictions);
+
+        // Check args
+        if (args.use_predictions && has_predictions == false)
+            throw runtime_error ("'use-predictions' was specified, but the input file does not contain predictions");
 
         if (args.verbose)
         {
@@ -63,26 +69,52 @@ int main (int argc, char **argv)
         // Copy the points
         auto q (p);
 
+        // Keep track of how many we skipped
+        size_t used_predictions = 0;
+
         // Predict in batches
         const size_t batch_size = 1000;
 
         // For each point
-        for (size_t i = 0; i < p.size (); i += batch_size)
+        for (size_t i = 0; i < p.size (); )
         {
+            // Get a vector of indexes
+            vector<size_t> indexes;
+            indexes.reserve (batch_size);
+
+            // Fill the vector of indexes
+            while (i < p.size () && indexes.size () != batch_size)
+            {
+                // Can we use the input predictions?
+                if (args.use_predictions && p[i].prediction != 0)
+                {
+                    // Use the prediction
+                    q[i].cls = p[i].prediction;
+                    ++used_predictions;
+                }
+                else
+                {
+                    // Save this index
+                    indexes.push_back (i);
+                }
+
+                // Go to the next one
+                ++i;
+            }
+
             // Get number of samples to predict
-            const size_t rows = (i + batch_size < p.size ())
-                ? batch_size
-                : p.size () - i;
+            const size_t rows = indexes.size ();
 
             // Create the features
             const size_t cols = features_per_sample ();
             vector<float> f (rows * cols);
 
             // Get the rasters for each point
-            for (size_t j = 0; j < rows; ++j)
+            for (size_t j = 0; j < indexes.size (); ++j)
             {
                 // Get point sample index
-                const size_t index = i + j;
+                assert (j < indexes.size ());
+                const size_t index = indexes[j];
                 assert (index < p.size ());
 
                 // Create the raster at this point
@@ -105,19 +137,23 @@ int main (int argc, char **argv)
             assert (predictions.size () == rows);
 
             // Get the prediction for each batch point
-            for (size_t j = 0; j < rows; ++j)
+            for (size_t j = 0; j < indexes.size (); ++j)
             {
                 // Remap prediction
                 const unsigned pred = reverse_label_map.at (predictions[j]);
 
                 // Get point sample index
-                const size_t index = i + j;
+                assert (j < indexes.size ());
+                const size_t index = indexes[j];
                 assert (index < q.size ());
 
                 // Save predicted value
                 q[index].cls = pred;
             }
         }
+
+        if (args.verbose)
+            clog << "used predictions = " << 100.0 * used_predictions / p.size () << "%" << endl;
 
         // Keep track of performance
         unordered_map<long,confusion_matrix> cm;
