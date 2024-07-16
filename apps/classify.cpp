@@ -89,7 +89,7 @@ int main (int argc, char **argv)
                 if (args.use_predictions && p[i].prediction != 0)
                 {
                     // Use the prediction
-                    q[i].cls = p[i].prediction;
+                    q[i].prediction = p[i].prediction;
                     ++used_predictions;
                 }
                 else
@@ -148,7 +148,7 @@ int main (int argc, char **argv)
                 assert (index < q.size ());
 
                 // Save predicted value
-                q[index].cls = pred;
+                q[index].prediction = pred;
             }
         }
 
@@ -172,7 +172,7 @@ int main (int argc, char **argv)
             const long actual = p[i].cls;
 
             // Get predicted value
-            const long pred = q[i].cls;
+            const long pred = q[i].prediction;
 
             for (auto j : cm)
             {
