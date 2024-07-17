@@ -82,7 +82,7 @@ classify: build
 
 .PHONY: xval # Cross-validate
 xval: build
-	@parallel --lb --jobs=5 --halt now,fail=1 \
+	@parallel --lb --jobs=1 --halt now,fail=1 \
 		"find $(INPUT) | build/debug/train \
 			--verbose \
 			--num-classes=7 \
