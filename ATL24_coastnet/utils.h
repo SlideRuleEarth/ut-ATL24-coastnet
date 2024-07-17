@@ -24,6 +24,10 @@
 #define Z_NAME "geoid_corrected_h"
 #endif
 
+#ifndef PREDICTION_NAME
+#define PREDICTION_NAME "prediction"
+#endif
+
 namespace ATL24_coastnet
 {
 
@@ -409,7 +413,7 @@ std::vector<ATL24_coastnet::classified_point2d> convert_dataframe (
     auto x_it = find (df.headers.begin(), df.headers.end(), X_NAME);
     auto z_it = find (df.headers.begin(), df.headers.end(), Z_NAME);
     auto cls_it = find (df.headers.begin(), df.headers.end(), "manual_label");
-    auto prediction_it = find (df.headers.begin(), df.headers.end(), "prediction");
+    auto prediction_it = find (df.headers.begin(), df.headers.end(), PREDICTION_NAME);
     auto surface_elevation_it = find (df.headers.begin(), df.headers.end(), "sea_surface_h");
     auto bathy_elevation_it = find (df.headers.begin(), df.headers.end(), "bathy_h");
 
