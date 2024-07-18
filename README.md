@@ -72,7 +72,7 @@ NOTE that there have been problems using Large File Support (LFS) on
 the SlideRule github repository, so LFS has been turned OFF for model
 files.
 
-Classify and cross-validate:
+Classify:
 
 ``` bash
 $ make classify
@@ -91,6 +91,32 @@ results-filename: predictions/ATL03_20181027185143_04450108_005_01_gt3r_0_result
 Classifed CSV files will be written to a `predictions` directory. Each
 input granule CSV will have a corresponding classified `.csv` file and
 a `.txt` file containing performance statistics.
+
+``` bash
+$ ls -1 predictions/
+...
+ATL03_20230213042035_08341807_006_01_gt2l_0_classified.csv
+ATL03_20230213042035_08341807_006_01_gt2l_0_results.txt
+ATL03_20230328030558_01031906_006_01_gt2l_0_classified.csv
+ATL03_20230328030558_01031906_006_01_gt2l_0_results.txt
+ATL03_20230407113920_02611908_006_01_gt1l_0_classified.csv
+ATL03_20230407113920_02611908_006_01_gt1l_0_results.txt
+ATL03_20230407113920_02611908_006_01_gt2l_0_classified.csv
+ATL03_20230407113920_02611908_006_01_gt2l_0_results.txt
+ATL03_20230407113920_02611908_006_01_gt3l_0_classified.csv
+ATL03_20230407113920_02611908_006_01_gt3l_0_results.txt
+$ cat predictions/ATL03_20230407113920_02611908_006_01_gt3l_0_results.txt
+cls     acc     F1      bal_acc cal_F1  tp      tn      fp      fn      support total
+0       0.983   0.867   0.924   0.914   26346   448235  3638    4464    30810   482683
+40      0.998   0.952   0.981   0.980   11044   470520  696     423     11467   482683
+41      0.985   0.992   0.951   0.913   437142  38460   3817    3264    440406  482683
+weighted_accuracy = 0.985
+weighted_F1 = 0.983
+weighted_bal_acc = 0.950
+weighted_cal_F1 = 0.915
+```
+
+Cross-validate:
 
 ``` bash
 $ make xval
