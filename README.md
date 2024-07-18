@@ -17,7 +17,8 @@ You will also need to install the XGBoost `C Package`, found here:
 
 `https://xgboost.readthedocs.io/en/stable/tutorials/c_api_tutorial.html#install-xgboost-on-conda-environment`
 
-If you are not using Conda, you can simply install the package at the system level.
+If you are not using Conda, you can simply install the package at the
+system level.
 
 # Build
 
@@ -57,7 +58,20 @@ Training files
 ...
 ```
 
-Classify and cross validate:
+After training, a model will be written to `./coastnet_model.json`.
+
+This model will be used for classification and cross-validation.
+
+If you would like to keep the model, you can copy it to the `./models`
+directory with a date attached, like, for example,
+`./models/coastnet_model-20240624.json`. You can then check the model
+into source code control for later use.
+
+NOTE that there have been problems using Large File Support (LFS) on
+the SlideRule github repository, so LFS has been turned OFF for model
+files.
+
+Classify and cross-validate:
 
 ``` bash
 $ make classify
@@ -71,6 +85,13 @@ num-classes: 7
 model-filename: coastnet_model.json
 results-filename: predictions/ATL03_20181027185143_04450108_005_01_gt3r_0_results.txt
 ...
+```
+
+Classifed CSV files will be written to a `predictions` directory. Each
+input granule CSV will have a corresponding classified `.csv` file and
+a `.txt` file containing performance statistics.
+
+``` bash
 $ make xval
 ...
 Reading filenames from stdin
@@ -106,4 +127,45 @@ scale_z_min: 0.9
 scale_z_max: 1.1
 mirror_probabilty: 0.5
 ...
+```
+
+The `.txt` files contain statistics for the model that was trained on
+all files. This is the model that will ultimately be shipped. However,
+the performance statistics for this model are not properly
+cross-validated. Performance statistics for the properly cross
+validated test files may be slightly worse than the aggregated
+statistics from the `make classify` command.
+
+If the performance statistics for the aggregated `make classify`
+command are equal to the statistics of the `make xval` command, it
+means that the model is not over-fitting. In practice, the
+cross-validated performance numbers are typically slightly worse than
+the statistics for the model that uses all training files. For
+example,
+
+```
+$ make classify
+...
+Surface
+Average Acc = 0.952
+Average F1 = 0.962
+Average BA = 0.933
+...
+Bathy
+Average Acc = 0.982
+Average F1 = 0.627
+Average BA = 0.921
+...
+
+$ make xval
+...
+Surface
+Average Acc = 0.944
+Average F1 = 0.954
+Average BA = 0.925
+...
+Bathy
+Average Acc = 0.980
+Average F1 = 0.603
+Average BA = 0.893
 ```
