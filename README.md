@@ -35,7 +35,7 @@ Create symlink to the input data:
 $ ln -s <path to training data>/data
 ```
 
-Create the model:
+# Create the model
 
 ``` bash
 $ make train
@@ -72,7 +72,7 @@ NOTE that there have been problems using Large File Support (LFS) on
 the SlideRule github repository, so LFS has been turned OFF for model
 files.
 
-Classify:
+# Classify
 
 ``` bash
 $ make classify
@@ -116,7 +116,7 @@ weighted_bal_acc = 0.950
 weighted_cal_F1 = 0.915
 ```
 
-Cross-validate:
+# Cross-validate
 
 ``` bash
 $ make xval
