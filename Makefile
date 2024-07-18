@@ -77,7 +77,9 @@ classify: build
 	@mkdir -p predictions
 	@find $(INPUT) | parallel --verbose --lb --jobs=4 --halt now,fail=1 \
 		"build/debug/classify --verbose --num-classes=7 --model-filename=coastnet_model.json --results-filename=predictions/{/.}_results.txt < {} > predictions/{/.}_classified.csv"
+	@echo "Surface"
 	@./scripts/summarize_scores.sh "./predictions/*_results.txt" 41
+	@echo "Bathy"
 	@./scripts/summarize_scores.sh "./predictions/*_results.txt" 40
 
 .PHONY: xval # Cross-validate
@@ -94,7 +96,9 @@ xval: build
 			> coastnet_test_files-{}.txt" \
 			::: $$(seq 0 4)
 	@./scripts/classify.sh | parallel --verbose --lb --jobs=4 --halt now,fail=1
+	@echo "Surface"
 	@./scripts/summarize_scores.sh "./predictions/*_results-?.txt" 41
+	@echo "Bathy"
 	@./scripts/summarize_scores.sh "./predictions/*_results-?.txt" 40
 
 ##############################################################################
