@@ -174,7 +174,8 @@ data. This means that the shipping model can't be cross-validated
 because if we had more labeled data to test upon, those
 files would be part of the training dataset.
 
-Here is an example:
+Here is an typical example of prediction scores for the model trained
+on all files and the cross-validated models:
 
 ```
 $ make classify
