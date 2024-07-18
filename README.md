@@ -157,18 +157,24 @@ mirror_probabilty: 0.5
 ```
 
 The `.txt` files contain statistics for the model that was trained on
-all files. This is the model that will ultimately be shipped. However,
-the performance statistics for this model are not properly
-cross-validated. Performance statistics for the properly cross
-validated test files may be slightly worse than the aggregated
-statistics from the `make classify` command.
+all files. This is the model that will ultimately be shipped.
 
-If the performance statistics for the aggregated `make classify`
-command are equal to the statistics of the `make xval` command, it
-means that the model is not over-fitting. In practice, the
-cross-validated performance numbers are typically slightly worse than
-the statistics for the model that uses all training files. For
-example,
+Typically, when the cross-validated statistics are worse than the
+shipping model's statistics, it means that the model is over-fitting.
+However, in this case, we expect the cross-validate statistics to be
+(slightly) worse than the statistics for the shipping model: each
+cross-validation fold can't quite represent the entire set of training
+files, so the statistics for each fold will usually be equal to, or
+slightly worse than, the shipping model's statistics.
+
+
+Another way to put it is this: We want the shipping model to be as
+good as it can possibly be, so we train it on all available training
+data. This means that the shipping model can't be cross-validated
+because if we had more labeled data to test upon, those
+files would be part of the training dataset.
+
+Here is an example:
 
 ```
 $ make classify
