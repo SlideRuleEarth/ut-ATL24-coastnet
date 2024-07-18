@@ -6,6 +6,7 @@ Deep residual network for coastal feature extraction
 
 ``` bash
 dnf -y install \
+    gcc \
     cmake \
     cppcheck \
     python3.9  \
