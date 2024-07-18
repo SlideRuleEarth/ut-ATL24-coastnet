@@ -31,6 +31,10 @@
 namespace ATL24_coastnet
 {
 
+const std::string LABEL_NAME = std::string ("manual_label");
+const std::string SEA_SURFACE_NAME = std::string ("sea_surface_h");
+const std::string BATHY_NAME = std::string ("bathy_h");
+
 struct photon_hash
 {
     std::size_t operator() (const std::pair<long,long> &v) const
@@ -402,107 +406,51 @@ std::vector<ATL24_coastnet::classified_point2d> convert_dataframe (
 
     // Check invariants
     assert (df.is_valid ());
-    assert (!df.headers.empty ());
-    assert (!df.columns.empty ());
+    assert (df.rows () != 0);
+    assert (df.cols () != 0);
 
     // Get number of photons in this file
-    const size_t nrows = df.columns[0].size ();
+    const size_t nrows = df.rows ();
 
     // Get the columns we are interested in
-    auto pi_it = find (df.headers.begin(), df.headers.end(), PI_NAME);
-    auto x_it = find (df.headers.begin(), df.headers.end(), X_NAME);
-    auto z_it = find (df.headers.begin(), df.headers.end(), Z_NAME);
-    auto cls_it = find (df.headers.begin(), df.headers.end(), "manual_label");
-    auto prediction_it = find (df.headers.begin(), df.headers.end(), PREDICTION_NAME);
-    auto surface_elevation_it = find (df.headers.begin(), df.headers.end(), "sea_surface_h");
-    auto bathy_elevation_it = find (df.headers.begin(), df.headers.end(), "bathy_h");
+    const auto headers = df.get_headers ();
+    auto pi_it = find (headers.begin(), headers.end(), PI_NAME);
+    auto x_it = find (headers.begin(), headers.end(), X_NAME);
+    auto z_it = find (headers.begin(), headers.end(), Z_NAME);
+    auto cls_it = find (headers.begin(), headers.end(), LABEL_NAME);
+    auto prediction_it = find (headers.begin(), headers.end(), PREDICTION_NAME);
+    auto surface_elevation_it = find (headers.begin(), headers.end(), SEA_SURFACE_NAME);
+    auto bathy_elevation_it = find (headers.begin(), headers.end(), BATHY_NAME);
 
-    assert (pi_it != df.headers.end ());
-    assert (x_it != df.headers.end ());
-    assert (z_it != df.headers.end ());
-
-    if (pi_it == df.headers.end ())
+    if (pi_it == headers.end ())
         throw runtime_error ("Can't find 'ph_index' in dataframe");
-    if (x_it == df.headers.end ())
+    if (x_it == headers.end ())
         throw runtime_error ("Can't find 'along_track_dist' in dataframe");
-    if (z_it == df.headers.end ())
+    if (z_it == headers.end ())
         throw runtime_error ("Can't find 'geoid_corrected_h' in dataframe");
 
-    size_t ph_index = pi_it - df.headers.begin();
-    size_t x_index = x_it - df.headers.begin();
-    size_t z_index = z_it - df.headers.begin();
-    has_manual_label = cls_it != df.headers.end ();
-    size_t cls_index = has_manual_label ?
-        cls_it - df.headers.begin() :
-        df.headers.size ();
-    has_predictions = prediction_it != df.headers.end ();
-    size_t prediction_index = has_predictions ?
-        prediction_it - df.headers.begin() :
-        df.headers.size ();
-    has_surface_elevations = surface_elevation_it != df.headers.end ();
-    size_t surface_elevation_index = has_surface_elevations ?
-        surface_elevation_it - df.headers.begin() :
-        df.headers.size ();
-    has_bathy_elevations = bathy_elevation_it != df.headers.end ();
-    size_t bathy_elevation_index = has_bathy_elevations ?
-        bathy_elevation_it - df.headers.begin() :
-        df.headers.size ();
-
-    // Check logic
-    assert (ph_index < df.headers.size ());
-    assert (x_index < df.headers.size ());
-    assert (z_index < df.headers.size ());
-    if (has_manual_label)
-        assert (cls_index < df.headers.size ());
-    if (has_predictions)
-        assert (prediction_index < df.headers.size ());
-    if (has_surface_elevations)
-        assert (surface_elevation_index < df.headers.size ());
-    if (has_bathy_elevations)
-        assert (bathy_elevation_index < df.headers.size ());
-
-    assert (ph_index < df.columns.size ());
-    assert (x_index < df.columns.size ());
-    assert (z_index < df.columns.size ());
-    if (has_manual_label)
-        assert (cls_index < df.columns.size ());
-    if (has_predictions)
-        assert (prediction_index < df.columns.size ());
-    if (has_surface_elevations)
-        assert (surface_elevation_index < df.columns.size ());
-    if (has_bathy_elevations)
-        assert (bathy_elevation_index < df.columns.size ());
+    has_manual_label = cls_it != headers.end ();
+    has_predictions = prediction_it != headers.end ();
+    has_surface_elevations = surface_elevation_it != headers.end ();
+    has_bathy_elevations = bathy_elevation_it != headers.end ();
 
     // Stuff values into the vector
     std::vector<ATL24_coastnet::classified_point2d> dataset (nrows);
 
-    for (size_t j = 0; j < nrows; ++j)
+    for (size_t i = 0; i < nrows; ++i)
     {
-        // Check logic
-        assert (j < df.columns[ph_index].size ());
-        assert (j < df.columns[x_index].size ());
-        assert (j < df.columns[z_index].size ());
-        if (has_manual_label)
-            assert (j < df.columns[cls_index].size ());
-        if (has_predictions)
-            assert (j < df.columns[prediction_index].size ());
-        if (has_surface_elevations)
-            assert (j < df.columns[surface_elevation_index].size ());
-        if (has_bathy_elevations)
-            assert (j < df.columns[bathy_elevation_index].size ());
-
         // Make assignments
-        dataset[j].h5_index = df.columns[ph_index][j];
-        dataset[j].x = df.columns[x_index][j];
-        dataset[j].z = df.columns[z_index][j];
+        dataset[i].h5_index = df.get_value (PI_NAME, i);
+        dataset[i].x = df.get_value (X_NAME, i);
+        dataset[i].z = df.get_value (Z_NAME, i);
         if (has_manual_label)
-            dataset[j].cls = df.columns[cls_index][j];
+            dataset[i].cls = df.get_value (LABEL_NAME, i);
         if (has_predictions)
-            dataset[j].prediction = df.columns[prediction_index][j];
+            dataset[i].prediction = df.get_value (PREDICTION_NAME, i);
         if (has_surface_elevations)
-            dataset[j].surface_elevation = df.columns[surface_elevation_index][j];
+            dataset[i].surface_elevation = df.get_value (SEA_SURFACE_NAME, i);
         if (has_bathy_elevations)
-            dataset[j].bathy_elevation = df.columns[bathy_elevation_index][j];
+            dataset[i].bathy_elevation = df.get_value (BATHY_NAME, i);
     }
 
     return dataset;

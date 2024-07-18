@@ -28,6 +28,7 @@ endmacro()
 
 add_test(test_pgm)
 add_test(test_blunder_detection)
+add_test(test_dataframe)
 
 ############################################################
 # Applications
