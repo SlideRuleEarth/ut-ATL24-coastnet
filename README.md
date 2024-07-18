@@ -70,7 +70,7 @@ use_predictions: false
 num-classes: 7
 model-filename: coastnet_model.json
 results-filename: predictions/ATL03_20181027185143_04450108_005_01_gt3r_0_results.txt
-
+...
 $ make xval
 ...
 Reading filenames from stdin
