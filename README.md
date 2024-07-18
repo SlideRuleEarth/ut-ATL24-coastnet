@@ -21,13 +21,13 @@ You will also need to install the XGBoost `C Package`, found here:
 If you are not using Conda, you can simply install the package at the
 system level.
 
-# Build
-
-Build the executables:
+# Build and test
 
 ``` bash
 $ make build test
 ```
+
+# Create the model
 
 Create symlink to the input data:
 
@@ -35,7 +35,7 @@ Create symlink to the input data:
 $ ln -s <path to training data>/data
 ```
 
-# Create the model
+Train the model:
 
 ``` bash
 $ make train
