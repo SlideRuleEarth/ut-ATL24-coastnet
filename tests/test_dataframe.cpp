@@ -57,12 +57,13 @@ struct temp_file
     }
 };
 
-void test_dataframe (const size_t cols, const size_t rows, const size_t precision)
+mt19937 rng(12345);
+
+dataframe get_random_dataframe (const size_t cols, const size_t rows)
 {
     // Create the dataframe column names
     vector<string> names (cols);
-    size_t n = 0;
-    generate (names.begin(), names.end(), [&](){return to_string(n++);});
+    generate (names.begin(), names.end(), [&](){return to_string(rng ());});
 
     // Create a dataframe
     dataframe df;
@@ -76,6 +77,13 @@ void test_dataframe (const size_t cols, const size_t rows, const size_t precisio
     for (const auto &name : df.get_headers ())
         for (size_t i = 0; i < rows; ++i)
             df.set_value (name, i, d(rng));
+
+    return df;
+}
+
+void test_dataframe (const size_t cols, const size_t rows, const size_t precision)
+{
+    const auto df = get_random_dataframe (cols, rows);
 
     // Write it
     stringstream ss;
@@ -88,52 +96,44 @@ void test_dataframe (const size_t cols, const size_t rows, const size_t precisio
     VERIFY (df == tmp);
 }
 
-void test_timing ()
+void test_write (const size_t cols, const size_t rows)
 {
-    // Create the dataframe column names
-    const size_t cols = 16;
-    vector<string> names (cols);
-    size_t n = 0;
-    generate (names.begin(), names.end(), [&](){return to_string(n++);});
-
-    // Create a dataframe
-    dataframe df;
-    const size_t rows = 100'000;
-    for (const auto &i : names)
-        df.add_column(i);
-    df.set_rows (rows);
-
-    // Set the data to random numbers
-    mt19937 rng(12345);
-    std::uniform_real_distribution<> d(1.0, 100.0);
-    for (const auto &name : df.get_headers ())
-        for (size_t i = 0; i < rows; ++i)
-            df.set_value (name, i, d(rng));
+    const auto df = get_random_dataframe (cols, rows);
 
     temp_file tf;
-    timer t0;
+    timer t;
     clog << "Writing " << rows << " rows to " << tf.name << endl;
-    timer t1;
+    t.start ();
     write (tf.name, df);
-    t1.stop ();
+    t.stop ();
+    clog << "Write " << t.elapsed_ms () << "ms" << endl;
+}
+
+void test_read (const size_t cols, const size_t rows)
+{
+    const auto df = get_random_dataframe (cols, rows);
+
+    temp_file tf;
+    write (tf.name, df);
+    timer t;
     clog << "Reading " << rows << " rows from " << tf.name << endl;
-    timer t2;
+    t.start ();
     const auto tmp = read (tf.name);
-    t2.stop ();
-    clog << "Write " << t1.elapsed_ms () << "ms" << endl;
-    clog << "Read  " << t2.elapsed_ms () << "ms" << endl;
-    clog << "Total " << t0.elapsed_ms () << "ms" << endl;
+    t.stop ();
+    clog << "Read  " << t.elapsed_ms () << "ms" << endl;
+    VERIFY (df == tmp);
 }
 
 int main ()
 {
     try
     {
+        test_read (10, 300'000);
         test_dataframe (1, 1, 16);
         test_dataframe (10, 10, 16);
         test_dataframe (10, 100, 16);
         test_dataframe (100, 1, 16);
-        test_timing ();
+        test_write (10, 100'000);
 
         return 0;
     }

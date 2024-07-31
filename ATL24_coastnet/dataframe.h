@@ -169,8 +169,8 @@ dataframe read (std::istream &is)
     // Move the data to the dataframe
     df.set_values (std::move (values));
     assert (values.empty ());
-
     assert (df.is_valid ());
+
     return df;
 }
 
