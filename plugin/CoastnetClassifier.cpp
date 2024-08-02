@@ -7,9 +7,9 @@
 #include "ATL24_coastnet/utils.h"
 #include "ATL24_coastnet/dataframe.h"
 #include "ATL24_coastnet/raster.h"
-#include "features.h"
-#include "xgboost.h"
-#include "classify_cmd.h"
+#include "apps/features.h"
+#include "ATL24_coastnet/xgboost.h"
+#include "apps/classify_cmd.h"
 
 #include "CoastnetClassifier.h"
 #include "icesat2/BathyFields.h"
@@ -29,9 +29,6 @@ void classify (bool verbose, bool use_predictions, string model_filename, const 
     // Create the booster
     xgboost::xgbooster xgb (verbose);
     xgb.load_model (model_filename);
-
-    bool has_manual_label = false;
-    bool has_predictions = use_predictions;
 
     if (verbose)
     {
@@ -137,12 +134,12 @@ void classify (bool verbose, bool use_predictions, string model_filename, const 
 
 const char* CoastnetClassifier::CLASSIFIER_NAME = "coastnet";
 const char* CoastnetClassifier::COASTNET_PARMS = "coastnet";
-const char* CoastnetClassifier::DEFAULT_COASTNET_MODEL = "/data/model-20240607.json";
+const char* CoastnetClassifier::DEFAULT_COASTNET_MODEL = "/data/coastnet_model-20240628.json";
 
 static const char* COASTNET_PARM_MODEL = "model";
 static const char* COASTNET_PARM_SET_CLASS = "set_class";
 static const char* COASTNET_PARM_SET_SURFACE = "set_surface";
-static const char* COASTNET_PARM_SET_SURFACE = "use_predictions";
+static const char* COASTNET_PARM_USE_PREDICTIONS = "use_predictions";
 static const char* COASTNET_PARM_VERBOSE = "verbose";
 
 /******************************************************************************
@@ -243,13 +240,13 @@ bool CoastnetClassifier::run (const vector<extent_t*>& extents)
             for(size_t j = 0; j < extents[i]->photon_count; j++)
             {
                 // add samples
-                utils::sample s = {
+                ATL24_coastnet::classified_point2d p = {
                     .h5_index = static_cast<size_t>(photons[j].index_ph),
                     .x = photons[j].x_atc,
                     .z = photons[j].ortho_h,
                     .cls = static_cast<size_t>(photons[j].class_ph)
                 };
-                samples.push_back(s);
+                samples.push_back(p);
 
                 // initialize predictions
                 size_t prediction = BathyFields::UNCLASSIFIED;
@@ -258,7 +255,7 @@ bool CoastnetClassifier::run (const vector<extent_t*>& extents)
         }
 
         // Run classification
-        classify(parms.verbose, parms.model, samples, predictions);
+        classify(parms.verbose, parms.use_predictions, parms.model, samples, predictions);
 
         // Update extents
         size_t s = 0; // sample index
