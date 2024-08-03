@@ -37,13 +37,11 @@ class CoastnetClassifier: public BathyClassifier
         struct parms_t {
             string model;           // filename for xgboost model
             bool set_class;         // whether to update class_ph in extent
-            bool set_surface;       // whether to update surface_h in extent
             bool use_predictions;   // only classify photons that are marked unclassified
             bool verbose;           // verbose settin gin XGBoost library
             parms_t(): 
                 model (DEFAULT_COASTNET_MODEL),
                 set_class (false),
-                set_surface (false),
                 use_predictions (false),
                 verbose (true) {};
             ~parms_t() {};

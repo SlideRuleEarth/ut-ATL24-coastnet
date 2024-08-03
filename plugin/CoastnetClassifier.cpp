@@ -8,7 +8,7 @@
 #include "ATL24_coastnet/dataframe.h"
 #include "ATL24_coastnet/raster.h"
 #include "apps/features.h"
-#include "ATL24_coastnet/xgboost.h"
+#include "xgboost.h"
 #include "apps/classify_cmd.h"
 
 #include "CoastnetClassifier.h"
@@ -24,10 +24,9 @@ using BathyFields::photon_t;
 using namespace std;
 using namespace ATL24_coastnet;
 
-void classify (bool verbose, bool use_predictions, string model_filename, const vector<ATL24_coastnet::classified_point2d>& p, vector<size_t>& q)
+void classify (bool verbose, bool use_predictions, string model_filename, vector<ATL24_coastnet::classified_point2d>& p, vector<size_t>& q)
 {
-    // Create the booster
-    xgboost::xgbooster xgb (verbose);
+	xgboost::xgbooster xgb (verbose);
     xgb.load_model (model_filename);
 
     if (verbose)
@@ -138,7 +137,6 @@ const char* CoastnetClassifier::DEFAULT_COASTNET_MODEL = "/data/coastnet_model-2
 
 static const char* COASTNET_PARM_MODEL = "model";
 static const char* COASTNET_PARM_SET_CLASS = "set_class";
-static const char* COASTNET_PARM_SET_SURFACE = "set_surface";
 static const char* COASTNET_PARM_USE_PREDICTIONS = "use_predictions";
 static const char* COASTNET_PARM_VERBOSE = "verbose";
 
@@ -186,11 +184,6 @@ CoastnetClassifier::CoastnetClassifier (lua_State* L, int index):
         /* set class */
         lua_getfield(L, index, COASTNET_PARM_SET_CLASS);
         parms.set_class = LuaObject::getLuaBoolean(L, -1, true, parms.set_class);
-        lua_pop(L, 1);
-
-        /* set surface */
-        lua_getfield(L, index, COASTNET_PARM_SET_SURFACE);
-        parms.set_surface = LuaObject::getLuaBoolean(L, -1, true, parms.set_surface);
         lua_pop(L, 1);
 
         /* use predictions */
@@ -264,8 +257,7 @@ bool CoastnetClassifier::run (const vector<extent_t*>& extents)
             photon_t* photons = extents[i]->photons;
             for(size_t j = 0; j < extents[i]->photon_count; j++)
             {
-                if(parms.set_surface) photons[j].surface_h = samples[s].surface_elevation;
-                if(parms.set_class) photons[j].class_ph = samples[s].prediction;
+//                if(parms.set_class) photons[j].class_ph = samples[s].prediction;
                 photons[j].processing_result = predictions[s];
                 s++; // go to next sample
             }
