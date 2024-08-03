@@ -24,7 +24,7 @@ using BathyFields::photon_t;
 using namespace std;
 using namespace ATL24_coastnet;
 
-void classify (bool verbose, bool use_predictions, string model_filename, vector<ATL24_coastnet::classified_point2d>& p, vector<size_t>& q)
+void classify (bool verbose, bool use_predictions, string model_filename, vector<ATL24_coastnet::classified_point2d>& p)
 {
 	xgboost::xgbooster xgb (verbose);
     xgb.load_model (model_filename);
@@ -60,10 +60,10 @@ void classify (bool verbose, bool use_predictions, string model_filename, vector
         while (i < p.size () && indexes.size () != batch_size)
         {
             // Can we use the input predictions?
-            if (use_predictions && p[i].prediction != 0)
+            if (use_predictions && p[i].cls != 0)
             {
                 // Use the prediction
-                q[i] = p[i].prediction;
+                p[i].prediction = p[i].cls;
                 ++used_predictions;
             }
             else
@@ -122,7 +122,7 @@ void classify (bool verbose, bool use_predictions, string model_filename, vector
             assert (index < q.size ());
 
             // Save predicted value
-            q[index] = pred;
+            p[index].prediction = pred;
         }
     }
 }
@@ -222,8 +222,6 @@ bool CoastnetClassifier::run (const vector<extent_t*>& extents)
         // Preallocate samples and predictions vector
         std::vector<ATL24_coastnet::classified_point2d> samples;
         samples.reserve(number_of_samples);
-        std::vector<size_t> predictions;
-        predictions.reserve(number_of_samples);
         mlog(INFO, "Building %ld photon samples", number_of_samples);
 
         // Build and add samples
@@ -234,33 +232,26 @@ bool CoastnetClassifier::run (const vector<extent_t*>& extents)
             {
                 // add samples
                 ATL24_coastnet::classified_point2d p = {
-                    .h5_index = static_cast<size_t>(photons[j].index_ph),
+                    .h5_index = (i << 32) | j, // TEMPORARY HACK to unsort results below
                     .x = photons[j].x_atc,
                     .z = photons[j].ortho_h,
-                    .cls = static_cast<size_t>(photons[j].class_ph)
+                    .cls = static_cast<size_t>(photons[j].class_ph),
+                    .prediction = BathyFields::UNCLASSIFIED
                 };
                 samples.push_back(p);
-
-                // initialize predictions
-                size_t prediction = BathyFields::UNCLASSIFIED;
-                predictions.push_back(prediction);
             }
         }
 
         // Run classification
-        classify(parms.verbose, parms.use_predictions, parms.model, samples, predictions);
+        classify(parms.verbose, parms.use_predictions, parms.model, samples);
 
         // Update extents
-        size_t s = 0; // sample index
-        for(size_t i = 0; i < extents.size(); i++)
+        for(auto sample: samples)
         {
-            photon_t* photons = extents[i]->photons;
-            for(size_t j = 0; j < extents[i]->photon_count; j++)
-            {
-//                if(parms.set_class) photons[j].class_ph = samples[s].prediction;
-                photons[j].processing_result = predictions[s];
-                s++; // go to next sample
-            }
+            size_t i = (sample.h5_index >> 32) & 0xFFFFFFFF;
+            size_t j = sample.h5_index & 0xFFFFFFFF;
+            if(parms.set_class) extents[i]->photons[j].class_ph = sample.prediction;
+            extents[i]->photons[j].processing_result = sample.prediction;
         }
     }
     catch (const std::exception &e)
