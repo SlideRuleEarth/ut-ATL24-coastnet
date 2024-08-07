@@ -2,14 +2,10 @@
  * INCLUDES
  ******************************************************************************/
 
-#include "icesat2/BathyFields.h"
 #include "OsApi.h"
 #include "EventLib.h"
 #include "LuaEngine.h"
 #include "CoastnetClassifier.h"
-
-using BathyFields::extent_t;
-using BathyFields::photon_t;
 
 /******************************************************************************
  * DEFINES

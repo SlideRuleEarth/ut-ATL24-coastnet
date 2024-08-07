@@ -7,11 +7,8 @@
 
 #include "LuaObject.h"
 #include "OsApi.h"
-#include "icesat2/BathyClassifier.h"
-#include "icesat2/BathyFields.h"
-
-using BathyFields::extent_t;
-using BathyFields::bathy_class_t;
+#include "bathy/BathyClassifier.h"
+#include "bathy/BathyParms.h"
 
 
 /******************************************************************************
@@ -54,7 +51,7 @@ class CoastnetClassifier: public BathyClassifier
         static int  luaCreate   (lua_State* L);
         static void init        (void);
 
-        bool run (const vector<extent_t*>& extents) override;
+        bool run (const vector<BathyParms::extent_t*>& extents) override;
 
     protected:
 

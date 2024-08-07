@@ -12,10 +12,7 @@
 #include "apps/classify_cmd.h"
 
 #include "CoastnetClassifier.h"
-#include "icesat2/BathyFields.h"
-
-using BathyFields::extent_t;
-using BathyFields::photon_t;
+#include "bathy/BathyParms.h"
 
 /******************************************************************************
  * EXTERNAL FUNCTION (to be moved)
@@ -208,7 +205,7 @@ CoastnetClassifier::~CoastnetClassifier (void)
 /*----------------------------------------------------------------------------
  * run
  *----------------------------------------------------------------------------*/
-bool CoastnetClassifier::run (const vector<extent_t*>& extents)
+bool CoastnetClassifier::run (const vector<BathyParms::extent_t*>& extents)
 {
     try
     {
@@ -227,7 +224,7 @@ bool CoastnetClassifier::run (const vector<extent_t*>& extents)
         // Build and add samples
         for(size_t i = 0; i < extents.size(); i++)
         {
-            photon_t* photons = extents[i]->photons;
+            BathyParms::photon_t* photons = extents[i]->photons;
             for(size_t j = 0; j < extents[i]->photon_count; j++)
             {
                 // add samples
@@ -236,7 +233,7 @@ bool CoastnetClassifier::run (const vector<extent_t*>& extents)
                     .x = photons[j].x_atc,
                     .z = photons[j].ortho_h,
                     .cls = static_cast<size_t>(photons[j].class_ph),
-                    .prediction = BathyFields::UNCLASSIFIED
+                    .prediction = BathyParms::UNCLASSIFIED
                 };
                 samples.push_back(p);
             }
@@ -251,7 +248,7 @@ bool CoastnetClassifier::run (const vector<extent_t*>& extents)
             size_t i = (sample.h5_index >> 32) & 0xFFFFFFFF;
             size_t j = sample.h5_index & 0xFFFFFFFF;
             if(parms.set_class) extents[i]->photons[j].class_ph = sample.prediction;
-            extents[i]->photons[j].processing_result = sample.prediction;
+            extents[i]->photons[j].predictions[classifier] = sample.prediction;
         }
     }
     catch (const std::exception &e)
