@@ -227,7 +227,7 @@ bool CoastnetClassifier::run (const vector<BathyParms::extent_t*>& extents)
             BathyParms::photon_t* photons = extents[i]->photons;
             for(size_t j = 0; j < extents[i]->photon_count; j++)
             {
-                // add samples
+                // Populate sample
                 ATL24_coastnet::classified_point2d p = {
                     .h5_index = (i << 32) | j, // TEMPORARY HACK to unsort results below
                     .x = photons[j].x_atc,
@@ -236,6 +236,12 @@ bool CoastnetClassifier::run (const vector<BathyParms::extent_t*>& extents)
                     .prediction = BathyParms::UNCLASSIFIED
                 };
                 samples.push_back(p);
+
+                // Clear classification (if necessary)
+                if(parms.set_class)
+                {
+                    photons[j].class_ph = BathyParms::UNCLASSIFIED;
+                }
             }
         }
 

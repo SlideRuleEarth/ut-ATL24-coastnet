@@ -38,7 +38,7 @@ class CoastnetClassifier: public BathyClassifier
             bool verbose;           // verbose settin gin XGBoost library
             parms_t(): 
                 model (DEFAULT_COASTNET_MODEL),
-                set_class (false),
+                set_class (true),
                 use_predictions (false),
                 verbose (true) {};
             ~parms_t() {};
