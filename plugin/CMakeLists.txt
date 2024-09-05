@@ -38,4 +38,4 @@ string(REGEX REPLACE "\n$" "" BUILDINFO "${BUILDINFO}")
 target_compile_definitions (coastnet PUBLIC BUILDINFO="${BUILDINFO}")
 
 # Plugin Installation #
-install (TARGETS coastnet LIBRARY DESTINATION ${INSTALLDIR}/etc/sliderule)
+install (TARGETS coastnet LIBRARY DESTINATION ${INSTALLDIR}/lib/sliderule)

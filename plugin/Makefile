@@ -11,5 +11,11 @@ config:
 install:
 	make -C build install
 
+publish:
+	aws s3 cp build/coastnet.so s3://sliderule/config/
+	
+publish-local:
+	cp build/coastnet.so /plugin/
+
 distclean:
 	rm -Rf build
