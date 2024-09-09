@@ -7,7 +7,7 @@
 #include "xgboost.h"
 #include "classify_cmd.h"
 
-const std::string usage {"ls *.csv | resnet [options]"};
+const std::string usage {"classify [options] < filename.csv"};
 
 int main (int argc, char **argv)
 {
