@@ -50,8 +50,7 @@ test:
 .PHONY: preprocess # Preprocess input data
 preprocess:
 	@mkdir -p ./input/manual
-	@./scripts/preprocess.sh  "./data/local/3DGL/*.csv" ./input/manual
-	@./scripts/preprocess.sh  "./data/local/OSU/*.csv" ./input/manual
+	@./scripts/preprocess.sh  "./data/remote/latest/*.csv" ./input/manual
 
 ##############################################################################
 #
