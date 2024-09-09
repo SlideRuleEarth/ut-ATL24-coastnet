@@ -12,17 +12,9 @@
 #include <unordered_map>
 #include <vector>
 
-#ifndef PI_NAME
-#define PI_NAME "ph_index"
-#endif
-
-#ifndef X_NAME
-#define X_NAME "along_track_dist"
-#endif
-
-#ifndef Z_NAME
-#define Z_NAME "geoid_corrected_h"
-#endif
+const std::string PI_NAME ("index_ph");
+const std::string X_NAME ("x_atc");
+const std::string Z_NAME ("ortho_h");
 
 #ifndef PREDICTION_NAME
 #define PREDICTION_NAME "prediction"
@@ -149,7 +141,7 @@ void write_point2d (std::ostream &os, const T &p)
     const auto pr = os.precision ();
 
     // Print along-track meters
-    os << "ph_index,along_track_dist,geoid_corrected_h,manual_label" << endl;
+    os << "index_ph,x_atc,ortho_h,manual_label" << endl;
     for (size_t i = 0; i < p.size (); ++i)
     {
         // Write the index
@@ -176,7 +168,7 @@ void write_classified_point2d (std::ostream &os, const T &p)
     const auto pr = os.precision ();
 
     // Print along-track meters
-    os << "ph_index,along_track_dist,geoid_corrected_h,manual_label,prediction,sea_surface_h,bathy_h" << endl;
+    os << "index_ph,x_atc,ortho_h,manual_label,prediction,sea_surface_h,bathy_h" << endl;
     for (size_t i = 0; i < p.size (); ++i)
     {
         // Write the index
@@ -423,11 +415,11 @@ std::vector<ATL24_coastnet::classified_point2d> convert_dataframe (
     auto bathy_elevation_it = find (headers.begin(), headers.end(), BATHY_NAME);
 
     if (pi_it == headers.end ())
-        throw runtime_error ("Can't find 'ph_index' in dataframe");
+        throw runtime_error ("Can't find 'index_ph' in dataframe");
     if (x_it == headers.end ())
-        throw runtime_error ("Can't find 'along_track_dist' in dataframe");
+        throw runtime_error ("Can't find 'x_atc' in dataframe");
     if (z_it == headers.end ())
-        throw runtime_error ("Can't find 'geoid_corrected_h' in dataframe");
+        throw runtime_error ("Can't find 'ortho_h' in dataframe");
 
     has_manual_label = cls_it != headers.end ();
     has_predictions = prediction_it != headers.end ();
