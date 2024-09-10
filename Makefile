@@ -120,47 +120,6 @@ score_checked:
 
 ##############################################################################
 #
-# View data
-#
-##############################################################################
-
-TRUTH_FNS=$(shell find $(INPUT_GLOB) | shuf | tail)
-
-.PHONY: view_truth # View truth labels
-view_truth:
-	@parallel --lb --jobs=100 \
-		"streamlit run ../ATL24_viewer/apps/view_classifications.py -- --verbose {}" \
-		::: ${TRUTH_FNS}
-
-SURFACE_PREDICTION_FNS=$(shell find ./predictions/$(ID)/*_classified_surface.csv | tail)
-
-.PHONY: view_surface # View water surface prediction labels
-view_surface:
-	@parallel --lb --jobs=100 \
-		"streamlit run ../ATL24_viewer/apps/view_predictions.py -- --verbose {}" \
-		::: ${SURFACE_PREDICTION_FNS}
-
-BATHY_PREDICTION_FNS=$(shell find ./predictions/$(ID)/*_classified_bathy.csv | shuf | tail)
-
-.PHONY: view_bathy # View bathy prediction labels
-view_bathy:
-	@parallel --lb --jobs=100 \
-		"streamlit run ../ATL24_viewer/apps/view_predictions.py -- --verbose {}" \
-		::: ${BATHY_PREDICTION_FNS}
-
-##############################################################################
-#
-# Publication
-#
-##############################################################################
-
-.PHONY: plots # Generate plots for publications
-plots:
-	./scripts/create_plots.sh
-	./scripts/create_mixed_plots.sh
-
-##############################################################################
-#
 # Get help by running
 #
 #     $ make help
