@@ -1,11 +1,7 @@
-#include "ATL24_coastnet/precompiled.h"
-#include "ATL24_coastnet/confusion.h"
-#include "ATL24_coastnet/utils.h"
-#include "ATL24_coastnet/dataframe.h"
-#include "ATL24_coastnet/raster.h"
-#include "features.h"
-#include "xgboost.h"
 #include "classify_cmd.h"
+#include "coastnet.h"
+#include "dataframe.h"
+#include "utils.h"
 
 const std::string usage {"classify [options] < filename.csv"};
 
@@ -27,18 +23,12 @@ int main (int argc, char **argv)
         {
             clog << "cmd_line_parameters:" << endl;
             clog << args;
-        }
-
-        if (args.verbose)
-        {
             clog << "sampling parameters:" << endl;
             print_sampling_params (clog);
             clog << endl;
+            clog << "Reading points from stdin" << endl;
+            clog << endl;
         }
-
-        // Create the booster
-        xgboost::xgbooster xgb (args.verbose);
-        xgb.load_model (args.model_filename);
 
         // Read the points
         const auto df = ATL24_coastnet::dataframe::read (cin);
@@ -46,213 +36,25 @@ int main (int argc, char **argv)
         // Convert it to the correct format
         bool has_manual_label;
         bool has_predictions;
-        auto p = convert_dataframe (df, has_manual_label, has_predictions);
+        const auto p = convert_dataframe (df, has_manual_label, has_predictions);
 
         // Check args
         if (args.use_predictions && has_predictions == false)
             throw runtime_error ("'use-predictions' was specified, but the input file does not contain predictions");
 
         if (args.verbose)
-        {
             clog << p.size () << " points read" << endl;
-            clog << "Sorting points" << endl;
-        }
 
-        // Sort them by X
-        sort (p.begin (), p.end (),
-            [](const auto &a, const auto &b)
-            { return a.x < b.x; });
+        // Classify them
+        const auto q = classify (p, args);
+        assert (q.size () == p.size ());
 
-        if (args.verbose)
-            clog << "Classifying points" << endl;
-
-        // Copy the points
-        auto q (p);
-
-        // Keep track of how many we skipped
-        size_t used_predictions = 0;
-
-        // Predict in batches
-        const size_t batch_size = 1000;
-
-        // For each point
-        for (size_t i = 0; i < p.size (); )
+        // Ensure photon order did not change
+#pragma omp parallel for
+        for (size_t i = 0; i < q.size (); ++i)
         {
-            // Get a vector of indexes
-            vector<size_t> indexes;
-            indexes.reserve (batch_size);
-
-            // Fill the vector of indexes
-            while (i < p.size () && indexes.size () != batch_size)
-            {
-                // Can we use the input predictions?
-                if (args.use_predictions && p[i].prediction != 0)
-                {
-                    // Use the prediction
-                    q[i].prediction = p[i].prediction;
-                    ++used_predictions;
-                }
-                else
-                {
-                    // Save this index
-                    indexes.push_back (i);
-                }
-
-                // Go to the next one
-                ++i;
-            }
-
-            // Get number of samples to predict
-            const size_t rows = indexes.size ();
-
-            // Create the features
-            const size_t cols = features_per_sample ();
-            vector<float> f (rows * cols);
-
-            // Get the rasters for each point
-            for (size_t j = 0; j < indexes.size (); ++j)
-            {
-                // Get point sample index
-                assert (j < indexes.size ());
-                const size_t index = indexes[j];
-                assert (index < p.size ());
-
-                // Create the raster at this point
-                auto r = create_raster (p, index, sampling_params::patch_rows, sampling_params::patch_cols, sampling_params::aspect_ratio);
-
-                // The first feature is the elevation
-                f[j * cols] = p[index].z;
-
-                // The rest of the features are the raster values
-                for (size_t k = 0; k < r.size (); ++k)
-                {
-                    const size_t n = j * cols + 1 + k;
-                    assert (n < f.size ());
-                    f[n] = r[k];
-                }
-            }
-
-            // Process the batch
-            const auto predictions = xgb.predict (f, rows, cols);
-            assert (predictions.size () == rows);
-
-            // Get the prediction for each batch point
-            for (size_t j = 0; j < indexes.size (); ++j)
-            {
-                // Remap prediction
-                const unsigned pred = reverse_label_map.at (predictions[j]);
-
-                // Get point sample index
-                assert (j < indexes.size ());
-                const size_t index = indexes[j];
-                assert (index < q.size ());
-
-                // Save predicted value
-                q[index].prediction = pred;
-            }
-        }
-
-        if (args.verbose)
-            clog << "used predictions = " << 100.0 * used_predictions / p.size () << "%" << endl;
-
-        // Keep track of performance
-        unordered_map<long,confusion_matrix> cm;
-
-        // Allocate confusion matrix for each classification
-        cm[0] = confusion_matrix ();
-        cm[40] = confusion_matrix ();
-        cm[41] = confusion_matrix ();
-
-        // Get results
-        //
-        // For each point
-        for (size_t i = 0; i < p.size (); ++i)
-        {
-            // Get actual value
-            const long actual = p[i].cls;
-
-            // Get predicted value
-            const long pred = q[i].prediction;
-
-            for (auto j : cm)
-            {
-                // Get the key
-                const auto cls = j.first;
-
-                // Update the matrix
-                const bool is_present = (actual == cls);
-                const bool is_predicted = (pred == cls);
-                cm[cls].update (is_present, is_predicted);
-            }
-        }
-
-        // Compile results
-        stringstream ss;
-        ss << setprecision(3) << fixed;
-        ss << "cls"
-            << "\t" << "acc"
-            << "\t" << "F1"
-            << "\t" << "bal_acc"
-            << "\t" << "cal_F1"
-            << "\t" << "tp"
-            << "\t" << "tn"
-            << "\t" << "fp"
-            << "\t" << "fn"
-            << "\t" << "support"
-            << "\t" << "total"
-            << endl;
-        double weighted_f1 = 0.0;
-        double weighted_accuracy = 0.0;
-        double weighted_bal_acc = 0.0;
-        double weighted_cal_f1 = 0.0;
-
-        // Copy map so that it's ordered
-        std::map<long,confusion_matrix> m (cm.begin (), cm.end ());
-        for (auto i : m)
-        {
-            const auto key = i.first;
-            ss << key
-                << "\t" << cm[key].accuracy ()
-                << "\t" << cm[key].F1 ()
-                << "\t" << cm[key].balanced_accuracy ()
-                << "\t" << cm[key].calibrated_F_beta ()
-                << "\t" << cm[key].true_positives ()
-                << "\t" << cm[key].true_negatives ()
-                << "\t" << cm[key].false_positives ()
-                << "\t" << cm[key].false_negatives ()
-                << "\t" << cm[key].support ()
-                << "\t" << cm[key].total ()
-                << endl;
-            if (!isnan (cm[key].F1 ()))
-                weighted_f1 += cm[key].F1 () * cm[key].support () / cm[key].total ();
-            if (!isnan (cm[key].accuracy ()))
-                weighted_accuracy += cm[key].accuracy () * cm[key].support () / cm[key].total ();
-            if (!isnan (cm[key].balanced_accuracy ()))
-                weighted_bal_acc += cm[key].balanced_accuracy () * cm[key].support () / cm[key].total ();
-            if (!isnan (cm[key].calibrated_F_beta ()))
-                weighted_cal_f1 += cm[key].calibrated_F_beta () * cm[key].support () / cm[key].total ();
-        }
-        ss << "weighted_accuracy = " << weighted_accuracy << endl;
-        ss << "weighted_F1 = " << weighted_f1 << endl;
-        ss << "weighted_bal_acc = " << weighted_bal_acc << endl;
-        ss << "weighted_cal_F1 = " << weighted_cal_f1 << endl;
-
-        // Show results
-        if (args.verbose)
-            clog << ss.str ();
-
-        // Write results, if specified
-        if (!args.results_filename.empty ())
-        {
-            if (args.verbose)
-                clog << "Writing " << args.results_filename << endl;
-
-            ofstream ofs (args.results_filename);
-
-            if (!ofs)
-                cerr << "Could not open file for writing" << endl;
-            else
-                ofs << ss.str ();
+            assert (p[i].h5_index == q[i].h5_index);
+            ((void) (i)); // Eliminate unused variable warning
         }
 
         // Write classified output to stdout

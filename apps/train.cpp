@@ -1,10 +1,7 @@
-#include "ATL24_coastnet/precompiled.h"
-#include "ATL24_coastnet/custom_dataset.h"
-#include "ATL24_coastnet/utils.h"
-#include "ATL24_coastnet/raster.h"
-#include "features.h"
-#include "xgboost.h"
+#include "custom_dataset.h"
 #include "train_cmd.h"
+#include "utils.h"
+#include "xgboost.h"
 
 const std::string usage {"ls *.csv | resnet [options]"};
 
@@ -189,7 +186,7 @@ int main (int argc, char **argv)
         xgboost::xgbooster xgb (args.verbose);
 
         const size_t train_rows = train_features.size ();
-        const size_t train_cols = features_per_sample ();
+        const size_t train_cols = FEATURES_PER_SAMPLE;
 
         xgb.train (train_features.get_features (),
             train_features.get_labels (),
@@ -203,7 +200,7 @@ int main (int argc, char **argv)
         clog << "Testing model" << endl;
 
         const size_t test_rows = test_features.size ();
-        const size_t test_cols = features_per_sample ();
+        const size_t test_cols = FEATURES_PER_SAMPLE;
         const auto predictions = xgb.predict (test_features.get_features (),
             test_rows,
             test_cols);

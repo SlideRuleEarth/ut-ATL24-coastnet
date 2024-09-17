@@ -1,9 +1,7 @@
-#include "ATL24_coastnet/coastnet.h"
-#include "ATL24_coastnet/precompiled.h"
-#include "ATL24_coastnet/confusion.h"
-#include "ATL24_coastnet/utils.h"
-#include "ATL24_coastnet/dataframe.h"
+#include "dataframe.h"
+#include "coastnet.h"
 #include "score_cmd.h"
+#include "utils.h"
 
 const std::string usage {"score_coastnet < filename.csv"};
 

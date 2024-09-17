@@ -2,18 +2,7 @@
 #define GEOTIFF_H
 
 #include "raster.h"
-#include "container_utils.h"
 #include <gdal/gdal_priv.h>
-#include <algorithm>
-#include <cmath>
-#include <cassert>
-#include <fstream>
-#include <iostream>
-#include <vector>
-#include <string>
-#include <stdexcept>
-#include <type_traits>
-#include <numeric>
 
 namespace ATL24_coastnet
 {

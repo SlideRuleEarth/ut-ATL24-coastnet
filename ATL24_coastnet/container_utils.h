@@ -1,12 +1,7 @@
 #ifndef CONTAINER_UTILS_H
 #define CONTAINER_UTILS_H
 
-#include <string>
-#include <vector>
-#include <random>
-#include <cassert>
-#include <algorithm>
-#include <cmath>
+#include "precompiled.h"
 
 namespace ATL24_coastnet
 {

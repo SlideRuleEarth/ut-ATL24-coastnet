@@ -1,8 +1,8 @@
-#include "ATL24_coastnet/blunder_detection.h"
-#include "ATL24_coastnet/precompiled.h"
-#include "ATL24_coastnet/utils.h"
-#include "ATL24_coastnet/dataframe.h"
+#include "blunder_detection.h"
 #include "blunder_detection_cmd.h"
+#include "coastnet.h"
+#include "dataframe.h"
+#include "utils.h"
 
 const std::string usage {"blunder_detection [options] < input.csv > output.csv"};
 

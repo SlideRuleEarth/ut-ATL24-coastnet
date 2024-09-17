@@ -1,9 +1,7 @@
 #ifndef CMD_UTILS_H
 #define CMD_UTILS_H
 
-#include <getopt.h>
-#include <string>
-#include <iostream>
+#include "precompiled.h"
 
 namespace ATL24_coastnet
 {

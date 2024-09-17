@@ -1,13 +1,8 @@
 #pragma once
 
-#include <algorithm>
-#include <cassert>
-#include <cmath>
-#include <iostream>
-#include <limits>
-#include <numeric>
-#include <unordered_map>
-#include <vector>
+#include "precompiled.h"
+#include "confusion.h"
+#include "xgboost.h"
 
 namespace ATL24_coastnet
 {
@@ -70,6 +65,19 @@ struct classified_point2d
     double surface_elevation;
     double bathy_elevation;
 };
+
+std::ostream& operator<< (std::ostream &s, const classified_point2d &p)
+{
+    s << std::setprecision(15) << std::fixed;
+    s << "h5_index\t" << p.h5_index << std::endl;
+    s << "x\t" << p.x << std::endl;
+    s << "z\t" << p.z << std::endl;
+    s << "cls\t" << p.cls << std::endl;
+    s << "prediction\t" << p.prediction << std::endl;
+    s << "surface_elevation\t" << p.surface_elevation << std::endl;
+    s << "bathy_elevation\t" << p.bathy_elevation << std::endl;
+    return s;
+}
 
 struct classified_point3d
 {
@@ -448,5 +456,314 @@ std::vector<double> get_bathy_estimates (const T &p, const double sigma)
 {
     return get_elevation_estimates (p, sigma, bathy_class);
 }
+
+namespace sampling_params
+{
+    const size_t patch_rows = 63;
+    const size_t patch_cols = 15;
+    const int64_t input_size = patch_rows * patch_cols;
+    const double aspect_ratio = 4.0;
+}
+
+void print_sampling_params (std::ostream &os)
+{
+    os << "patch_rows: " << sampling_params::patch_rows << std::endl;
+    os << "patch_cols: " << sampling_params::patch_cols << std::endl;
+    os << "input_size: " << sampling_params::input_size << std::endl;
+    os << "aspect_ratio: " << sampling_params::aspect_ratio << std::endl;
+}
+
+// total features =
+//        photon elevation
+//      + raster size
+constexpr size_t FEATURES_PER_SAMPLE = 1 + sampling_params::patch_rows * sampling_params::patch_cols;
+
+template<typename T,typename U>
+std::vector<ATL24_coastnet::classified_point2d> classify (T p, const U &args)
+{
+    using namespace std;
+    using namespace ATL24_coastnet;
+
+    // Get indexes into p
+    vector<size_t> sorted_indexes (p.size ());
+
+    // 0, 1, 2, ...
+    iota (sorted_indexes.begin (), sorted_indexes.end (), 0);
+
+    // Sort indexes by X
+    sort (sorted_indexes.begin (), sorted_indexes.end (),
+        [&](const auto &a, const auto &b)
+        { return p[a].x < p[b].x; });
+
+    // Sort points by X
+    {
+    auto tmp (p);
+    for (size_t i = 0; i < sorted_indexes.size (); ++i)
+        p[i] = tmp[sorted_indexes[i]];
+    }
+
+    // Save the predictions
+    vector<unsigned> q (p.size ());
+
+    for (size_t i = 0; i < p.size (); ++i)
+    {
+        q[i] = p[i].prediction;
+        p[i].prediction = 0;
+    }
+
+    // Create the booster
+    xgboost::xgbooster xgb (args.verbose);
+    xgb.load_model (args.model_filename);
+
+    // Keep track of how many we skipped
+    size_t used_predictions = 0;
+
+    // Predict in batches
+    const size_t batch_size = 1000;
+
+    // For each point
+    for (size_t i = 0; i < p.size (); )
+    {
+        // Get a vector of indexes
+        vector<size_t> indexes;
+        indexes.reserve (batch_size);
+
+        // Fill the vector of indexes
+        while (i < p.size () && indexes.size () != batch_size)
+        {
+            // Can we use the input predictions?
+            if (args.use_predictions && p[i].prediction != 0)
+            {
+                // Use the prediction
+                p[i].prediction = q[i];
+                ++used_predictions;
+            }
+            else
+            {
+                // Save this index
+                indexes.push_back (i);
+            }
+
+            // Go to the next one
+            ++i;
+        }
+
+        // Get number of samples to predict
+        const size_t rows = indexes.size ();
+
+        // Create the features
+        const size_t cols = FEATURES_PER_SAMPLE;
+        vector<float> f (rows * cols);
+
+        // Get the rasters for each point
+        for (size_t j = 0; j < indexes.size (); ++j)
+        {
+            // Get point sample index
+            assert (j < indexes.size ());
+            const size_t index = indexes[j];
+            assert (index < p.size ());
+
+            // Create the raster at this point
+            auto r = create_raster (p, index, sampling_params::patch_rows, sampling_params::patch_cols, sampling_params::aspect_ratio);
+
+            // The first feature is the elevation
+            f[j * cols] = p[index].z;
+
+            // The rest of the features are the raster values
+            for (size_t k = 0; k < r.size (); ++k)
+            {
+                const size_t n = j * cols + 1 + k;
+                assert (n < f.size ());
+                f[n] = r[k];
+            }
+        }
+
+        // Process the batch
+        const auto predictions = xgb.predict (f, rows, cols);
+        assert (predictions.size () == rows);
+
+        // Get the prediction for each batch point
+        for (size_t j = 0; j < indexes.size (); ++j)
+        {
+            // Remap prediction
+            const unsigned pred = reverse_label_map.at (predictions[j]);
+
+            // Get point sample index
+            assert (j < indexes.size ());
+            const size_t index = indexes[j];
+            assert (index < p.size ());
+
+            // Save predicted value
+            p[index].prediction = pred;
+        }
+    }
+
+    if (args.verbose)
+        clog << "used predictions = " << 100.0 * used_predictions / p.size () << "%" << endl;
+
+    // Keep track of performance
+    unordered_map<long,confusion_matrix> cm;
+
+    // Allocate confusion matrix for each classification
+    cm[0] = confusion_matrix ();
+    cm[40] = confusion_matrix ();
+    cm[41] = confusion_matrix ();
+
+    // Get results
+    //
+    // For each point
+    for (size_t i = 0; i < p.size (); ++i)
+    {
+        // Get actual value
+        const long actual = p[i].cls;
+
+        // Get predicted value
+        const long pred = p[i].prediction;
+
+        for (auto j : cm)
+        {
+            // Get the key
+            const auto cls = j.first;
+
+            // Update the matrix
+            const bool is_present = (actual == cls);
+            const bool is_predicted = (pred == cls);
+            cm[cls].update (is_present, is_predicted);
+        }
+    }
+
+    // Compile results
+    stringstream ss;
+    ss << setprecision(3) << fixed;
+    ss << "cls"
+        << "\t" << "acc"
+        << "\t" << "F1"
+        << "\t" << "bal_acc"
+        << "\t" << "cal_F1"
+        << "\t" << "tp"
+        << "\t" << "tn"
+        << "\t" << "fp"
+        << "\t" << "fn"
+        << "\t" << "support"
+        << "\t" << "total"
+        << endl;
+    double weighted_f1 = 0.0;
+    double weighted_accuracy = 0.0;
+    double weighted_bal_acc = 0.0;
+    double weighted_cal_f1 = 0.0;
+
+    // Copy map so that it's ordered
+    std::map<long,confusion_matrix> m (cm.begin (), cm.end ());
+    for (auto i : m)
+    {
+        const auto key = i.first;
+        ss << key
+            << "\t" << cm[key].accuracy ()
+            << "\t" << cm[key].F1 ()
+            << "\t" << cm[key].balanced_accuracy ()
+            << "\t" << cm[key].calibrated_F_beta ()
+            << "\t" << cm[key].true_positives ()
+            << "\t" << cm[key].true_negatives ()
+            << "\t" << cm[key].false_positives ()
+            << "\t" << cm[key].false_negatives ()
+            << "\t" << cm[key].support ()
+            << "\t" << cm[key].total ()
+            << endl;
+        if (!isnan (cm[key].F1 ()))
+            weighted_f1 += cm[key].F1 () * cm[key].support () / cm[key].total ();
+        if (!isnan (cm[key].accuracy ()))
+            weighted_accuracy += cm[key].accuracy () * cm[key].support () / cm[key].total ();
+        if (!isnan (cm[key].balanced_accuracy ()))
+            weighted_bal_acc += cm[key].balanced_accuracy () * cm[key].support () / cm[key].total ();
+        if (!isnan (cm[key].calibrated_F_beta ()))
+            weighted_cal_f1 += cm[key].calibrated_F_beta () * cm[key].support () / cm[key].total ();
+    }
+    ss << "weighted_accuracy = " << weighted_accuracy << endl;
+    ss << "weighted_F1 = " << weighted_f1 << endl;
+    ss << "weighted_bal_acc = " << weighted_bal_acc << endl;
+    ss << "weighted_cal_F1 = " << weighted_cal_f1 << endl;
+
+    // Show results
+    if (args.verbose)
+        clog << ss.str ();
+
+    // Write results, if specified
+    if (!args.results_filename.empty ())
+    {
+        if (args.verbose)
+            clog << "Writing " << args.results_filename << endl;
+
+        ofstream ofs (args.results_filename);
+
+        if (!ofs)
+            cerr << "Could not open file for writing" << endl;
+        else
+            ofs << ss.str ();
+    }
+
+    // Restore original order
+    {
+    auto tmp (p);
+    for (size_t i = 0; i < sorted_indexes.size (); ++i)
+        p[sorted_indexes[i]] = tmp[i];
+    }
+
+    return p;
+}
+
+template<typename T>
+class features
+{
+    public:
+    explicit features (const T &dataset)
+        : dataset (dataset)
+    {
+    }
+    size_t size () const
+    {
+        return dataset.size ();
+    }
+    std::vector<float> get_features () const
+    {
+        using namespace std;
+
+        // Get all the features for this dataset
+        const size_t rows = dataset.size ();
+        const size_t cols = FEATURES_PER_SAMPLE;
+        vector<float> f (rows * cols);
+
+        // Stuff values into features vector
+        for (size_t i = 0; i < rows; ++i)
+        {
+            // First feature is the photon's elevation
+            assert (i * cols < f.size ());
+            f[i * cols] = dataset.get_elevation (i);
+
+            // The other features are the raster values
+            const auto r = dataset.get_raster (i);
+
+            for (size_t j = 0; j < r.size (); ++j)
+            {
+                const size_t index = i * cols + 1 + j;
+                assert (index < f.size ());
+                f[index] = r[j];
+            }
+        }
+
+        return f;
+    }
+    std::vector<unsigned> get_labels () const
+    {
+        std::vector<unsigned> l (dataset.size ());
+
+        for (size_t i = 0; i < l.size (); ++i)
+            l[i] = dataset.get_label (i);
+
+        return l;
+    }
+
+    private:
+    const T &dataset;
+};
 
 } // namespace coastnet

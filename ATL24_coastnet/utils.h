@@ -1,16 +1,7 @@
 #pragma once
 
-#include "ATL24_coastnet/coastnet.h"
+#include "coastnet.h"
 #include "raster.h"
-#include <algorithm>
-#include <cassert>
-#include <iomanip>
-#include <iostream>
-#include <random>
-#include <sstream>
-#include <string>
-#include <unordered_map>
-#include <vector>
 
 const std::string PI_NAME ("index_ph");
 const std::string X_NAME ("x_atc");
@@ -93,7 +84,7 @@ class prediction_cache
     };
 };
 
-std::vector<classified_point2d> read_classified_point2d (std::istream &is)
+std::vector<ATL24_coastnet::classified_point2d> read_classified_point2d (std::istream &is)
 {
     using namespace std;
 

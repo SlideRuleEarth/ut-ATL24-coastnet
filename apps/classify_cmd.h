@@ -1,11 +1,7 @@
 #ifndef CMD_H
 #define CMD_H
 
-#include <getopt.h>
-#include <iostream>
-#include <stdexcept>
-#include <string>
-#include "ATL24_coastnet/cmd_utils.h"
+#include "cmd_utils.h"
 
 namespace ATL24_coastnet
 {

@@ -1,12 +1,6 @@
 #pragma once
 
-#include "raster.h"
-#include <algorithm>
-#include <cassert>
-#include <iostream>
-#include <sstream>
-#include <string>
-#include <vector>
+#include "precompiled.h"
 
 namespace ATL24_coastnet
 {

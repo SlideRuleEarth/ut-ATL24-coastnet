@@ -1,9 +1,6 @@
-#include "ATL24_coastnet/raster.h"
-#include "ATL24_coastnet/pgm.h"
-#include "ATL24_coastnet/verify.h"
-#include <iostream>
-#include <stdexcept>
-#include <sstream>
+#include "raster.h"
+#include "pgm.h"
+#include "verify.h"
 
 using namespace std;
 using namespace ATL24_coastnet::raster;

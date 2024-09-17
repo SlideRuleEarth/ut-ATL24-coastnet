@@ -1,11 +1,9 @@
 #pragma once
 
-#include "ATL24_coastnet/coastnet.h"
-#include "ATL24_coastnet/pgm.h"
-#include "ATL24_coastnet/raster.h"
-#include "ATL24_coastnet/utils.h"
-#include "ATL24_coastnet/dataframe.h"
-#include <map>
+#include "coastnet.h"
+#include "dataframe.h"
+#include "raster.h"
+#include "utils.h"
 
 namespace ATL24_coastnet
 {

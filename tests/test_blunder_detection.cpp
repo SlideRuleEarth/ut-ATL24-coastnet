@@ -1,8 +1,5 @@
-#include "ATL24_coastnet/coastnet.h"
-#include "ATL24_coastnet/verify.h"
-#include <iostream>
-#include <stdexcept>
-#include <vector>
+#include "coastnet.h"
+#include "verify.h"
 
 using namespace std;
 using namespace ATL24_coastnet;

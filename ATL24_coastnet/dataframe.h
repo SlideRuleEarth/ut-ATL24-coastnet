@@ -1,14 +1,6 @@
 #pragma once
 
-#include <algorithm>
-#include <cassert>
-#include <fstream>
-#include <iostream>
-#include <iomanip>
-#include <sstream>
-#include <string>
-#include <unordered_map>
-#include <vector>
+#include "precompiled.h"
 
 namespace ATL24_coastnet
 {
