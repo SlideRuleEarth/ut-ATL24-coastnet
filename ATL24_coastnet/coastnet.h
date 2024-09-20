@@ -715,8 +715,8 @@ template<typename T>
 class features
 {
     public:
-    explicit features (const T &dataset)
-        : dataset (dataset)
+    explicit features (const T &_dataset)
+        : dataset (_dataset)
     {
     }
     size_t size () const

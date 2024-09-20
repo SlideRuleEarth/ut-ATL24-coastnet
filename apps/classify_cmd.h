@@ -1,7 +1,7 @@
 #ifndef CMD_H
 #define CMD_H
 
-#include "cmd_utils.h"
+#include "../ATL24_coastnet/cmd_utils.h"
 
 namespace ATL24_coastnet
 {

@@ -92,8 +92,8 @@ class dmatrix
 class xgbooster
 {
     public:
-    explicit xgbooster (const bool verbose)
-        : verbose (verbose)
+    explicit xgbooster (const bool _verbose)
+        : verbose (_verbose)
         , initialized (false)
         , trained (false)
     {

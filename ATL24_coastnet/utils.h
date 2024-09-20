@@ -84,45 +84,6 @@ class prediction_cache
     };
 };
 
-std::vector<ATL24_coastnet::classified_point2d> read_classified_point2d (std::istream &is)
-{
-    using namespace std;
-
-    string line;
-
-    // Get the column labels
-    getline (is, line);
-
-    vector<classified_point2d> p;
-    while (getline (is, line))
-    {
-        stringstream ss (line);
-        size_t h5_index;
-        ss >> h5_index;
-        ss.get (); // ignore ','
-        double x;
-        ss >> x;
-        ss.get (); // ignore ','
-        double z;
-        ss >> z;
-        ss.get (); // ignore ','
-        size_t cls;
-        ss >> cls;
-        ss.get (); // ignore ','
-        size_t prediction;
-        ss >> prediction;
-        ss.get (); // ignore ','
-        double surface_elevation;
-        ss >> surface_elevation;
-        p.push_back (classified_point2d {h5_index, x, z, cls, prediction, surface_elevation});
-        double bathy_elevation;
-        ss >> bathy_elevation;
-        p.push_back (classified_point2d {h5_index, x, z, cls, prediction, bathy_elevation});
-    }
-
-    return p;
-}
-
 template<typename T>
 void write_point2d (std::ostream &os, const T &p)
 {
@@ -224,16 +185,6 @@ template<typename T>
 point2d_extents get_extents (const T &p)
 {
     return get_extents (p, 0, p.size ());
-}
-
-std::pair<size_t,size_t> get_grid_location (const auto &p,
-    const auto &minp,
-    const double x_resolution,
-    const double z_resolution)
-{
-    const size_t row = (p.z - minp.z) / z_resolution;
-    const size_t col = (p.x - minp.x) / x_resolution;
-    return std::make_pair (row, col);
 }
 
 struct augmentation_params
