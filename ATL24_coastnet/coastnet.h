@@ -601,104 +601,107 @@ std::vector<ATL24_coastnet::classified_point2d> classify (T p, const U &args)
     if (args.verbose)
         clog << "used predictions = " << 100.0 * used_predictions / p.size () << "%" << endl;
 
-    // Keep track of performance
-    unordered_map<long,confusion_matrix> cm;
-
-    // Allocate confusion matrix for each classification
-    cm[0] = confusion_matrix ();
-    cm[40] = confusion_matrix ();
-    cm[41] = confusion_matrix ();
-
-    // Get results
-    //
-    // For each point
-    for (size_t i = 0; i < p.size (); ++i)
+    if(args.get_results)
     {
-        // Get actual value
-        const long actual = p[i].cls;
+        // Keep track of performance
+        unordered_map<long,confusion_matrix> cm;
 
-        // Get predicted value
-        const long pred = p[i].prediction;
+        // Allocate confusion matrix for each classification
+        cm[0] = confusion_matrix ();
+        cm[40] = confusion_matrix ();
+        cm[41] = confusion_matrix ();
 
-        for (auto j : cm)
+        // Get results
+        //
+        // For each point
+        for (size_t i = 0; i < p.size (); ++i)
         {
-            // Get the key
-            const auto cls = j.first;
+            // Get actual value
+            const long actual = p[i].cls;
 
-            // Update the matrix
-            const bool is_present = (actual == cls);
-            const bool is_predicted = (pred == cls);
-            cm[cls].update (is_present, is_predicted);
+            // Get predicted value
+            const long pred = p[i].prediction;
+
+            for (auto j : cm)
+            {
+                // Get the key
+                const auto cls = j.first;
+
+                // Update the matrix
+                const bool is_present = (actual == cls);
+                const bool is_predicted = (pred == cls);
+                cm[cls].update (is_present, is_predicted);
+            }
         }
-    }
 
-    // Compile results
-    stringstream ss;
-    ss << setprecision(3) << fixed;
-    ss << "cls"
-        << "\t" << "acc"
-        << "\t" << "F1"
-        << "\t" << "bal_acc"
-        << "\t" << "cal_F1"
-        << "\t" << "tp"
-        << "\t" << "tn"
-        << "\t" << "fp"
-        << "\t" << "fn"
-        << "\t" << "support"
-        << "\t" << "total"
-        << endl;
-    double weighted_f1 = 0.0;
-    double weighted_accuracy = 0.0;
-    double weighted_bal_acc = 0.0;
-    double weighted_cal_f1 = 0.0;
-
-    // Copy map so that it's ordered
-    std::map<long,confusion_matrix> m (cm.begin (), cm.end ());
-    for (auto i : m)
-    {
-        const auto key = i.first;
-        ss << key
-            << "\t" << cm[key].accuracy ()
-            << "\t" << cm[key].F1 ()
-            << "\t" << cm[key].balanced_accuracy ()
-            << "\t" << cm[key].calibrated_F_beta ()
-            << "\t" << cm[key].true_positives ()
-            << "\t" << cm[key].true_negatives ()
-            << "\t" << cm[key].false_positives ()
-            << "\t" << cm[key].false_negatives ()
-            << "\t" << cm[key].support ()
-            << "\t" << cm[key].total ()
+        // Compile results
+        stringstream ss;
+        ss << setprecision(3) << fixed;
+        ss << "cls"
+            << "\t" << "acc"
+            << "\t" << "F1"
+            << "\t" << "bal_acc"
+            << "\t" << "cal_F1"
+            << "\t" << "tp"
+            << "\t" << "tn"
+            << "\t" << "fp"
+            << "\t" << "fn"
+            << "\t" << "support"
+            << "\t" << "total"
             << endl;
-        if (!isnan (cm[key].F1 ()))
-            weighted_f1 += cm[key].F1 () * cm[key].support () / cm[key].total ();
-        if (!isnan (cm[key].accuracy ()))
-            weighted_accuracy += cm[key].accuracy () * cm[key].support () / cm[key].total ();
-        if (!isnan (cm[key].balanced_accuracy ()))
-            weighted_bal_acc += cm[key].balanced_accuracy () * cm[key].support () / cm[key].total ();
-        if (!isnan (cm[key].calibrated_F_beta ()))
-            weighted_cal_f1 += cm[key].calibrated_F_beta () * cm[key].support () / cm[key].total ();
-    }
-    ss << "weighted_accuracy = " << weighted_accuracy << endl;
-    ss << "weighted_F1 = " << weighted_f1 << endl;
-    ss << "weighted_bal_acc = " << weighted_bal_acc << endl;
-    ss << "weighted_cal_F1 = " << weighted_cal_f1 << endl;
+        double weighted_f1 = 0.0;
+        double weighted_accuracy = 0.0;
+        double weighted_bal_acc = 0.0;
+        double weighted_cal_f1 = 0.0;
 
-    // Show results
-    if (args.verbose)
-        clog << ss.str ();
+        // Copy map so that it's ordered
+        std::map<long,confusion_matrix> m (cm.begin (), cm.end ());
+        for (auto i : m)
+        {
+            const auto key = i.first;
+            ss << key
+                << "\t" << cm[key].accuracy ()
+                << "\t" << cm[key].F1 ()
+                << "\t" << cm[key].balanced_accuracy ()
+                << "\t" << cm[key].calibrated_F_beta ()
+                << "\t" << cm[key].true_positives ()
+                << "\t" << cm[key].true_negatives ()
+                << "\t" << cm[key].false_positives ()
+                << "\t" << cm[key].false_negatives ()
+                << "\t" << cm[key].support ()
+                << "\t" << cm[key].total ()
+                << endl;
+            if (!isnan (cm[key].F1 ()))
+                weighted_f1 += cm[key].F1 () * cm[key].support () / cm[key].total ();
+            if (!isnan (cm[key].accuracy ()))
+                weighted_accuracy += cm[key].accuracy () * cm[key].support () / cm[key].total ();
+            if (!isnan (cm[key].balanced_accuracy ()))
+                weighted_bal_acc += cm[key].balanced_accuracy () * cm[key].support () / cm[key].total ();
+            if (!isnan (cm[key].calibrated_F_beta ()))
+                weighted_cal_f1 += cm[key].calibrated_F_beta () * cm[key].support () / cm[key].total ();
+        }
+        ss << "weighted_accuracy = " << weighted_accuracy << endl;
+        ss << "weighted_F1 = " << weighted_f1 << endl;
+        ss << "weighted_bal_acc = " << weighted_bal_acc << endl;
+        ss << "weighted_cal_F1 = " << weighted_cal_f1 << endl;
 
-    // Write results, if specified
-    if (!args.results_filename.empty ())
-    {
+        // Show results
         if (args.verbose)
-            clog << "Writing " << args.results_filename << endl;
+            clog << ss.str ();
 
-        ofstream ofs (args.results_filename);
+        // Write results, if specified
+        if (!args.results_filename.empty ())
+        {
+            if (args.verbose)
+                clog << "Writing " << args.results_filename << endl;
 
-        if (!ofs)
-            cerr << "Could not open file for writing" << endl;
-        else
-            ofs << ss.str ();
+            ofstream ofs (args.results_filename);
+
+            if (!ofs)
+                cerr << "Could not open file for writing" << endl;
+            else
+                ofs << ss.str ();
+        }
     }
 
     // Restore original order
