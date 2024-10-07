@@ -66,7 +66,6 @@ dataframe get_random_dataframe (const size_t cols, const size_t rows)
     df.set_rows (rows);
 
     // Set the data to random numbers
-    mt19937 rng(12345);
     std::uniform_real_distribution<> d(1.0, 100.0);
     for (const auto &name : df.get_headers ())
         for (size_t i = 0; i < rows; ++i)

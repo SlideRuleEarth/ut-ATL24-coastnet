@@ -28,10 +28,10 @@ void test_bad_headers ()
     }
     {
         // Wrong maxsize
-        stringstream s;
-        s.str ("P5\n1 1\n255555\n");
+        stringstream tmp_s;
+        tmp_s.str ("P5\n1 1\n255555\n");
         bool failed = false;
-        try { h = read_header (s); }
+        try { h = read_header (tmp_s); }
         catch (...) { failed = true; }
         VERIFY (failed);
     }
