@@ -6,9 +6,9 @@ Average cal_F1 = 0.900
 Average Weighted F1 = 0.935
 Average Weighted cal_F1 = 0.893
 Bathy
-Average Acc = 0.965
-Average F1 = 0.812
-Average BA = 0.926
+Average Acc = 0.982
+Average F1 = 0.664
+Average BA = 0.921
 Average cal_F1 = 0.900
 Average Weighted F1 = 0.935
 Average Weighted cal_F1 = 0.893
