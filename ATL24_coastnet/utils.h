@@ -5,7 +5,7 @@
 
 const std::string PI_NAME ("index_ph");
 const std::string X_NAME ("x_atc");
-const std::string Z_NAME ("ortho_h");
+const std::string Z_NAME ("geoid_corr_h");
 
 #ifndef PREDICTION_NAME
 #define PREDICTION_NAME "prediction"
@@ -93,7 +93,7 @@ void write_point2d (std::ostream &os, const T &p)
     const auto pr = os.precision ();
 
     // Print along-track meters
-    os << "index_ph,x_atc,ortho_h,manual_label" << endl;
+    os << "index_ph,x_atc,geoid_corr_h,manual_label" << endl;
     for (size_t i = 0; i < p.size (); ++i)
     {
         // Write the index
@@ -120,7 +120,7 @@ void write_classified_point2d (std::ostream &os, const T &p)
     const auto pr = os.precision ();
 
     // Print along-track meters
-    os << "index_ph,x_atc,ortho_h,manual_label,prediction,sea_surface_h,bathy_h" << endl;
+    os << "index_ph,x_atc,geoid_corr_h,manual_label,prediction,sea_surface_h,bathy_h" << endl;
     for (size_t i = 0; i < p.size (); ++i)
     {
         // Write the index
@@ -361,7 +361,7 @@ std::vector<ATL24_coastnet::classified_point2d> convert_dataframe (
     if (x_it == headers.end ())
         throw runtime_error ("Can't find 'x_atc' in dataframe");
     if (z_it == headers.end ())
-        throw runtime_error ("Can't find 'ortho_h' in dataframe");
+        throw runtime_error ("Can't find 'geoid_corr_h' in dataframe");
 
     has_manual_label = cls_it != headers.end ();
     has_predictions = prediction_it != headers.end ();
