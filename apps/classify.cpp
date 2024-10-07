@@ -2,6 +2,7 @@
 #include "coastnet.h"
 #include "dataframe.h"
 #include "utils.h"
+#include "classify_cmd.h"
 
 const std::string usage {"classify [options] < filename.csv"};
 
@@ -46,7 +47,7 @@ int main (int argc, char **argv)
             clog << p.size () << " points read" << endl;
 
         // Classify them
-        const auto q = classify (p, args);
+        const auto q = classify (args.verbose, p, args.model_filename, args.use_predictions);
         assert (q.size () == p.size ());
 
         // Ensure photon order did not change
