@@ -29,20 +29,20 @@ class coastnet_dataset
 
     public:
     coastnet_dataset (const std::vector<std::string> &fns,
-        const size_t patch_rows,
-        const size_t patch_cols,
-        const double aspect_ratio,
-        const augmentation_params &ap,
-        const bool ap_enabled,
+        const size_t init_patch_rows,
+        const size_t init_patch_cols,
+        const double init_aspect_ratio,
+        const augmentation_params &init_ap,
+        const bool init_ap_enabled,
         const size_t samples_per_class,
         const bool verbose,
-        RNG &rng)
-        : patch_rows (patch_rows)
-        , patch_cols (patch_cols)
-        , aspect_ratio (aspect_ratio)
-        , ap (ap)
-        , ap_enabled (ap_enabled)
-        , rng (rng)
+        RNG &init_rng)
+        : patch_rows (init_patch_rows)
+        , patch_cols (init_patch_cols)
+        , aspect_ratio (init_aspect_ratio)
+        , ap (init_ap)
+        , ap_enabled (init_ap_enabled)
+        , rng (init_rng)
     {
         using namespace std;
 

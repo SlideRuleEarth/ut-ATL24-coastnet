@@ -15,9 +15,9 @@ struct header
 {
     header () : w (0), h (0)
     { }
-    header (const size_t w, const size_t h)
-        : w (w)
-        , h (h)
+    header (const size_t init_w, const size_t init_h)
+        : w (init_w)
+        , h (init_h)
     { }
     size_t w; // Width of image in pixels
     size_t h; // Height of images in pixels
