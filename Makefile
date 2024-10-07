@@ -75,11 +75,15 @@ train: build
 classify: build
 	@mkdir -p predictions
 	@find $(INPUT) | parallel --verbose --lb --jobs=4 --halt now,fail=1 \
-		"build/debug/classify --verbose --num-classes=7 --model-filename=coastnet_model.json --results-filename=predictions/{/.}_results.txt < {} > predictions/{/.}_classified.csv"
-	@echo "Surface"
-	@./scripts/summarize_scores.sh "./predictions/*_results.txt" 41
-	@echo "Bathy"
-	@./scripts/summarize_scores.sh "./predictions/*_results.txt" 40
+		"build/debug/classify --verbose --num-classes=7 --model-filename=coastnet_model.json < {} > predictions/{/.}_classified.csv"
+
+.PHONY: score # Compute scores
+score:
+	@./scripts/compute_scores.sh "./predictions/*_classified.csv"
+	@echo "Surface" | tee scores.txt
+	@./scripts/summarize_scores.sh "./predictions/*_classified_results.txt" 41 | tee -a scores.txt
+	@echo "Bathy" | tee -a scores.txt
+	@./scripts/summarize_scores.sh "./predictions/*_classified_results.txt" 40 | tee -a scores.txt
 
 .PHONY: xval # Cross-validate
 xval: build
@@ -95,10 +99,14 @@ xval: build
 			> coastnet_test_files-{}.txt" \
 			::: $$(seq 0 4)
 	@./scripts/classify.sh | parallel --verbose --lb --jobs=4 --halt now,fail=1
-	@echo "Surface"
-	@./scripts/summarize_scores.sh "./predictions/*_results-?.txt" 41
-	@echo "Bathy"
-	@./scripts/summarize_scores.sh "./predictions/*_results-?.txt" 40
+
+.PHONY: score_xval # Compute xval scores
+score_xval:
+	@./scripts/compute_scores.sh "./predictions/*_classified_?.csv"
+	@echo "Surface" | tee scores_xval.txt
+	@./scripts/summarize_scores.sh "./predictions/*_classified_?_results.txt" 41 | tee -a scores_xval.txt
+	@echo "Bathy" | tee -a scores_xval.txt
+	@./scripts/summarize_scores.sh "./predictions/*_classified_?_results.txt" 40 | tee -a scores_xval.txt
 
 ##############################################################################
 # Blunder detection
@@ -109,14 +117,14 @@ check: build
 	@build=debug ./scripts/check.sh \
 		"./predictions/*_classified.csv" \
 		./predictions
-	@./scripts/compute_scores.sh "./predictions/*_classified_checked.csv"
 
 .PHONY: score_checked # Generate scores on checked files
 score_checked:
-	@echo "Checked Surface Scores"
-	@./scripts/summarize_scores.sh "./predictions/*_classified_checked_results.txt" 41
-	@echo "Checked Bathy Scores"
-	@./scripts/summarize_scores.sh "./predictions/*_classified_checked_results.txt" 40
+	@./scripts/compute_scores.sh "./predictions/*_classified_checked.csv"
+	@echo "Checked Surface" | tee scores_checked.txt
+	@./scripts/summarize_scores.sh "./predictions/*_classified_checked_results.txt" 41 | tee -a scores_checked.txt
+	@echo "Checked Bathy" | tee -a scores_checked.txt
+	@./scripts/summarize_scores.sh "./predictions/*_classified_checked_results.txt" 40 | tee -a scores_checked.txt
 
 ##############################################################################
 #
