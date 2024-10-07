@@ -11,5 +11,5 @@ echo build = ${build}
 
 find $1 | \
     parallel --verbose --lb --jobs=15 \
-        "build/${build}/blunder_detection \
+        "build/${build}/blunder_detection --verbose \
         < {} > $2/{/.}_checked.csv"
