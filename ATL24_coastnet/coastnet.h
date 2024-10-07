@@ -478,8 +478,8 @@ void print_sampling_params (std::ostream &os)
 //      + raster size
 constexpr size_t FEATURES_PER_SAMPLE = 1 + sampling_params::patch_rows * sampling_params::patch_cols;
 
-template<typename T,typename U>
-std::vector<ATL24_coastnet::classified_point2d> classify (T p, const U &args)
+template<typename T>
+T classify (const bool verbose, T p, const std::string &model_filename, const bool use_predictions)
 {
     using namespace std;
     using namespace ATL24_coastnet;
@@ -512,8 +512,8 @@ std::vector<ATL24_coastnet::classified_point2d> classify (T p, const U &args)
     }
 
     // Create the booster
-    xgboost::xgbooster xgb (args.verbose);
-    xgb.load_model (args.model_filename);
+    xgboost::xgbooster xgb (verbose);
+    xgb.load_model (model_filename);
 
     // Keep track of how many we skipped
     size_t used_predictions = 0;
@@ -532,7 +532,7 @@ std::vector<ATL24_coastnet::classified_point2d> classify (T p, const U &args)
         while (i < p.size () && indexes.size () != batch_size)
         {
             // Can we use the input predictions?
-            if (args.use_predictions && p[i].prediction != 0)
+            if (use_predictions && p[i].prediction != 0)
             {
                 // Use the prediction
                 p[i].prediction = q[i];
@@ -598,111 +598,8 @@ std::vector<ATL24_coastnet::classified_point2d> classify (T p, const U &args)
         }
     }
 
-    if (args.verbose)
+    if (verbose)
         clog << "used predictions = " << 100.0 * used_predictions / p.size () << "%" << endl;
-
-    if(args.get_results)
-    {
-        // Keep track of performance
-        unordered_map<long,confusion_matrix> cm;
-
-        // Allocate confusion matrix for each classification
-        cm[0] = confusion_matrix ();
-        cm[40] = confusion_matrix ();
-        cm[41] = confusion_matrix ();
-
-        // Get results
-        //
-        // For each point
-        for (size_t i = 0; i < p.size (); ++i)
-        {
-            // Get actual value
-            const long actual = p[i].cls;
-
-            // Get predicted value
-            const long pred = p[i].prediction;
-
-            for (auto j : cm)
-            {
-                // Get the key
-                const auto cls = j.first;
-
-                // Update the matrix
-                const bool is_present = (actual == cls);
-                const bool is_predicted = (pred == cls);
-                cm[cls].update (is_present, is_predicted);
-            }
-        }
-
-        // Compile results
-        stringstream ss;
-        ss << setprecision(3) << fixed;
-        ss << "cls"
-            << "\t" << "acc"
-            << "\t" << "F1"
-            << "\t" << "bal_acc"
-            << "\t" << "cal_F1"
-            << "\t" << "tp"
-            << "\t" << "tn"
-            << "\t" << "fp"
-            << "\t" << "fn"
-            << "\t" << "support"
-            << "\t" << "total"
-            << endl;
-        double weighted_f1 = 0.0;
-        double weighted_accuracy = 0.0;
-        double weighted_bal_acc = 0.0;
-        double weighted_cal_f1 = 0.0;
-
-        // Copy map so that it's ordered
-        std::map<long,confusion_matrix> m (cm.begin (), cm.end ());
-        for (auto i : m)
-        {
-            const auto key = i.first;
-            ss << key
-                << "\t" << cm[key].accuracy ()
-                << "\t" << cm[key].F1 ()
-                << "\t" << cm[key].balanced_accuracy ()
-                << "\t" << cm[key].calibrated_F_beta ()
-                << "\t" << cm[key].true_positives ()
-                << "\t" << cm[key].true_negatives ()
-                << "\t" << cm[key].false_positives ()
-                << "\t" << cm[key].false_negatives ()
-                << "\t" << cm[key].support ()
-                << "\t" << cm[key].total ()
-                << endl;
-            if (!isnan (cm[key].F1 ()))
-                weighted_f1 += cm[key].F1 () * cm[key].support () / cm[key].total ();
-            if (!isnan (cm[key].accuracy ()))
-                weighted_accuracy += cm[key].accuracy () * cm[key].support () / cm[key].total ();
-            if (!isnan (cm[key].balanced_accuracy ()))
-                weighted_bal_acc += cm[key].balanced_accuracy () * cm[key].support () / cm[key].total ();
-            if (!isnan (cm[key].calibrated_F_beta ()))
-                weighted_cal_f1 += cm[key].calibrated_F_beta () * cm[key].support () / cm[key].total ();
-        }
-        ss << "weighted_accuracy = " << weighted_accuracy << endl;
-        ss << "weighted_F1 = " << weighted_f1 << endl;
-        ss << "weighted_bal_acc = " << weighted_bal_acc << endl;
-        ss << "weighted_cal_F1 = " << weighted_cal_f1 << endl;
-
-        // Show results
-        if (args.verbose)
-            clog << ss.str ();
-
-        // Write results, if specified
-        if (!args.results_filename.empty ())
-        {
-            if (args.verbose)
-                clog << "Writing " << args.results_filename << endl;
-
-            ofstream ofs (args.results_filename);
-
-            if (!ofs)
-                cerr << "Could not open file for writing" << endl;
-            else
-                ofs << ss.str ();
-        }
-    }
 
     // Restore original order
     {
@@ -718,8 +615,8 @@ template<typename T>
 class features
 {
     public:
-    explicit features (const T &_dataset)
-        : dataset (_dataset)
+    explicit features (const T &init_dataset)
+        : dataset (init_dataset)
     {
     }
     size_t size () const
