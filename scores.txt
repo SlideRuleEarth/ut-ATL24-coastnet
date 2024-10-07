@@ -1,0 +1,14 @@
+Surface
+Average Acc = 0.948
+Average F1 = 0.960
+Average BA = 0.931
+Average cal_F1 = 0.900
+Average Weighted F1 = 0.935
+Average Weighted cal_F1 = 0.893
+Bathy
+Average Acc = 0.965
+Average F1 = 0.812
+Average BA = 0.926
+Average cal_F1 = 0.900
+Average Weighted F1 = 0.935
+Average Weighted cal_F1 = 0.893
