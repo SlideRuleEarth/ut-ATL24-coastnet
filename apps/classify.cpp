@@ -26,9 +26,7 @@ int main (int argc, char **argv)
             clog << args;
             clog << "sampling parameters:" << endl;
             print_sampling_params (clog);
-            clog << endl;
             clog << "Reading points from stdin" << endl;
-            clog << endl;
         }
 
         // Read the points
@@ -46,17 +44,42 @@ int main (int argc, char **argv)
         if (args.verbose)
             clog << p.size () << " points read" << endl;
 
+        // Copy points
+        auto q (p);
+
+        // Get indexes into q
+        vector<size_t> sorted_indexes (q.size ());
+
+        // 0, 1, 2, ...
+        iota (sorted_indexes.begin (), sorted_indexes.end (), 0);
+
+        // Sort indexes by X
+        sort (sorted_indexes.begin (), sorted_indexes.end (),
+            [&](const auto &a, const auto &b)
+            { return q[a].x < q[b].x; });
+
+        // Sort points by X
+        {
+        auto tmp (q);
+        for (size_t i = 0; i < sorted_indexes.size (); ++i)
+            q[i] = tmp[sorted_indexes[i]];
+        }
+
         // Classify them
-        const auto q = classify (args.verbose, p, args.model_filename, args.use_predictions);
+        q = classify (args.verbose, q, args.model_filename, args.use_predictions);
         assert (q.size () == p.size ());
+
+        // Restore original order
+        {
+        auto tmp (q);
+        for (size_t i = 0; i < sorted_indexes.size (); ++i)
+            q[sorted_indexes[i]] = tmp[i];
+        }
 
         // Ensure photon order did not change
 #pragma omp parallel for
-        for (size_t i = 0; i < q.size (); ++i)
-        {
+        for ([[maybe_unused]] size_t i = 0; i < q.size (); ++i)
             assert (p[i].h5_index == q[i].h5_index);
-            ((void) (i)); // Eliminate unused variable warning
-        }
 
         // Write classified output to stdout
         write_classified_point2d (cout, q);
