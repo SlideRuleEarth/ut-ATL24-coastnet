@@ -22,12 +22,12 @@ def preprocess(verbose,
         print(f'Read {total} photons')
 
     # Filter out photons
-    df = df[df['ortho_h'] > min_elevation]
+    df = df[df['geoid_corr_h'] > min_elevation]
 
     if verbose:
         print(f'Filtered {total - len(df)} photons')
 
-    df = df[df['ortho_h'] < max_elevation]
+    df = df[df['geoid_corr_h'] < max_elevation]
 
     if verbose:
         print(f'Filtered {total - len(df)} photons')
