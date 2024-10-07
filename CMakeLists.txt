@@ -14,7 +14,7 @@ if(CCACHE_PROGRAM)
     set_property(GLOBAL PROPERTY RULE_LAUNCH_COMPILE "${CCACHE_PROGRAM}")
 endif()
 
-set(CMAKE_CXX_FLAGS "-Wall -Werror ${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
+set(CMAKE_CXX_FLAGS "-Wall -Werror -Wshadow ${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
 
 include_directories(${PROJECT_SOURCE_DIR} ${PROJECT_SOURCE_DIR}/ATL24_coastnet)
 
