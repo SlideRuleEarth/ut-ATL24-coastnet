@@ -388,7 +388,7 @@ T box_filter (const T &p, const int filter_width)
 }
 
 template<typename T>
-std::vector<double> get_elevation_estimates (const T &p, const double sigma, const unsigned cls)
+std::vector<double> get_elevation_estimates (T p, const double sigma, const unsigned cls)
 {
     using namespace std;
 
@@ -483,24 +483,6 @@ T classify (const bool verbose, T p, const std::string &model_filename, const bo
 {
     using namespace std;
     using namespace ATL24_coastnet;
-
-    // Get indexes into p
-    vector<size_t> sorted_indexes (p.size ());
-
-    // 0, 1, 2, ...
-    iota (sorted_indexes.begin (), sorted_indexes.end (), 0);
-
-    // Sort indexes by X
-    sort (sorted_indexes.begin (), sorted_indexes.end (),
-        [&](const auto &a, const auto &b)
-        { return p[a].x < p[b].x; });
-
-    // Sort points by X
-    {
-    auto tmp (p);
-    for (size_t i = 0; i < sorted_indexes.size (); ++i)
-        p[i] = tmp[sorted_indexes[i]];
-    }
 
     // Save the predictions
     vector<unsigned> q (p.size ());
@@ -600,13 +582,6 @@ T classify (const bool verbose, T p, const std::string &model_filename, const bo
 
     if (verbose)
         clog << "used predictions = " << 100.0 * used_predictions / p.size () << "%" << endl;
-
-    // Restore original order
-    {
-    auto tmp (p);
-    for (size_t i = 0; i < sorted_indexes.size (); ++i)
-        p[sorted_indexes[i]] = tmp[i];
-    }
 
     return p;
 }
