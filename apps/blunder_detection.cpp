@@ -55,45 +55,48 @@ int main (int argc, char **argv)
         if (has_predictions == false)
             throw runtime_error ("Expected the dataframe to have predictions, but none were found");
 
-        if (args.verbose)
-            clog << "Sorting points" << endl;
+        // Get indexes into p
+        vector<size_t> sorted_indexes (p.size ());
 
-        // Sort them by X
-        sort (p.begin (), p.end (),
-            [](const auto &a, const auto &b)
-            { return a.x < b.x; });
+        // 0, 1, 2, ...
+        iota (sorted_indexes.begin (), sorted_indexes.end (), 0);
+
+        // Sort indexes by X
+        sort (sorted_indexes.begin (), sorted_indexes.end (),
+            [&](const auto &a, const auto &b)
+            { return p[a].x < p[b].x; });
+
+        // Sort points by X
+        {
+        auto tmp (p);
+        for (size_t i = 0; i < sorted_indexes.size (); ++i)
+            p[i] = tmp[sorted_indexes[i]];
+        }
+
+        if (args.verbose)
+            clog << "Getting surface and bathy estimates" << endl;
+
+        // Compute surface and bathy estimates
+        const auto s = get_surface_estimates (p, args.surface_sigma);
+        const auto b = get_bathy_estimates (p, args.bathy_sigma);
+
+        assert (s.size () == p.size ());
+        assert (b.size () == p.size ());
+
+        // Assign surface and bathy estimates
+        for (size_t j = 0; j < p.size (); ++j)
+        {
+            p[j].surface_elevation = s[j];
+            p[j].bathy_elevation = b[j];
+        }
 
         if (args.verbose)
             clog << "Re-classifying points" << endl;
 
-        // Copy the photons
-        auto q (p);
+        auto q = blunder_detection (p, args);
 
-        const size_t iterations = 3;
-
-        for (size_t i = 0; i < iterations; ++i)
-        {
-            if (args.verbose)
-                clog << "Blunder detection pass " << i << endl;
-
-            q = blunder_detection (p, args);
-
-            // Check logic
-            assert (p.size () == q.size ());
-
-            // Rerun surface and bathy estimates
-            const auto s = get_surface_estimates (q, args.surface_sigma);
-            const auto b = get_bathy_estimates (q, args.bathy_sigma);
-
-            assert (s.size () == q.size ());
-            assert (b.size () == q.size ());
-
-            for (size_t j = 0; j < q.size (); ++j)
-            {
-                q[j].surface_elevation = s[j];
-                q[j].bathy_elevation = b[j];
-            }
-        }
+        // Check logic
+        assert (p.size () == q.size ());
 
         if (args.verbose)
         {
@@ -103,6 +106,13 @@ int main (int argc, char **argv)
                 if (p[i].prediction != q[i].prediction)
                     ++changed;
             clog << changed << " point classifications changed" << endl;
+        }
+
+        // Restore original order
+        {
+        auto tmp (q);
+        for (size_t i = 0; i < sorted_indexes.size (); ++i)
+            q[sorted_indexes[i]] = tmp[i];
         }
 
         // Write re-classified output to stdout
