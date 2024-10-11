@@ -1,6 +1,7 @@
 #pragma once
 
 #include "precompiled.h"
+#include "blunder_detection.h"
 #include "confusion.h"
 #include "xgboost.h"
 
@@ -18,10 +19,6 @@ struct postprocess_params
     double surface_sigma = 100.0;
     double bathy_sigma = 60.0;
 };
-
-// ASPRS Definitions
-constexpr unsigned bathy_class = 40;
-constexpr unsigned sea_surface_class = 41;
 
 // The classifier wants the labels to be 0-based and sequential,
 // so remap the ASPRS labels during data loading
@@ -487,6 +484,22 @@ T classify (const bool verbose, T p, const std::string &model_filename, const bo
     using namespace std;
     using namespace ATL24_coastnet;
 
+    // Get indexes into p
+    vector<size_t> sorted_indexes (p.size ());
+
+    // 0, 1, 2, ...
+    iota (sorted_indexes.begin (), sorted_indexes.end (), 0);
+
+    // Sort indexes by X
+    sort (sorted_indexes.begin (), sorted_indexes.end (),
+        [&](const auto &a, const auto &b)
+        { return p[a].x < p[b].x; });
+
+    // Sort points by X
+    sort (p.begin (), p.end (),
+        [&](const auto &a, const auto &b)
+        { return a.x < b.x; });
+
     // Save the predictions
     vector<unsigned> q (p.size ());
 
@@ -584,7 +597,37 @@ T classify (const bool verbose, T p, const std::string &model_filename, const bo
     }
 
     if (verbose)
+    {
         clog << "used predictions = " << 100.0 * used_predictions / p.size () << "%" << endl;
+        clog << "Getting surface and bathy estimates" << endl;
+    }
+
+    // Do post-processing
+    postprocess_params params;
+
+    // Compute surface and bathy estimates
+    const auto s = get_surface_estimates (p, params.surface_sigma);
+    const auto b = get_bathy_estimates (p, params.bathy_sigma);
+
+    assert (s.size () == p.size ());
+    assert (b.size () == p.size ());
+
+    // Assign surface and bathy estimates
+    for (size_t j = 0; j < p.size (); ++j)
+    {
+        p[j].surface_elevation = s[j];
+        p[j].bathy_elevation = b[j];
+    }
+
+    if (verbose)
+        clog << "Re-classifying points" << endl;
+
+    p = blunder_detection (p, params);
+
+    // Restore original order
+    auto tmp (p);
+    for (size_t i = 0; i < sorted_indexes.size (); ++i)
+        p[sorted_indexes[i]] = tmp[i];
 
     return p;
 }

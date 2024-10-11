@@ -1,9 +1,13 @@
 #pragma once
 
-#include "coastnet.h"
+#include "precompiled.h"
 
 namespace ATL24_coastnet
 {
+
+// ASPRS Definitions
+constexpr unsigned bathy_class = 40;
+constexpr unsigned sea_surface_class = 41;
 
 namespace detail
 {
