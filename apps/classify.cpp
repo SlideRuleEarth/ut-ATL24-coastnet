@@ -1,3 +1,4 @@
+#include "blunder_detection.h"
 #include "cmd_utils.h"
 #include "coastnet.h"
 #include "dataframe.h"
@@ -68,6 +69,31 @@ int main (int argc, char **argv)
         // Classify them
         q = classify (args.verbose, q, args.model_filename, args.use_predictions);
         assert (q.size () == p.size ());
+
+        if (args.verbose)
+            clog << "Getting surface and bathy estimates" << endl;
+
+        // Do post-processing
+        postprocess_params params;
+
+        // Compute surface and bathy estimates
+        const auto s = get_surface_estimates (q, params.surface_sigma);
+        const auto b = get_bathy_estimates (q, params.bathy_sigma);
+
+        assert (s.size () == q.size ());
+        assert (b.size () == q.size ());
+
+        // Assign surface and bathy estimates
+        for (size_t j = 0; j < q.size (); ++j)
+        {
+            q[j].surface_elevation = s[j];
+            q[j].bathy_elevation = b[j];
+        }
+
+        if (args.verbose)
+            clog << "Re-classifying points" << endl;
+
+        q = blunder_detection (q, params);
 
         // Restore original order
         {
