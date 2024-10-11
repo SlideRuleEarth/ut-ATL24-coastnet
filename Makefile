@@ -75,7 +75,7 @@ train: build
 classify: build
 	@mkdir -p predictions
 	@find $(INPUT) | parallel --verbose --lb --jobs=4 --halt now,fail=1 \
-		"build/release/classify --verbose --num-classes=7 --model-filename=coastnet_model.json < {} > predictions/{/.}_classified.csv"
+		"build/debug/classify --verbose --num-classes=7 --model-filename=coastnet_model.json < {} > predictions/{/.}_classified.csv"
 
 .PHONY: score # Compute scores
 score:
