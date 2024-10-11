@@ -7,12 +7,17 @@
 namespace ATL24_coastnet
 {
 
-constexpr double surface_min_elevation = -20.0; // meters
-constexpr double surface_max_elevation = 20.0; // meters
-constexpr double bathy_min_elevation = -100.0; // meters
-constexpr double water_column_width = 100.0; // meters
-constexpr double surface_range = 3.0; // +-meters
-constexpr double bathy_range = 3.0; // +-meters
+struct postprocess_params
+{
+    double surface_min_elevation = -20.0;
+    double surface_max_elevation = 20.0;
+    double bathy_min_elevation = -100.0;
+    double water_column_width = 100;
+    double surface_range = 3.0;
+    double bathy_range = 3.0;
+    double surface_sigma = 100.0;
+    double bathy_sigma = 60.0;
+};
 
 // ASPRS Definitions
 constexpr unsigned bathy_class = 40;

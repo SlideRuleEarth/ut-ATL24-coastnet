@@ -168,7 +168,7 @@ T bathy_range_check (T p, const double range)
 } // namespace detail
 
 template<typename T,typename U>
-T blunder_detection (T p, const U &args)
+T blunder_detection (T p, const U &params)
 {
     // Reclassify photons using heuristics
     using namespace std;
@@ -176,33 +176,23 @@ T blunder_detection (T p, const U &args)
     if (p.empty ())
         return p;
 
-    // Count classes
-    const size_t total_surface = count_predictions (p, sea_surface_class);
-    const size_t total_bathy = count_predictions (p, bathy_class);
-
-    if (args.verbose)
-    {
-        clog << "Total surface photons: " << total_surface << endl;
-        clog << "Total bathy photons: " << total_bathy << endl;
-    }
-
     // Surface photons must be near sea level
     p = detail::surface_elevation_check (p,
-        args.surface_min_elevation,
-        args.surface_max_elevation);
+        params.surface_min_elevation,
+        params.surface_max_elevation);
 
     // Bathy photons can't be too deep
     p = detail::bathy_elevation_check (p,
-        args.bathy_min_elevation);
+        params.bathy_min_elevation);
 
     // Bathy photons can't be above the sea surface
-    p = detail::relative_depth_check (p, args.water_column_width);
+    p = detail::relative_depth_check (p, params.water_column_width);
 
     // Sea surface photons must all be near the elevation estimate
-    p = detail::surface_range_check (p, args.surface_range);
+    p = detail::surface_range_check (p, params.surface_range);
 
     // Bathy photons must all be near the elevation estimate
-    p = detail::bathy_range_check (p, args.bathy_range);
+    p = detail::bathy_range_check (p, params.bathy_range);
 
     return p;
 }
