@@ -109,24 +109,6 @@ score_xval:
 	@./scripts/summarize_scores.sh "./predictions/*_classified_?_results.txt" 40 | tee -a scores_xval.txt
 
 ##############################################################################
-# Blunder detection
-##############################################################################
-
-.PHONY: check # Run blunder detection
-check: build
-	@build=debug ./scripts/check.sh \
-		"./predictions/*_classified.csv" \
-		./predictions
-
-.PHONY: score_checked # Generate scores on checked files
-score_checked:
-	@./scripts/compute_scores.sh "./predictions/*_classified_checked.csv"
-	@echo "Checked Surface" | tee scores_checked.txt
-	@./scripts/summarize_scores.sh "./predictions/*_classified_checked_results.txt" 41 | tee -a scores_checked.txt
-	@echo "Checked Bathy" | tee -a scores_checked.txt
-	@./scripts/summarize_scores.sh "./predictions/*_classified_checked_results.txt" 40 | tee -a scores_checked.txt
-
-##############################################################################
 #
 # View results
 #
@@ -136,7 +118,7 @@ score_checked:
 view:
 	@parallel --lb --jobs=100 \
 		"streamlit run ../ATL24_viewer/view_predictions.py -- --verbose {}" \
-		::: $$(find ./predictions/*_checked.csv | head)
+		::: $$(find ./predictions/*.csv | head)
 
 ##############################################################################
 #
