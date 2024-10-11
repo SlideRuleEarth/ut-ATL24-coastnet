@@ -27,7 +27,6 @@ macro(add_test name)
 endmacro()
 
 add_test(test_pgm)
-add_test(test_blunder_detection)
 add_test(test_dataframe)
 
 ############################################################
@@ -44,6 +43,3 @@ target_precompile_headers(classify PUBLIC ATL24_coastnet/precompiled.h)
 
 add_executable(score ./apps/score.cpp)
 target_precompile_headers(score PUBLIC ATL24_coastnet/precompiled.h)
-
-add_executable(blunder_detection ./apps/blunder_detection.cpp)
-target_precompile_headers(blunder_detection PUBLIC ATL24_coastnet/precompiled.h)
