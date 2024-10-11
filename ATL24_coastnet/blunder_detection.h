@@ -24,11 +24,11 @@ T surface_elevation_check (T p,
 
         // Too high?
         if (p[i].z > surface_max_elevation)
-            p[i].prediction = unclassified_class;
+            p[i].prediction = 0;
 
         // Too low?
         if (p[i].z < surface_min_elevation)
-            p[i].prediction = unclassified_class;
+            p[i].prediction = 0;
     }
 
     return p;
@@ -49,7 +49,7 @@ T bathy_elevation_check (T p,
 
         // Too deep?
         if (p[i].z < bathy_min_elevation)
-            p[i].prediction = unclassified_class;
+            p[i].prediction = 0;
     }
 
     return p;
@@ -99,7 +99,7 @@ T relative_depth_check (T p, const double water_column_width)
             continue; // Yes, keep going
 
         // No, reassign
-        p[i].prediction = unclassified_class;
+        p[i].prediction = 0;
     }
 
     return p;
@@ -129,7 +129,7 @@ T surface_range_check (T p, const double range)
 
         // Must be within +-range
         if (d > range)
-            p[i].prediction = unclassified_class;
+            p[i].prediction = 0;
     }
 
     return p;
@@ -159,7 +159,7 @@ T bathy_range_check (T p, const double range)
 
         // Must be within +-range
         if (d > range)
-            p[i].prediction = unclassified_class;
+            p[i].prediction = 0;
     }
 
     return p;

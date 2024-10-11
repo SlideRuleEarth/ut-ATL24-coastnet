@@ -15,10 +15,8 @@ constexpr double surface_range = 3.0; // +-meters
 constexpr double bathy_range = 3.0; // +-meters
 
 // ASPRS Definitions
-constexpr unsigned unclassified_class = 1;
 constexpr unsigned bathy_class = 40;
 constexpr unsigned sea_surface_class = 41;
-constexpr unsigned water_column_class = 45;
 
 // The classifier wants the labels to be 0-based and sequential,
 // so remap the ASPRS labels during data loading
