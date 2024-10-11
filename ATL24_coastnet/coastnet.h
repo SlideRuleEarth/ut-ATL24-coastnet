@@ -619,6 +619,7 @@ T classify (const bool verbose, T p, const std::string &model_filename, const bo
         p[j].bathy_elevation = b[j];
     }
 
+    // Apply blunder detection
     if (verbose)
         clog << "Re-classifying points" << endl;
 
