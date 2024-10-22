@@ -24,8 +24,11 @@ include_directories(${PROJECT_SOURCE_DIR} ${PROJECT_SOURCE_DIR}/ATL24_coastnet)
 macro(add_test name)
     add_executable(${name} ./tests/${name}.cpp)
     target_link_libraries(${name})
+    target_link_libraries(${name} xgboost::xgboost)
 endmacro()
 
+add_test(test_blunder_detection)
+add_test(test_classify)
 add_test(test_pgm)
 add_test(test_dataframe)
 
