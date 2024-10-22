@@ -37,15 +37,11 @@ int main (int argc, char **argv)
         bool has_predictions;
         const auto p = convert_dataframe (df, has_manual_label, has_predictions);
 
-        // Check args
-        if (args.use_predictions && has_predictions == false)
-            throw runtime_error ("'use-predictions' was specified, but the input file does not contain predictions");
-
         if (args.verbose)
             clog << p.size () << " points read" << endl;
 
         // Classify them
-        const auto q = classify (args.verbose, p, args.model_filename, args.use_predictions);
+        const auto q = classify (args.verbose, p, args.model_filename);
         assert (q.size () == p.size ());
 
         // Ensure photon order did not change

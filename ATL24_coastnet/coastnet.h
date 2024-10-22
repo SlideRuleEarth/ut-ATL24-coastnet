@@ -479,7 +479,7 @@ void print_sampling_params (std::ostream &os)
 constexpr size_t FEATURES_PER_SAMPLE = 1 + sampling_params::patch_rows * sampling_params::patch_cols;
 
 template<typename T>
-T classify (const bool verbose, T p, const std::string &model_filename, const bool use_predictions)
+T classify (const bool verbose, T p, const std::string &model_filename)
 {
     using namespace std;
     using namespace ATL24_coastnet;
@@ -500,21 +500,13 @@ T classify (const bool verbose, T p, const std::string &model_filename, const bo
         [&](const auto &a, const auto &b)
         { return a.x < b.x; });
 
-    // Save the predictions
-    vector<unsigned> q (p.size ());
-
+    // Zero out the predictions
     for (size_t i = 0; i < p.size (); ++i)
-    {
-        q[i] = p[i].prediction;
         p[i].prediction = 0;
-    }
 
     // Create the booster
     xgboost::xgbooster xgb (verbose);
     xgb.load_model (model_filename);
-
-    // Keep track of how many we skipped
-    size_t used_predictions = 0;
 
     // Predict in batches
     const size_t batch_size = 1000;
@@ -529,18 +521,8 @@ T classify (const bool verbose, T p, const std::string &model_filename, const bo
         // Fill the vector of indexes
         while (i < p.size () && indexes.size () != batch_size)
         {
-            // Can we use the input predictions?
-            if (use_predictions && p[i].prediction != 0)
-            {
-                // Use the prediction
-                p[i].prediction = q[i];
-                ++used_predictions;
-            }
-            else
-            {
-                // Save this index
-                indexes.push_back (i);
-            }
+            // Save it
+            indexes.push_back (i);
 
             // Go to the next one
             ++i;
@@ -597,10 +579,7 @@ T classify (const bool verbose, T p, const std::string &model_filename, const bo
     }
 
     if (verbose)
-    {
-        clog << "used predictions = " << 100.0 * used_predictions / p.size () << "%" << endl;
         clog << "Getting surface and bathy estimates" << endl;
-    }
 
     // Do post-processing
     postprocess_params params;
