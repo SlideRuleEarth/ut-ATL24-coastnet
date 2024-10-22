@@ -3,6 +3,7 @@
 #include "precompiled.h"
 #include "blunder_detection.h"
 #include "confusion.h"
+#include "utils.h"
 #include "xgboost.h"
 
 namespace ATL24_coastnet
@@ -41,29 +42,6 @@ std::unordered_map<long,long> reverse_label_map = {
     {4, 41},
     {5, 45},
     {6, 40},
-};
-
-struct point2d
-{
-    size_t h5_index;
-    double x, z;
-};
-
-struct point3d
-{
-    size_t h5_index;
-    double ts, lat, lon, z;
-};
-
-struct classified_point2d
-{
-    size_t h5_index;
-    double x;
-    double z;
-    size_t cls;
-    size_t prediction;
-    double surface_elevation;
-    double bathy_elevation;
 };
 
 std::ostream& operator<< (std::ostream &s, const classified_point2d &p)

@@ -1,6 +1,5 @@
 #pragma once
 
-#include "coastnet.h"
 #include "raster.h"
 
 const std::string PI_NAME ("index_ph");
@@ -13,6 +12,55 @@ const std::string Z_NAME ("geoid_corr_h");
 
 namespace ATL24_coastnet
 {
+
+struct point2d
+{
+    size_t h5_index;
+    double x, z;
+};
+
+bool operator== (const point2d &a, const point2d &b)
+{
+    if (a.h5_index != b.h5_index)
+        return false;
+    if (a.x != b.x)
+        return false;
+    if (a.z != b.z)
+        return false;
+
+    return true;
+}
+
+struct classified_point2d
+{
+    size_t h5_index;
+    double x;
+    double z;
+    size_t cls;
+    size_t prediction;
+    double surface_elevation;
+    double bathy_elevation;
+};
+
+bool operator== (const classified_point2d &a, const classified_point2d &b)
+{
+    if (a.h5_index != b.h5_index)
+        return false;
+    if (a.x != b.x)
+        return false;
+    if (a.z != b.z)
+        return false;
+    if (a.cls != b.cls)
+        return false;
+    if (a.prediction != b.prediction)
+        return false;
+    if (a.surface_elevation != b.surface_elevation)
+        return false;
+    if (a.bathy_elevation != b.bathy_elevation)
+        return false;
+
+    return true;
+}
 
 const std::string LABEL_NAME = std::string ("manual_label");
 const std::string SEA_SURFACE_NAME = std::string ("sea_surface_h");
