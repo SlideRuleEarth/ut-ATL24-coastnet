@@ -122,6 +122,29 @@ view:
 
 ##############################################################################
 #
+# Make everything
+#
+##############################################################################
+
+.PHONY: everything # Make everything. This will take a while.
+everything:
+	@scripts/yesno.bash "This will clean, retrain, classify, xval, ... etc."
+	@echo "Build/test"
+	@$(MAKE) --no-print-directory BUILD=release clean build test
+	@echo "Cleaning local files"
+	@rm -rf input/manual
+	@rm -rf predictions/
+	@echo "Preprocessing"
+	@$(MAKE) --no-print-directory preprocess
+	@echo "Training"
+	@$(MAKE) --no-print-directory train BUILD=release
+	@echo "Classifying/scoring"
+	@$(MAKE) --no-print-directory classify score BUILD=release
+	@echo "Cross-validating"
+	@$(MAKE) --no-print-directory xval score_xval BUILD=release
+
+##############################################################################
+#
 # Get help by running
 #
 #     $ make help
