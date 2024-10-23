@@ -61,8 +61,9 @@ preprocess:
 INPUT=./input/manual/*.csv
 
 .PHONY: train # Train a model
+train: BUILD=debug
 train: build
-	find $(INPUT) | build/debug/train \
+	find $(INPUT) | build/$(BUILD)/train \
 		--verbose \
 		--num-classes=7 \
 		--test-dataset=0 \
@@ -72,10 +73,11 @@ train: build
 		--model-filename=coastnet_model.json
 
 .PHONY: classify # Run classifier
+classify: BUILD=debug
 classify: build
 	@mkdir -p predictions
 	@find $(INPUT) | parallel --verbose --lb --jobs=4 --halt now,fail=1 \
-		"build/debug/classify --verbose --num-classes=7 --model-filename=coastnet_model.json < {} > predictions/{/.}_classified.csv"
+		"build/$(BUILD)/classify --verbose --num-classes=7 --model-filename=coastnet_model.json < {} > predictions/{/.}_classified.csv"
 
 .PHONY: score # Compute scores
 score:
