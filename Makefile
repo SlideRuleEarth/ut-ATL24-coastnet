@@ -130,7 +130,7 @@ view:
 
 .PHONY: everything # Make everything. This will take a while.
 everything:
-	@scripts/yesno.bash "This will clean, retrain, classify, xval, ... etc."
+	@scripts/yesno.bash "This will clean, preprocess, retrain, classify, xval, ... etc."
 	@echo "Build/test"
 	@$(MAKE) --no-print-directory BUILD=release clean build test
 	@echo "Cleaning local files"
