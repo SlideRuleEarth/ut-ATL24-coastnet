@@ -354,9 +354,18 @@ ATL24_coastnet::raster::raster<unsigned char> create_raster (const T &p,
             dx = mirror ? -dx : dx;
         }
 
+        // Check bounds
+        const double tmp_i = dz + rows / 2.0;
+        const double tmp_j = (dx / aspect_ratio) + cols / 2.0;
+
+        if (tmp_i < 0.0)
+            continue;
+        if (tmp_j < 0.0)
+            continue;
+
         // Convert from meters to a patch index
-        const size_t patch_i = dz + rows / 2.0;
-        const size_t patch_j = (dx / aspect_ratio) + cols / 2.0;
+        const size_t patch_i = tmp_i;
+        const size_t patch_j = tmp_j;
 
         // Check bounds
         if (patch_j >= r.cols ())
