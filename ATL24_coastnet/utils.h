@@ -271,7 +271,7 @@ ATL24_coastnet::raster::raster<unsigned char> create_raster (const T &p,
     using namespace std;
 
     // Create random number generator
-    std::default_random_engine rng (random_seed);
+    std::mt19937 rng (random_seed);
 
     // Check invariants
     assert (index < p.size ());
