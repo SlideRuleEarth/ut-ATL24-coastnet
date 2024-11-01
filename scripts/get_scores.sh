@@ -4,7 +4,7 @@
 set -eu
 IFS=$'\n\t'
 
-input=$(ls -1 ./predictions/*_classified.csv)
+input=$(ls -1 ${1})
 
 build/debug/score --verbose \
     --ignore-class=41 --class=40 \
