@@ -79,13 +79,11 @@ classify: build
 	@find $(INPUT) | parallel --verbose --lb --jobs=4 --halt now,fail=1 \
 		"build/$(BUILD)/classify --verbose --num-classes=7 --model-filename=coastnet_model.json < {} > predictions/{/.}_classified.csv"
 
-.PHONY: score # Compute scores
-score:
-	@./scripts/compute_scores.sh "./predictions/*_classified.csv"
-	@echo "Surface" | tee scores.txt
-	@./scripts/summarize_scores.sh "./predictions/*_classified_results.txt" 41 | tee -a scores.txt
-	@echo "Bathy" | tee -a scores.txt
-	@./scripts/summarize_scores.sh "./predictions/*_classified_results.txt" 40 | tee -a scores.txt
+.PHONY: score # Get scores
+score: build
+	@./scripts/get_scores.sh
+	@cat ./micro_scores_no_surface.txt
+	@cat ./micro_scores_all.txt
 
 .PHONY: xval # Cross-validate
 xval: build

@@ -16,6 +16,15 @@ class confusion_matrix
     {
     }
 
+    // Add a matrix to this one
+    void add (const confusion_matrix &m)
+    {
+        tp += m.tp;
+        tn += m.tn;
+        fp += m.fp;
+        fn += m.fn;
+    }
+
     // Matrix count access functions
     size_t true_positives () const { return static_cast<size_t> (tp); }
     size_t true_negatives () const { return static_cast<size_t> (tn); }
