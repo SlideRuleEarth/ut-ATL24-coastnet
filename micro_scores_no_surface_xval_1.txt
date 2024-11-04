@@ -1,0 +1,2 @@
+cls	acc	F1	bal_acc	cal_F1	MCC	Avg	tp	tn	fp	fn	support	total
+40	0.955	0.827	0.929	0.909	0.804	0.867	525986	4169298	158433	62139	588125	4915856
