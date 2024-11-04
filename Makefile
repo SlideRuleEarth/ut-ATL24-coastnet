@@ -81,9 +81,7 @@ classify: build
 
 .PHONY: score # Get scores
 score: build
-	@./scripts/get_scores.sh
-	@cat ./micro_scores_no_surface.txt
-	@cat ./micro_scores_all.txt
+	@./scripts/get_scores.sh "./predictions/*_classified.csv" ""
 
 .PHONY: xval # Cross-validate
 xval: build
@@ -102,11 +100,11 @@ xval: build
 
 .PHONY: score_xval # Compute xval scores
 score_xval:
-	@./scripts/compute_scores.sh "./predictions/*_classified_?.csv"
-	@echo "Surface" | tee scores_xval.txt
-	@./scripts/summarize_scores.sh "./predictions/*_classified_?_results.txt" 41 | tee -a scores_xval.txt
-	@echo "Bathy" | tee -a scores_xval.txt
-	@./scripts/summarize_scores.sh "./predictions/*_classified_?_results.txt" 40 | tee -a scores_xval.txt
+	@./scripts/get_scores.sh "./predictions/*_classified_0.csv" "_xval_0"
+	@./scripts/get_scores.sh "./predictions/*_classified_1.csv" "_xval_1"
+	@./scripts/get_scores.sh "./predictions/*_classified_2.csv" "_xval_2"
+	@./scripts/get_scores.sh "./predictions/*_classified_3.csv" "_xval_3"
+	@./scripts/get_scores.sh "./predictions/*_classified_4.csv" "_xval_4"
 
 ##############################################################################
 #
