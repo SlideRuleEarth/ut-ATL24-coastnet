@@ -460,6 +460,110 @@ void test_bathy_depth_check ()
     }
 }
 
+void test_filter_isolated_bathy ()
+{
+    {
+    vector<classified_point2d> p;
+
+    // h5_index, x, z, cls, prediction, surface_elevation, bathy_elevation
+    p.push_back ({0, 0.0, 0.0, 0, 40});
+    p.push_back ({1, 0.0, 0.0, 0, 41});
+    p.push_back ({2, 0.0, 6.0, 0, 40});
+    p.push_back ({3, 5.0, 0.0, 0, 40});
+    p.push_back ({4, 6.0, 0.0, 0, 40});
+    p.push_back ({5, 7.0, 5.0, 0, 40});
+
+    const double r = 4.0;
+    const double n = 2;
+    p = detail::filter_isolated_bathy (p, r, n);
+
+    VERIFY (p[0].prediction == 0); // reclass
+    VERIFY (p[1].prediction == 41);
+    VERIFY (p[2].prediction == 0); // reclass
+    VERIFY (p[3].prediction == 40);
+    VERIFY (p[4].prediction == 40);
+    VERIFY (p[5].prediction == 0); // reclass
+    }
+
+    {
+    vector<classified_point2d> p;
+
+    // h5_index, x, z, cls, prediction, surface_elevation, bathy_elevation
+    p.push_back ({0, 0.0, 0.0, 0, 40});
+    p.push_back ({1, 1.0, -1.0, 0, 40});
+    p.push_back ({2, 1.0, 0.0, 0, 40});
+    p.push_back ({3, 1.0, 1.0, 0, 40});
+    p.push_back ({4, 2.0, 0.0, 0, 40});
+    p.push_back ({5, 3.0, -1.0, 0, 40});
+    p.push_back ({6, 3.0, 0.0, 0, 40});
+    p.push_back ({7, 3.0, 1.0, 0, 40});
+    p.push_back ({8, 4.0, 0.0, 0, 40});
+
+    auto q = detail::filter_isolated_bathy (p, 100, 3);
+
+    for (size_t i = 0; i < q.size (); ++i)
+        VERIFY (q[i].prediction == 40); // no reclass
+
+    q = detail::filter_isolated_bathy (p, 0.1, 3);
+
+    for (size_t i = 0; i < q.size (); ++i)
+        VERIFY (q[i].prediction == 0); // reclass
+
+    q = detail::filter_isolated_bathy (p, 1.1, 5);
+
+    for (size_t i = 0; i < q.size (); ++i)
+        VERIFY (q[i].prediction == 40); // no reclass
+    }
+
+    {
+    vector<classified_point2d> p;
+
+    // h5_index, x, z, cls, prediction, surface_elevation, bathy_elevation
+    p.push_back ({0, 0.0, 0.0, 0, 40});
+    p.push_back ({1, 1.0, -1.0, 0, 40});
+    p.push_back ({2, 1.0, 0.0, 0, 40});
+    p.push_back ({3, 1.0, 1.0, 0, 40});
+    p.push_back ({4, 2.0, 0.0, 0, 40});
+    p.push_back ({5, 4.0, 0.0, 0, 40});
+    p.push_back ({6, 6.0, 0.0, 0, 40});
+    p.push_back ({7, 7.0, -1.0, 0, 40});
+    p.push_back ({8, 7.0, 0.0, 0, 40});
+    p.push_back ({9, 7.0, 1.0, 0, 40});
+
+    auto q = detail::filter_isolated_bathy (p, 1.1, 5);
+
+    VERIFY (q[0].prediction == 40);
+    VERIFY (q[1].prediction == 40);
+    VERIFY (q[2].prediction == 40);
+    VERIFY (q[3].prediction == 40);
+    VERIFY (q[4].prediction == 40);
+    VERIFY (q[5].prediction == 0); // reclass
+    VERIFY (q[6].prediction == 0); // reclass
+    VERIFY (q[7].prediction == 0); // reclass
+    VERIFY (q[8].prediction == 0); // reclass
+    VERIFY (q[9].prediction == 0); // reclass
+
+    p.push_back ({10, 8.0, 0.0, 0, 40});
+    q = detail::filter_isolated_bathy (p, 1.1, 5);
+
+    VERIFY (q[0].prediction == 40);
+    VERIFY (q[1].prediction == 40);
+    VERIFY (q[2].prediction == 40);
+    VERIFY (q[3].prediction == 40);
+    VERIFY (q[4].prediction == 40);
+    VERIFY (q[5].prediction == 0); // reclass
+    VERIFY (q[6].prediction == 40);
+    VERIFY (q[7].prediction == 40);
+    VERIFY (q[8].prediction == 40);
+    VERIFY (q[9].prediction == 40);
+
+    q = detail::filter_isolated_bathy (p, 0.9, 5);
+
+    for (size_t i = 0; i < q.size (); ++i)
+        VERIFY (q[i].prediction == 0); // no reclass
+    }
+}
+
 int main ()
 {
     try
@@ -476,6 +580,7 @@ int main ()
         test_no_surface ();
         test_no_bathy ();
         test_bathy_depth_check ();
+        test_filter_isolated_bathy ();
 
         return 0;
     }
