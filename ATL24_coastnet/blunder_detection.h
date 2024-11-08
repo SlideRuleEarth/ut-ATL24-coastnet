@@ -60,16 +60,86 @@ T bathy_elevation_check (T p,
 }
 
 template<typename T>
-T relative_depth_check (T p, const double water_column_width)
+std::vector<double> get_quantized_variance (const T &p, const unsigned cls, const double bin_size)
 {
+    using namespace std;
+
     assert (!p.empty ());
 
-    // Count surface photons
-    const size_t total_surface = count_predictions (p, sea_surface_class);
+    // Get extent
+    const unsigned min_x = p[0].x;
+    const unsigned max_x = p.back ().x + bin_size;
 
-    // If there is no surface, there is nothing to do
-    if (total_surface == 0)
-        return p;
+    // Values should be sorted
+    assert (min_x < max_x);
+    const size_t total = (max_x - min_x) / bin_size;
+
+    // Get 1m window averages
+    vector<double> sums (total);
+    vector<double> sums2 (total);
+    vector<double> totals (total);
+    for (size_t i = 0; i < p.size (); ++i)
+    {
+        // Skip non-'cls' photons
+        if (p[i].prediction != cls)
+            continue;
+
+        // Get along-track index
+        const double distance = (p[i].x - min_x) / bin_size;
+        assert (distance >= 0.0);
+        const unsigned j = std::floor (distance);
+
+        // Check logic
+        assert (j < sums.size ());
+        assert (j < sums2.size ());
+        assert (j < totals.size ());
+
+        // Count the value
+        sums[j] += p[i].z;
+        sums2[j] += (p[i].z * p[i].z);
+        ++totals[j];
+    }
+
+    // Compute the variance of 'cls' at each photon
+    vector<double> var (p.size (), NAN);
+    for (size_t i = 0; i < var.size (); ++i)
+    {
+        // Get along-track index
+        const double distance = (p[i].x - min_x) / bin_size;
+        assert (distance >= 0.0);
+        const unsigned j = std::floor (distance);
+
+        // Check logic
+        assert (j < sums.size ());
+        assert (j < sums2.size ());
+        assert (j < totals.size ());
+
+        if (totals[j] == 0)
+            continue; // Leave it NAN
+
+        // E(X) = E(X^2) - E(X)^2
+        const double ex = sums[j] / totals[j];
+        const double ex2 = sums2[j] / totals[j];
+
+        // Check for rounding error
+        assert (i < var.size ());
+        if (ex2 < ex * ex)
+            var[i] = 0.0;
+        else
+            var[i] = ex2 - ex * ex;
+
+        // Logic check
+        assert (var[i] >= 0.0);
+        assert (!std::isnan (var[i]));
+    }
+
+    return var;
+}
+
+template<typename T>
+T bathy_depth_check (T p, const double surface_bin_size, const double surface_depth_factor)
+{
+    assert (!p.empty ());
 
     // Count bathy photons
     const size_t total_bathy = count_predictions (p, bathy_class);
@@ -78,8 +148,23 @@ T relative_depth_check (T p, const double water_column_width)
     if (total_bathy == 0)
         return p;
 
-    // We need to know the along-track distance to surface photons
-    const auto nearby_surface_indexes = get_nearest_along_track_prediction (p, sea_surface_class);
+    // Count surface photons
+    const size_t total_surface = count_predictions (p, sea_surface_class);
+
+    // If there is no surface, there can't be any bathy
+    if (total_surface == 0)
+    {
+        for (size_t i = 0; i < p.size (); ++i)
+            p[i].prediction = 0;
+
+        return p;
+    }
+
+    // Compute sea surface variance
+    const auto var = get_quantized_variance (p, sea_surface_class, surface_bin_size);
+
+    // Variance is computed at each photon
+    assert (var.size () == p.size ());
 
     for (size_t i = 0; i < p.size (); ++i)
     {
@@ -87,23 +172,29 @@ T relative_depth_check (T p, const double water_column_width)
         if (p[i].prediction != bathy_class)
             continue;
 
-        // Get the closest surface index
-        const size_t j = nearby_surface_indexes[i];
-
-        // How far away is it?
-        assert (j < p.size ());
-        const double dx = fabs (p[i].x - p[j].x);
-
-        // If it's too far away, we can't do the check
-        if (dx > water_column_width)
+        // If there is no sea surface above it, this can't be bathy
+        if (std::isnan (var[i]))
+        {
+            p[i].prediction = 0;
             continue;
+        }
 
-        // If the bathy below the surface?
-        if (p[i].z < p[j].surface_elevation)
-            continue; // Yes, keep going
+        // Is the bathy deep enough below the surface?
+        //
+        // It must be 'surface_depth_factor' stddev's below the surface, but
+        // but clamp the buffer depth to 1.0m.
+        const double surface_stddev = std::sqrt (var[i]);
+        const double min_depth =
+            surface_depth_factor * surface_stddev > 1.0
+            ? 1.0
+            : surface_depth_factor * surface_stddev;
+        const double bathy_min_depth = p[i].surface_elevation - min_depth;
 
-        // No, reassign
-        p[i].prediction = 0;
+        if (p[i].z > bathy_min_depth)
+        {
+            p[i].prediction = 0;
+            continue;
+        }
     }
 
     return p;
@@ -190,7 +281,7 @@ T blunder_detection (T p, const U &params)
         params.bathy_min_elevation);
 
     // Bathy photons can't be above the sea surface
-    p = detail::relative_depth_check (p, params.water_column_width);
+    p = detail::bathy_depth_check (p, params.blunder_surface_bin_size, params.blunder_surface_depth_factor);
 
     // Sea surface photons must all be near the elevation estimate
     p = detail::surface_range_check (p, params.surface_range);
