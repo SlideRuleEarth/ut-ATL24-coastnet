@@ -20,6 +20,8 @@ struct postprocess_params
     double bathy_sigma = 60.0;
     double blunder_surface_bin_size = 30.0;
     double blunder_surface_depth_factor = 10.0;
+    double isolated_bathy_radius = 10.0;
+    double isolated_bathy_min_photons = 3;
 };
 
 // The classifier wants the labels to be 0-based and sequential,

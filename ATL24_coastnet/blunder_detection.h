@@ -260,6 +260,141 @@ T bathy_range_check (T p, const double range)
     return p;
 }
 
+template<typename T>
+T filter_isolated_bathy (T p,
+    const double isolated_bathy_radius,
+    const double isolated_bathy_min_photons)
+{
+    using namespace std;
+
+    assert (!p.empty ());
+
+    // Get indexes of bathy photons
+    vector<size_t> indexes;
+    for (size_t i = 0; i < p.size (); ++i)
+        if (p[i].prediction == bathy_class)
+            indexes.push_back (i);
+
+    // For each bathy photon, get left and right window indexes
+    vector<pair<size_t,size_t>> lr_indexes (indexes.size ());
+    for (size_t i = 0; i < lr_indexes.size (); ++i)
+    {
+        // Get left boundary
+        size_t j1 = i;
+        while (j1 > 0)
+        {
+
+            // Values should be sorted by XATC
+            assert (i < indexes.size ());
+            assert (j1 - 1 < indexes.size ());
+            assert (indexes[i] < p.size ());
+            assert (indexes[j1 - 1] < p.size ());
+            assert (p[indexes[j1 - 1]].x <= p[indexes[i]].x);
+
+            // Get the distance from 'i' to 'j' along X axis
+            const double dx = p[indexes[i]].x - p[indexes[j1 - 1]].x;
+
+            if (dx > isolated_bathy_radius)
+                break;
+
+            // Move left
+            --j1;
+        }
+
+        // Get right boundary
+        size_t j2 = i;
+        while (j2 + 1 < lr_indexes.size ())
+        {
+
+            // Values should be sorted by XATC
+            assert (i < indexes.size ());
+            assert (j2 + 1 < indexes.size ());
+            assert (indexes[i] < p.size ());
+            assert (indexes[j2 + 1] < p.size ());
+            assert (p[indexes[i]].x <= p[indexes[j2 + 1]].x);
+
+            // Get the distance from 'i' to 'j' along X axis
+            const double dx = p[indexes[j2 + 1]].x - p[indexes[i]].x;
+
+            if (dx > isolated_bathy_radius)
+                break;
+
+            // Move right
+            ++j2;
+        }
+
+        lr_indexes[i] = make_pair (j1, j2);
+    }
+
+    // For each bathy photon, count how many neighbors are within the radius
+    vector<size_t> neighbors (indexes.size ());
+    for (size_t i = 0; i < neighbors.size (); ++i)
+    {
+        // Get bounding indexes
+        assert (i < lr_indexes.size ());
+        size_t j1 = lr_indexes[i].first;
+        size_t j2 = lr_indexes[i].second;
+
+        // For each photon in the window
+        for (size_t j = j1; j <= j2; ++j)
+        {
+            assert (i < indexes.size ());
+            assert (j < indexes.size ());
+            assert (indexes[i] < p.size ());
+            assert (indexes[j] < p.size ());
+            const double dx = fabs (p[indexes[i]].x - p[indexes[j]].x);
+            const double dz = fabs (p[indexes[i]].z - p[indexes[j]].z);
+            const double d = std::sqrt (dx * dx + dz * dz);
+
+            // Count it
+            if (d < isolated_bathy_radius)
+                ++neighbors[i];
+        }
+
+        // Note that we always get a count of at least 1 because
+        // the photon at 'i' is 0.0 meters away
+        assert (neighbors[i] >= 1);
+    }
+
+    // Assume they are all isolated
+    for (size_t i = 0; i < indexes.size (); ++i)
+    {
+        assert (indexes[i] < p.size ());
+        p[indexes[i]].prediction = 0;
+    }
+
+    // Turn back on ones that are not isolated
+    for (size_t i = 0; i < indexes.size (); ++i)
+    {
+        if (neighbors[i] < isolated_bathy_min_photons)
+            continue;
+
+        // Get bounding indexes
+        assert (i < lr_indexes.size ());
+        size_t j1 = lr_indexes[i].first;
+        size_t j2 = lr_indexes[i].second;
+
+        // For each photon in the window
+        for (size_t j = j1; j <= j2; ++j)
+        {
+            const double dx = fabs (p[indexes[i]].x - p[indexes[j]].x);
+            const double dz = fabs (p[indexes[i]].z - p[indexes[j]].z);
+            const double d = std::sqrt (dx * dx + dz * dz);
+
+            // Is it close enough?
+            if (d > isolated_bathy_radius)
+                continue;
+
+            // Turn it back on
+            assert (j < indexes.size ());
+            assert (indexes[j] < p.size ());
+            p[indexes[j]].prediction = 40;
+        }
+    }
+
+    return p;
+}
+
 } // namespace detail
 
 template<typename T,typename U>
@@ -288,6 +423,9 @@ T blunder_detection (T p, const U &params)
 
     // Bathy photons must all be near the elevation estimate
     p = detail::bathy_range_check (p, params.bathy_range);
+
+    // Remove stray bathy photons
+    p = detail::filter_isolated_bathy (p, params.isolated_bathy_radius, params.isolated_bathy_min_photons);
 
     return p;
 }
