@@ -1,3 +1,4 @@
+#include "blunder_detection.h"
 #include "coastnet.h"
 #include "verify.h"
 
@@ -14,50 +15,10 @@ bool about_equal (double a, double b, unsigned precision = 3)
 void test_empty ()
 {
     vector<classified_point2d> p;
-    const auto x1 = get_nearest_along_track_prediction (p, 0);
+    const auto x1 = get_surface_estimates (p, 2.0);
     VERIFY (x1.empty ());
-    const auto x2 = get_surface_estimates (p, 2.0);
+    const auto x2 = get_bathy_estimates (p, 2.0);
     VERIFY (x2.empty ());
-    const auto x3 = get_bathy_estimates (p, 2.0);
-    VERIFY (x3.empty ());
-}
-
-void test_get_nearest_along_track_photon ()
-{
-    vector<classified_point2d> p;
-
-    //  h5_index, x, z, cls, pred
-    p.push_back ({0, 1, 0, 0, 41});
-    p.push_back ({1, 2, 100, 0, 0});
-    p.push_back ({2, 3, 100, 0, 0});
-    p.push_back ({3, 10, 200, 0, 40});
-    p.push_back ({4, 11, 300, 0, 0});
-
-    const auto indexes_0 = get_nearest_along_track_prediction (p, 0);
-    const auto indexes_40 = get_nearest_along_track_prediction (p, 40);
-    const auto indexes_41 = get_nearest_along_track_prediction (p, 41);
-    const auto indexes_123 = get_nearest_along_track_prediction (p, 123);
-
-    VERIFY (indexes_0[0] == 1);
-    VERIFY (indexes_0[1] == 1);
-    VERIFY (indexes_0[2] == 2);
-    VERIFY (indexes_0[3] == 4);
-    VERIFY (indexes_0[4] == 4);
-
-    VERIFY (indexes_40[0] == 3);
-    VERIFY (indexes_40[1] == 3);
-    VERIFY (indexes_40[2] == 3);
-    VERIFY (indexes_40[3] == 3);
-    VERIFY (indexes_40[4] == 3);
-
-    VERIFY (indexes_41[0] == 0);
-    VERIFY (indexes_41[1] == 0);
-    VERIFY (indexes_41[2] == 0);
-    VERIFY (indexes_41[3] == 0);
-    VERIFY (indexes_41[4] == 0);
-
-    for (auto i : indexes_123)
-        VERIFY (i == indexes_123.size ());
 }
 
 void test_count_photons ()
@@ -111,6 +72,55 @@ void test_get_quantized_average ()
     VERIFY (std::isnan (a2[1]));
     VERIFY (std::isnan (a2[2]));
     VERIFY (std::isnan (a2[3]));
+}
+
+void test_get_quantized_variance ()
+{
+    vector<classified_point2d> p;
+
+    //  h5_index, x, z, cls, pred
+    p.push_back ({0, 1.1, 100, 0, 0});
+    p.push_back ({1, 2.0, 101, 0, 0});
+    p.push_back ({2, 3.1, 102, 0, 0});
+    p.push_back ({3, 3.2, 103, 0, 1});
+    p.push_back ({4, 3.5, 104, 0, 0});
+    p.push_back ({5, 3.6, 105, 0, 0});
+    p.push_back ({6, 3.7, 106, 0, 0});
+    p.push_back ({7, 4.6, 107, 0, 0});
+
+    auto a0 = detail::get_quantized_variance (p, 0, 1.0);
+    auto a1 = detail::get_quantized_variance (p, 1, 1.0);
+    auto a2 = detail::get_quantized_variance (p, 2, 1.0);
+
+    VERIFY (a0.size () == p.size ());
+    VERIFY (about_equal (a0[0], 0));
+    VERIFY (about_equal (a0[1], 0));
+    VERIFY (a0[2] > 0.0);
+    VERIFY (a0[3] > 0.0);
+    VERIFY (a0[4] > 0.0);
+    VERIFY (a0[5] > 0.0);
+    VERIFY (a0[6] > 0.0);
+    VERIFY (about_equal (a0[7], 0));
+
+    VERIFY (a1.size () == p.size ());
+    VERIFY (std::isnan (a1[0]));
+    VERIFY (std::isnan (a1[1]));
+    VERIFY (!std::isnan (a1[2]));
+    VERIFY (!std::isnan (a1[3]));
+    VERIFY (!std::isnan (a1[4]));
+    VERIFY (!std::isnan (a1[5]));
+    VERIFY (!std::isnan (a1[6]));
+    VERIFY (std::isnan (a1[7]));
+
+    VERIFY (a2.size () == p.size ());
+    VERIFY (std::isnan (a2[0]));
+    VERIFY (std::isnan (a2[1]));
+    VERIFY (std::isnan (a2[2]));
+    VERIFY (std::isnan (a2[3]));
+    VERIFY (std::isnan (a2[4]));
+    VERIFY (std::isnan (a2[5]));
+    VERIFY (std::isnan (a2[6]));
+    VERIFY (std::isnan (a2[7]));
 }
 
 void test_get_nan_pairs ()
@@ -326,9 +336,9 @@ void test_no_surface ()
     auto z = get_surface_estimates (p, 2.0);
     VERIFY (!z.empty ());
 
-    const auto x = get_nearest_along_track_prediction (p, sea_surface_class);
+    const auto x = detail::get_quantized_variance (p, sea_surface_class, 1.0);
     for (auto i : x)
-        VERIFY (i == p.size ());
+        VERIFY (std::isnan (i));
 }
 
 void test_no_bathy ()
@@ -341,20 +351,123 @@ void test_no_bathy ()
     auto z = get_surface_estimates (p, 2.0);
     VERIFY (!z.empty ());
 
-    const auto x = get_nearest_along_track_prediction (p, bathy_class);
+    const auto x = detail::get_quantized_variance (p, bathy_class, 1.0);
     for (auto i : x)
-        VERIFY (i == p.size ());
+        VERIFY (std::isnan (i));
 }
 
+void test_bathy_depth_check ()
+{
+    {
+    vector<classified_point2d> p;
+
+    // Surface only
+    for (size_t i = 0; i < 100; ++i)
+        p.push_back ({0, 1, 0, 0, 41});
+
+    // No bathy, so no change
+    auto q = detail::bathy_depth_check (p, 1.0, 2.0);
+    VERIFY (p == q);
+    }
+
+    {
+    vector<classified_point2d> p;
+
+    // Bathy only
+    for (size_t i = 0; i < 100; ++i)
+        p.push_back ({0, 1, 0, 0, 40});
+
+    // No surface, so no bathy...
+    auto q = detail::bathy_depth_check (p, 1.0, 2.0);
+    for (size_t i = 0; i < 100; ++i)
+        VERIFY (q[i].prediction != 40);
+    }
+
+    {
+    vector<classified_point2d> p;
+
+    // h5_index, x, z, cls, prediction, surface_elevation, bathy_elevation
+    // Add surface at 0.0
+    for (size_t i = 0; i < 10; ++i)
+        p.push_back ({0, 1, 0.0, 0, 41});
+
+    // Add bathy at 1.0
+    for (size_t i = 0; i < 10; ++i)
+        p.push_back ({0, 1, 1.0, 0, 40});
+
+    // Add bathy at -1.0
+    for (size_t i = 0; i < 10; ++i)
+        p.push_back ({0, 1, -1.0, 0, 40});
+
+    auto q = detail::bathy_depth_check (p, 1.0, 2.0);
+
+    // These got changed
+    for (size_t i = 10; i < 20; ++i)
+        VERIFY (q[i].prediction == 0);
+
+    // These did not change
+    for (size_t i = 20; i < 30; ++i)
+        VERIFY (q[i].prediction == 40);
+    }
+
+    {
+    vector<classified_point2d> p;
+
+    // h5_index, x, z, cls, prediction, surface_elevation, bathy_elevation
+    //
+    // Add surface at -3.0
+    for (size_t i = 0; i < 10; ++i)
+        p.push_back ({0, 1, -3.0, 0, 41});
+
+    // More surface
+    for (size_t i = 0; i < 10; ++i)
+        p.push_back ({0, 1, -3.5, 0, 41});
+
+    const auto var = detail::get_quantized_variance (p, sea_surface_class, 1.0);
+
+    // Error is 0.25 at each photon, so var=0.25^2=0.0625
+    for (size_t i = 0; i < var.size (); ++i)
+        VERIFY (about_equal (var[i], 0.0625));
+
+    // Add bathy
+    p.push_back ({0, 1, 10.00, 0, 40}); // No
+    p.push_back ({0, 1,  0.00, 0, 40}); // No
+    p.push_back ({0, 1, -3.00, 0, 40}); // No
+    p.push_back ({0, 1, -3.74, 0, 40}); // No
+    p.push_back ({0, 1, -3.76, 0, 40}); // Yes
+    p.push_back ({0, 1, -5.00, 0, 40}); // Yes
+
+    // Get surface estimates
+    postprocess_params params;
+    auto z = get_surface_estimates (p, params.surface_sigma);
+
+    // Assign them
+    VERIFY (z.size () == p.size ());
+    for (size_t i = 0; i < p.size (); ++i)
+        p[i].surface_elevation = z[i];
+
+    auto q = detail::bathy_depth_check (p, 1.0, 2.0);
+
+    // These got changed
+    VERIFY (q[20].prediction == 0);
+    VERIFY (q[21].prediction == 0);
+    VERIFY (q[22].prediction == 0);
+    VERIFY (q[23].prediction == 0);
+
+    // These did not
+    VERIFY (q[24].prediction == 40);
+    VERIFY (q[25].prediction == 40);
+    }
+}
 
 int main ()
 {
     try
     {
         test_empty ();
-        test_get_nearest_along_track_photon ();
         test_count_photons ();
         test_get_quantized_average ();
+        test_get_quantized_variance ();
         test_get_nan_pairs ();
         test_interpolate_nans ();
         test_box_filter ();
@@ -362,6 +475,7 @@ int main ()
         test_get_bathy_estimates ();
         test_no_surface ();
         test_no_bathy ();
+        test_bathy_depth_check ();
 
         return 0;
     }
