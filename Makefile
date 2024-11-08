@@ -116,7 +116,7 @@ score_xval:
 view:
 	@parallel --lb --jobs=100 \
 		"streamlit run ../ATL24_viewer/view_predictions.py -- --verbose {}" \
-		::: $$(find ./predictions/*.csv | head)
+		::: $$(find ./predictions/*_classified.csv | head)
 
 ##############################################################################
 #
