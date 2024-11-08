@@ -14,11 +14,12 @@ struct postprocess_params
     double surface_min_elevation = -20.0;
     double surface_max_elevation = 20.0;
     double bathy_min_elevation = -100.0;
-    double water_column_width = 100;
     double surface_range = 3.0;
     double bathy_range = 3.0;
     double surface_sigma = 100.0;
     double bathy_sigma = 60.0;
+    double blunder_surface_bin_size = 30.0;
+    double blunder_surface_depth_factor = 10.0;
 };
 
 // The classifier wants the labels to be 0-based and sequential,
@@ -65,108 +66,6 @@ struct classified_point3d
 };
 
 template<typename T>
-std::vector<size_t> get_nearest_along_track_prediction (const T &p, const unsigned c)
-{
-    // At each point in 'p', what is the index of the closest point
-    // with the label 'c'?
-    using namespace std;
-
-    // Set sentinels
-    vector<size_t> indexes (p.size (), p.size ());
-
-    // Check data
-    if (p.empty ())
-        return indexes;
-
-    // Get first and last indexes with label 'c'
-    size_t first_index = p.size ();
-    size_t last_index = p.size ();
-    for (size_t i = 0; i < p.size (); ++i)
-    {
-        // Ignore ones that are the wrong class
-        if (p[i].prediction != c)
-            continue;
-
-        // Only set it if it's the first
-        if (first_index == p.size ())
-            first_index = i;
-
-        // Always set the last
-        last_index = i;
-    }
-
-    // If we didn't find at least one, there is nothing to do
-    if (first_index == p.size ())
-        return indexes;
-
-    // Check logic
-    assert (last_index != p.size ());
-
-    // Set all of the indexes to the left of 'first_index'
-    for (size_t i = 0; i < first_index; ++i)
-        indexes[i] = first_index;
-
-    // Set all of the indexes to the right of 'last_index'
-    for (size_t i = last_index; i < p.size (); ++i)
-        indexes[i] = last_index;
-
-    // Set sentinels
-    size_t left_index = p.size ();
-    size_t right_index = p.size ();
-
-    // Now set all of the indexes between 'first_index' and
-    // 'last_index'
-    for (size_t i = first_index; i < last_index; ++i)
-    {
-        // Is this a label that we are interested in?
-        if (p[i].prediction == c)
-        {
-            // Closest point with label 'c' is itself
-            indexes[i] = i;
-
-            // Save its position
-            right_index = left_index = i;
-
-            continue;
-        }
-
-        // Search to the right for the next index with label 'c'
-        if (right_index < i)
-        {
-            for (size_t j = i; j <= last_index; ++j)
-            {
-                if (p[j].prediction == c)
-                {
-                    right_index = j;
-                    break;
-                }
-            }
-        }
-
-        // Logic check
-        assert (left_index < i);
-        assert (i < right_index);
-        assert (p[left_index].x <= p[i].x);
-        assert (p[i].x <= p[right_index].x);
-
-        // Set the index of the closer of the two
-        const double d_left = p[i].x - p[left_index].x;
-        const double d_right = p[right_index].x - p[i].x;
-
-        if (d_left <= d_right)
-            indexes[i] = left_index;
-        else
-            indexes[i] = right_index;
-    }
-
-    // Logic check
-    for (size_t i = 0; i < indexes.size (); ++i)
-        assert (indexes[i] < p.size ());
-
-    return indexes;
-}
-
-template<typename T>
 size_t count_predictions (const T &p, const unsigned cls)
 {
     return std::count_if (p.begin (), p.end (), [&](auto i)
@@ -198,7 +97,9 @@ std::vector<double> get_quantized_average (const T &p, const unsigned cls)
             continue;
 
         // Get along-track index
-        const unsigned j = p[i].x - min_x;
+        const double distance = p[i].x - min_x;
+        assert (distance >= 0.0);
+        const unsigned j = std::floor (distance);
 
         // Check logic
         assert (j < totals.size ());
@@ -371,7 +272,7 @@ std::vector<double> get_elevation_estimates (T p, const double sigma, const unsi
     using namespace std;
 
     // Return value
-    vector<double> z (p.size (), numeric_limits<double>::max ());
+    vector<double> z (p.size ());
 
     // Count number of 'cls' predictions
     const size_t total = count_predictions (p, cls);
